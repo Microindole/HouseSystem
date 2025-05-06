@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}预约列表{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/appointments.css') }}">
+{% endblock %}
+{% block body %}
+<div class="container mt-4">
+    <h1 class="text-center">预约列表</h1>
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>房屋名称</th>
+                <th>租客</th>
+                <th>预约时间</th>
+                <th>状态</th>
+                {% if session.get('user_type') == 2 %}
+                <th>操作</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.house_name }}</td>
+                <td>{{ appointment.tenant_name }}</td>
+                <td>{{ appointment.appointment_time }}</td>
+                <td>{{ appointment.status }}</td>
+                {% if session.get('user_type') == 2 %}
+                <td>
+                    <button class="btn btn-success btn-sm" onclick="updateStatus({{ appointment.appointment_id }}, '已同意')">同意</button>
+                    <button class="btn btn-danger btn-sm" onclick="updateStatus({{ appointment.appointment_id }}, '已拒绝')">拒绝</button>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function updateStatus(appointmentId, status) {
+        fetch(`/house/appointment/${appointmentId}/update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        }).then(response => response.json()).then(data => {
+            alert(data.msg);
+            if (data.code === 200) location.reload();
+        });
+    }
+</script>
+{% endblock %}

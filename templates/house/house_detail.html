@@ -46,7 +46,7 @@
 
 
 
-            <a href="#" class="btn btn-secondary">预约看房</a>
+            <a href="#" class="btn btn-secondary" onclick="showAppointmentModal()">预约看房</a>
         </div>
     </div>
 
@@ -118,7 +118,128 @@
         <!-- 分页控件结束 -->
 
     </div>
-</div> <!-- container 结束 -->
+</div> <!-- container 结束 --><!-- 预约表单模态框 -->
+<div id="appointmentModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeAppointmentModal()">&times;</span>
+        <h3>预约看房</h3>
+        <form id="appointmentForm">
+            <div class="form-group">
+                <label for="houseId">房屋ID</label>
+                <!-- 自动填充房屋ID -->
+                <input type="text" id="houseId" name="house_id" value="{{ house.house_id }}" readonly required>
+            </div>
+            <div class="form-group">
+                <label for="houseName">房屋名称</label>
+                <!-- 自动填充房屋名称 -->
+                <input type="text" id="houseName" name="house_name" value="{{ house.house_name }}" readonly required>
+            </div>
+            <div class="form-group">
+                <label for="address">地址</label>
+                <!-- 自动填充用户地址 -->
+                <input type="text" id="address" name="address" value="{{ user.addr if user else '' }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="appointmentTime">预约时间</label>
+                <input type="datetime-local" id="appointmentTime" name="appointment_time" required>
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="closeAppointmentModal()">取消</button>
+                <button type="submit">提交预约</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* 模态框样式 */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        width: 400px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .close-button {
+        float: right;
+        font-size: 20px;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    // 显示模态框
+    function showAppointmentModal() {
+        const modal = document.getElementById('appointmentModal');
+        modal.style.display = 'flex'; // 显示模态框
+    }
+
+    // 隐藏模态框
+    function closeAppointmentModal() {
+        const modal = document.getElementById('appointmentModal');
+        modal.style.display = 'none'; // 隐藏模态框
+    }
+
+    // 提交预约表单
+    document.getElementById('appointmentForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        data.appointment_time = document.getElementById('appointmentTime').value; // 确保格式为 'YYYY-MM-DDTHH:mm'
+
+        fetch('/house/appointment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(response => response.json()).then(data => {
+            alert(data.msg);
+            if (data.code === 200) {
+                closeAppointmentModal();
+                location.reload();
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('提交失败，请稍后重试');
+        });
+    });
+</script>
 <script>
 window.houseId = {{ house.house_id }};
 

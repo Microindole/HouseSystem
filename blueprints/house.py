@@ -3,8 +3,7 @@ import json
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, abort # 导入 abort
 from sqlalchemy import or_
 from datetime import datetime
-
-from models import HouseInfoModel, HouseStatusModel, CommentModel, NewsModel, db  # 确保导入 NewsModel
+from models import HouseInfoModel, HouseStatusModel, CommentModel, NewsModel,TenantModel,LandlordModel,AppointmentModel,db  # 确保导入 NewsModel
 from decorators import login_required
 
 house_bp = Blueprint('house', __name__)
@@ -106,7 +105,12 @@ def house_detail(house_id):
     if not status:
         # 可以根据业务逻辑决定是否报错，或者提供默认状态
         status = HouseStatusModel(landlord_name='未知', status=-1) # 示例默认值
-
+    # 获取当前用户信息
+    user = None
+    if session.get('user_type') == 1:  # 租客
+        user = TenantModel.query.filter_by(tenant_name=session.get('username')).first()
+    elif session.get('user_type') == 2:  # 房东
+        user = LandlordModel.query.filter_by(landlord_name=session.get('username')).first()
     # --- 分页处理 ---
     page = request.args.get('page', 1, type=int) # 从 URL 参数获取页码，默认为1
     per_page = 10 # 每页显示10条评论
@@ -149,6 +153,7 @@ def house_detail(house_id):
     return render_template(
         'house/house_detail.html',
         house=house,
+        user=user,
         status=status,
         comments=enriched_comments, # 传递当前页处理后的评论
         pagination=pagination # 将分页对象传递给模板
@@ -207,3 +212,77 @@ def add_comment_form():
     db.session.commit()
     # 添加成功后重定向回详情页
     return redirect(url_for('house.house_detail', house_id=house_id))
+
+
+@house_bp.route('/appointment', methods=['POST'])
+@login_required
+def create_appointment():
+    try:
+        data = request.get_json()
+        house_id = data.get('house_id')
+        house_name = data.get('house_name')
+        appointment_time = data.get('appointment_time')
+        tenant_name = session.get('username')
+
+        # 查询房东信息
+        house = HouseInfoModel.query.filter_by(house_id=house_id).first()
+        if not house:
+            return jsonify({'code': 404, 'msg': '房屋不存在'}), 404
+
+        house_status = HouseStatusModel.query.filter_by(house_id=house_id).first()
+        if not house_status or not house_status.landlord_name:
+            return jsonify({'code': 404, 'msg': '房东信息不存在'}), 404
+
+        landlord_name = house_status.landlord_name
+
+        # 检查时间格式
+        try:
+            appointment_time = datetime.strptime(appointment_time, '%Y-%m-%dT%H:%M')  # 前端传递的时间格式
+        except ValueError:
+            return jsonify({'code': 400, 'msg': '预约时间格式错误'}), 400
+
+        # 创建预约记录
+        appointment = AppointmentModel(
+            house_id=house_id,
+            house_name=house_name,
+            tenant_name=tenant_name,
+            landlord_name=landlord_name,
+            appointment_time=appointment_time
+        )
+        db.session.add(appointment)
+        db.session.commit()
+        return jsonify({'code': 200, 'msg': '预约已提交'})
+
+    except Exception as e:
+        # 捕获所有异常并记录日志
+        import traceback
+        traceback.print_exc()
+        return jsonify({'code': 500, 'msg': '服务器内部错误'}), 500
+
+@house_bp.route('/appointments', methods=['GET'])
+@login_required
+def view_appointments():
+    user_type = session.get('user_type')
+    username = session.get('username')
+
+    if user_type == 1:  # 租客
+        appointments = AppointmentModel.query.filter_by(tenant_name=username).order_by(AppointmentModel.appointment_time.desc()).all()
+    elif user_type == 2:  # 房东
+        appointments = AppointmentModel.query.filter_by(landlord_name=username).order_by(AppointmentModel.appointment_time.desc()).all()
+    else:
+        return jsonify({'code': 403, 'msg': '无权限查看'}), 403
+
+    return render_template('house/appointments.html', appointments=appointments)
+@house_bp.route('/appointment/<int:appointment_id>/update', methods=['POST'])
+@login_required
+def update_appointment_status(appointment_id):
+    data = request.get_json()
+    status = data.get('status')
+
+    appointment = AppointmentModel.query.filter_by(appointment_id=appointment_id).first()
+    if not appointment:
+        return jsonify({'code': 404, 'msg': '预约不存在'}), 404
+
+    appointment.status = status
+    db.session.commit()
+    return jsonify({'code': 200, 'msg': '预约状态已更新'})

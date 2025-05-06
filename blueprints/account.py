@@ -9,6 +9,57 @@ from decorators import login_required
 account_bp = Blueprint("account", __name__)
 
 
+# @account_bp.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == "GET":
+#         return render_template("account/login.html")  # 渲染登录页面
+#     else:
+#         form = LoginForm(request.form)
+#         if form.validate():
+#             username = form.username.data
+#             password = form.password.data
+#             role=request.form.get('role');
+
+#             # 将角色映射为数值
+#             if role == 'tenant':
+#                 user_type = 1  # 租客
+#                 user = TenantModel.query.filter_by(tenant_name=username).first()
+#             elif role == 'landlord':
+#                 user_type = 2  # 房东
+#                 user = LandlordModel.query.filter_by(landlord_name=username).first()
+#             else:
+#                 return render_template('account/login.html', error="无效的用户角色，请重新选择")
+#             # 查询用户是否存在
+#             # user = LoginModel.query.filter_by(username=username).first()
+#             user_login = LoginModel.query.filter_by(username=username).first()
+#             if not user_login:
+#                 return render_template("account/login.html", error="用户名不存在！")
+#             # # 验证角色是否匹配
+#             # if user_type == 1 and not isinstance(user, TenantModel):
+#             #     return render_template('login.html', error="角色与用户名不匹配，请重新输入")
+#             # if user_type == 2 and not isinstance(user, LandlordModel):
+#             #     return render_template('login.html', error="角色与用户名不匹配，请重新输入")
+
+#             # 验证角色是否匹配
+#             if user_login.type != user_type:
+#                 return render_template("account/login.html", error="角色与用户名不匹配，请重新输入")
+
+#             if user_login.password == password:
+#                 session['username'] = username
+#                 session['user_type'] = user.type
+#                 # 根据用户角色跳转到对应页面
+#                 if user.type == 1:  # 租客
+#                     return redirect(url_for('account.tenant_home'))
+#                 elif user.type == 2:  # 房东
+#                     return redirect(url_for('account.landlord_home'))
+#                 elif user.type == 0:  # 管理员
+#                     return redirect(url_for('account.admin_dashboard'))
+#             else:
+#                 error = "密码错误！"
+#                 return render_template("account/login.html", error=error)
+#         else:
+#             # 表单验证失败
+#             return render_template("account/login.html", errors=form.errors)
 @account_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == "GET":
@@ -18,30 +69,41 @@ def login():
         if form.validate():
             username = form.username.data
             password = form.password.data
+            role = request.form.get('role')  # 获取前端传递的角色字段
+
+            # 将角色映射为数值
+            if role == 'tenant':
+                user_type = 1  # 租客
+                user = TenantModel.query.filter_by(tenant_name=username).first()
+            elif role == 'landlord':
+                user_type = 2  # 房东
+                user = LandlordModel.query.filter_by(landlord_name=username).first()
+            else:
+                return render_template('account/login.html', error="无效的用户角色，请重新选择")
 
             # 查询用户是否存在
-            user = LoginModel.query.filter_by(username=username).first()
-            if not user:
-                error = "用户名不存在！"
-                return render_template("account/login.html", error=error)
+            user_login = LoginModel.query.filter_by(username=username).first()
+            if not user_login:
+                return render_template("account/login.html", error="用户名不存在！")
 
-            if user.password == password:
-                session['username'] = username
-                session['user_type'] = user.type
-                # 根据用户角色跳转到对应页面
-                if user.type == 1:  # 租客
-                    return redirect(url_for('account.tenant_home'))
-                elif user.type == 2:  # 房东
-                    return redirect(url_for('account.landlord_home'))
-                elif user.type == 0:  # 管理员
-                    return redirect(url_for('account.admin_dashboard'))
-            else:
-                error = "密码错误！"
-                return render_template("account/login.html", error=error)
+            # 验证密码
+            if user_login.password != password:
+                return render_template("account/login.html", error="密码错误！")
+
+            # 验证角色是否匹配
+            if user_login.type != user_type:
+                return render_template("account/login.html", error="角色与用户名不匹配，请重新输入")
+
+            # 登录成功，设置 session
+            session['username'] = username
+            session['user_type'] = user_type
+            if user_type == 1:
+                return redirect(url_for('account.tenant_home'))
+            elif user_type == 2:
+                return redirect(url_for('account.landlord_home'))
         else:
             # 表单验证失败
             return render_template("account/login.html", errors=form.errors)
-
 
 @account_bp.route('/register', methods=['GET', 'POST'])
 def register():

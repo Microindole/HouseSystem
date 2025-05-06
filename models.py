@@ -96,3 +96,12 @@ class TenantModel(db.Model):
     tenant_name = db.Column(db.String(100), primary_key=True, comment='租客用户名')
     phone = db.Column(db.String(100), nullable=False, comment='联系方式')
     addr = db.Column(db.String(255), nullable=False, comment='用户住址')
+class AppointmentModel(db.Model):
+    __tablename__ = 'appointment'
+    appointment_id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment='预约ID')
+    house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id', ondelete='CASCADE'), nullable=False, comment='房屋ID')
+    house_name = db.Column(db.String(255), nullable=False, comment='房屋名称')
+    tenant_name = db.Column(db.String(100), db.ForeignKey('tenant.tenant_name', ondelete='CASCADE'), nullable=False, comment='租客用户名')
+    landlord_name = db.Column(db.String(100), db.ForeignKey('landlord.landlord_name', ondelete='CASCADE'), nullable=False, comment='房东用户名')
+    appointment_time = db.Column(db.DateTime, nullable=False, comment='预约时间')
+    status = db.Column(db.String(20), nullable=False, default='申请中', comment='预约状态（申请中/已同意/已拒绝）')
