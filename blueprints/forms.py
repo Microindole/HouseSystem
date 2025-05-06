@@ -49,21 +49,3 @@ class RegisterForm(Form):
         ('1', '租客'), ('2', '房东'), ('0', '管理员')
     ], validators=[DataRequired(message="请选择角色")])
 
-
-# class RegisterForm(Form):
-#     username = StringField('用户名', validators=[DataRequired(), Length(min=3, max=100)])
-#     password = PasswordField('密码', validators=[DataRequired(), Length(min=6, max=100)])
-#     phone = StringField('联系方式', validators=[DataRequired(), Length(min=10, max=15)])
-#     address = StringField('地址', validators=[DataRequired(), Length(min=5, max=200)])  # 新增地址字段
-#     user_type = SelectField('角色选择', choices=[('1', '租客'), ('2', '房东'), ('0', '管理员')], validators=[DataRequired()])
-# class RegisterForm(Form):
-#     username = StringField('用户名', validators=[DataRequired(), Length(min=3, max=20)])
-#     password = PasswordField('密码', validators=[
-#         DataRequired(),
-#         Length(min=6, max=20),
-#         EqualTo('confirm_password', message='两次密码输入不一致')
-#     ])
-#     confirm_password = PasswordField('确认密码', validators=[DataRequired()])
-#     phone = StringField('联系方式', validators=[DataRequired(), Length(min=10, max=15)])
-#     user_type = SelectField('角色选择', choices=[(1, '租客'), (2, '房东')], coerce=int)
-

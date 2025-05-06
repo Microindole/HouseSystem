@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}投诉/反馈{% endblock %}
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feedback/complaint.css') }}">
+<div class="complaint-simple-container">
+    <h2 class="complaint-simple-title">投诉 / 反馈</h2>
+    <form method="post" action="{{ url_for('feedback.complaint') }}" class="complaint-simple-form">
+        <div class="form-group">
+            <label for="type-select">信息类型</label>
+            <select name="type" id="type-select" class="animated-select">
+                <option value="投诉">投诉</option>
+                <option value="反馈">反馈</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label id="sender-label">投诉人：</label>
+            <input type="text" name="sender" value="{{ session['username'] }}" readonly class="animated-input">
+        </div>
+        <div id="complaint-fields">
+            <div class="form-group" style="position:relative;">
+                <label for="receiver">被投诉人（可选）：</label>
+                <input type="text" name="receiver" id="receiver" placeholder="如房东用户名、管理员等" class="animated-input" autocomplete="off">
+                <div id="receiver-autocomplete" class="autocomplete-list"></div>
+                <div id="receiver-type" class="receiver-type-tip"></div>
+            </div>
+            <div id="house-select-div" class="form-group" style="display:none;">
+                <label for="house_id">关联房源（可选）：</label>
+                <select name="house_id" id="house_id" class="animated-select">
+                    <option value="">不关联房源</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="content" id="content-label">投诉内容：</label>
+            <textarea name="content" id="content" rows="5" required class="animated-textarea"></textarea>
+        </div>
+        <button type="submit" class="complaint-simple-btn">提交</button>
+    </form>
+</div>
+<script>
+    const userList = {{ user_list|default([])|tojson|safe }};
+    const userType = {{ user_type|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/feedback/complaint.js') }}"></script>
+<script>
+    // 类型切换时动态显示/隐藏投诉相关字段和label
+    document.getElementById('type-select').addEventListener('change', function() {
+        const complaintFields = document.getElementById('complaint-fields');
+        const contentLabel = document.getElementById('content-label');
+        const senderLabel = document.getElementById('sender-label');
+        if (this.value === '投诉') {
+            complaintFields.style.display = '';
+            contentLabel.textContent = '投诉内容：';
+            senderLabel.textContent = '投诉人：';
+        } else {
+            complaintFields.style.display = 'none';
+            contentLabel.textContent = '反馈内容：';
+            senderLabel.textContent = '反馈人：';
+        }
+    });
+    // 默认显示投诉相关字段
+    document.getElementById('complaint-fields').style.display = '';
+</script>
+{% endblock %}

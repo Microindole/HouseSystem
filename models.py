@@ -96,6 +96,8 @@ class TenantModel(db.Model):
     tenant_name = db.Column(db.String(100), primary_key=True, comment='租客用户名')
     phone = db.Column(db.String(100), nullable=False, comment='联系方式')
     addr = db.Column(db.String(255), nullable=False, comment='用户住址')
+
+    
 class AppointmentModel(db.Model):
     __tablename__ = 'appointment'
     appointment_id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment='预约ID')
@@ -105,3 +107,13 @@ class AppointmentModel(db.Model):
     landlord_name = db.Column(db.String(100), db.ForeignKey('landlord.landlord_name', ondelete='CASCADE'), nullable=False, comment='房东用户名')
     appointment_time = db.Column(db.DateTime, nullable=False, comment='预约时间')
     status = db.Column(db.String(20), nullable=False, default='申请中', comment='预约状态（申请中/已同意/已拒绝）')
+
+
+class ComplaintModel(db.Model):
+    __tablename__ = 'complaint'
+    complaint_id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment='投诉/消息ID')
+    sender = db.Column(db.String(100), nullable=False, comment='发送人用户名（租客/房东/管理员）')
+    receiver = db.Column(db.String(100), nullable=True, comment='接收人用户名（为空表示所有管理员可见）')
+    content = db.Column(db.Text, nullable=False, comment='消息/投诉内容')
+    time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='发送时间')
+    type = db.Column(db.String(20), nullable=False, default='投诉', comment='类型：投诉/反馈')

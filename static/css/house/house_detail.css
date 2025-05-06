@@ -423,3 +423,159 @@ body {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* 添加内阴影模拟按下效果 */
     background-color: #eee; /* 按下时背景 */
 }
+
+/* 优化预约看房模态框样式，蓝白简约风+动画 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(33, 150, 243, 0.10);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeInModalBg 0.4s;
+}
+
+@keyframes fadeInModalBg {
+    from { background: rgba(33,150,243,0); }
+    to   { background: rgba(33,150,243,0.10);}
+}
+
+.modal-content {
+    background: #fff;
+    padding: 32px 28px 22px 28px;
+    border-radius: 14px;
+    width: 95%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px 0 rgba(33,150,243,0.18);
+    position: relative;
+    animation: popInModal 0.5s cubic-bezier(.4,2,.6,1);
+    border: 1.5px solid #2196f3;
+}
+
+@keyframes popInModal {
+    from { opacity: 0; transform: scale(0.85) translateY(40px);}
+    to   { opacity: 1; transform: scale(1) translateY(0);}
+}
+
+.close-button {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    font-size: 22px;
+    color: #2196f3;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+    z-index: 10;
+}
+.close-button:hover {
+    color: #1565c0;
+    transform: rotate(90deg) scale(1.2);
+}
+
+.modal-content h3 {
+    text-align: center;
+    color: #2196f3;
+    margin-bottom: 22px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+    animation: fadeIn 0.5s;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #1565c0;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid #bbdefb;
+    border-radius: 7px;
+    background: #f7faff;
+    color: #222;
+    font-size: 15px;
+    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+    outline: none;
+    animation: inputPop 0.5s;
+}
+
+.form-group input:focus {
+    border: 1.5px solid #2196f3;
+    background: #e3f2fd;
+    box-shadow: 0 0 0 2px #bbdefb;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 9px 0;
+    border: none;
+    border-radius: 7px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.18s;
+    margin: 0 2px;
+    box-shadow: 0 2px 8px rgba(33,150,243,0.06);
+    background: #2196f3;
+    color: #fff;
+    letter-spacing: 1px;
+    animation: popIn 0.5s;
+}
+
+.form-actions button[type="button"] {
+    background: #fff;
+    color: #2196f3;
+    border: 1.5px solid #2196f3;
+}
+
+.form-actions button[type="button"]:hover {
+    background: #e3f2fd;
+    color: #1565c0;
+    transform: translateY(-2px) scale(1.04);
+}
+
+.form-actions button[type="submit"]:hover {
+    background: #1565c0;
+    color: #fff;
+    transform: translateY(-2px) scale(1.04);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(24px);}
+    to { opacity: 1; transform: none;}
+}
+@keyframes inputPop {
+    from { box-shadow: 0 0 0 0 #bbdefb; }
+    to { box-shadow: 0 2px 8px rgba(33,150,243,0.04);}
+}
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.8);}
+    to { opacity: 1; transform: scale(1);}
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+    .modal-content {
+        width: 98vw;
+        min-width: 0;
+        padding: 18px 6vw 16px 6vw;
+    }
+}
