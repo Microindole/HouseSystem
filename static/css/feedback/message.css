@@ -1,0 +1,306 @@
+:root {
+    --navbar-height: 4rem; /* 根据你的 base.html 导航栏实际高度调整 */
+    --sidebar-width: 240px;
+    --chat-header-height: 60px;
+    --input-area-height: 80px; /* 可根据内容调整 */
+    --sent-bubble-bg: #cce4fc; /* 浅蓝色 */
+    --received-bubble-bg: #ffffff;
+    --body-bg: #f5f5f5;
+    --border-color: #e0e0e0;
+}
+
+/* 基础布局 */
+.chat-container {
+    display: flex;
+    height: calc(100vh - var(--navbar-height));
+    background-color: var(--body-bg);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* 左侧边栏 */
+.chat-sidebar {
+    width: var(--sidebar-width);
+    background-color: #ffffff;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.chat-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.chat-list-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.chat-list-item:hover {
+    background-color: #f0f0f0;
+}
+
+.chat-list-item.active {
+    background-color: #e0e0e0;
+}
+
+/* --- 移除 .chat-avatar --- */
+
+.chat-info {
+    flex-grow: 1;
+    overflow: hidden;
+    /* --- 如果移除了头像，可能需要调整这里的 margin --- */
+    /* margin-left: 10px; /* 移除或调整 */
+}
+
+.chat-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.chat-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-time {
+    font-size: 12px;
+    color: #888;
+    flex-shrink: 0;
+    margin-left: 5px;
+}
+
+.last-message {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 右侧主聊天区 */
+.chat-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 聊天头部 */
+.chat-header {
+    height: var(--chat-header-height);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #ffffff;
+    flex-shrink: 0;
+}
+
+.chat-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* 消息区域 */
+.message-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: var(--body-bg);
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* 消息垂直排列 */
+}
+
+.message-item {
+    display: flex; /* 保持 flex 用于对齐 */
+    margin-bottom: 15px;
+    max-width: 70%;
+}
+
+/* --- 移除 .message-avatar --- */
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+    /* --- 如果移除了头像，调整这里的 margin --- */
+    /* margin-left: 10px; /* 移除或调整 */
+    /* margin-right: 10px; /* 移除或调整 */
+}
+
+.message-sender { /* 这个类在 HTML 中被注释掉了，可以移除 */
+    /* font-size: 12px;
+    color: #888;
+    margin-bottom: 4px; */
+}
+
+.message-bubble {
+    padding: 10px 15px;
+    border-radius: 10px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 接收到的消息 */
+.message-item.received {
+    align-self: flex-start; /* 左对齐 */
+}
+/* --- 移除接收消息头像相关的 margin --- */
+/* .message-item.received .message-sender { margin-left: 15px; } */
+.message-item.received .message-bubble {
+    background-color: var(--received-bubble-bg);
+    border: 1px solid var(--border-color);
+    border-top-left-radius: 0;
+}
+/* 移除接收气泡的小三角 */
+/* .message-item.received .message-bubble::before { ... } */
+
+
+/* 发送的消息 */
+.message-item.sent {
+    margin-left: auto; /* 右对齐的关键 */
+    /* flex-direction: row-reverse; /* 不再需要反转，因为没有头像了 */
+    align-self: flex-end; /* 右对齐 */
+}
+/* --- 移除发送消息头像相关的 margin --- */
+/* .message-item.sent .message-sender { text-align: right; margin-right: 15px; } */
+.message-item.sent .message-bubble {
+    background-color: var(--sent-bubble-bg);
+    color: #000;
+    border-top-right-radius: 0;
+}
+/* 移除发送气泡的小三角 */
+/* .message-item.sent .message-bubble::before { ... } */
+
+.message-timestamp {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 5px;
+    /* text-align: inherit; /* 不再需要，直接左右对齐 */
+}
+.message-item.sent .message-timestamp {
+    align-self: flex-end; /* 时间戳靠右 */
+}
+.message-item.received .message-timestamp {
+    align-self: flex-start; /* 时间戳靠左 */
+}
+
+
+/* 输入区域 */
+.input-area {
+    height: var(--input-area-height);
+    border-top: 1px solid var(--border-color);
+    background-color: #ffffff;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.message-input {
+    flex-grow: 1;
+    height: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.4;
+    margin-right: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.message-input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 1px rgba(74, 144, 226, 0.5);
+}
+
+.send-button {
+    padding: 8px 20px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.send-button:hover {
+    background-color: #357abd;
+}
+
+/* 滚动条样式 (可选) */
+.message-area::-webkit-scrollbar,
+.chat-list::-webkit-scrollbar {
+    width: 6px;
+}
+.message-area::-webkit-scrollbar-track,
+.chat-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+.message-area::-webkit-scrollbar-thumb,
+.chat-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+.message-area::-webkit-scrollbar-thumb:hover,
+.chat-list::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+/* 响应式：小屏幕隐藏侧边栏 */
+@media (max-width: 768px) {
+    .chat-sidebar {
+        display: none;
+    }
+    /* .chat-main 不需要改动，因为它已经是 flex-grow: 1 */
+}
+
+/* 用于标记发送失败的消息 */
+.message-item.failed .message-bubble {
+    opacity: 0.7;
+    border: 1px dashed red;
+}
+.message-item.failed .message-timestamp::after {
+    content: " (发送失败)";
+    color: red;
+    font-size: 10px;
+    margin-left: 5px;
+}
+
+/* "开始对话吧" 占位符 */
+.no-messages-placeholder {
+    text-align: center;
+    color: #888;
+    margin-top: 40px; /* 增加一点上边距 */
+}

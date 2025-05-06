@@ -1,0 +1,196 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/* 页面背景和布局 */
+.login-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #2c3e50, #3498db); /* 渐变背景 */
+    animation: fadeIn 1s ease-in-out; /* 页面淡入动画 */
+    overflow: hidden;
+}
+
+/* 登录容器 */
+.login-page .login-container {
+    max-width: 360px;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9); /* 半透明白色背景 */
+    border: 1px solid #d1d5da;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* 强烈阴影 */
+    text-align: center;
+    font-family: Arial, sans-serif;
+    transform: rotateX(-10deg) scale(0.8); /* 初始旋转和缩小 */
+    animation: popInRotate 0.8s ease-out forwards; /* 旋转弹入动画 */
+}
+
+/* 标题样式 */
+.login-page .login-header h1 {
+    font-size: 28px;
+    color: #2c3e50; /* 深色字体 */
+    margin-bottom: 20px;
+    animation: slideIn 1s ease-in-out; /* 标题滑入动画 */
+}
+
+/* 表单组 */
+.login-page .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-in-out forwards;
+    animation-delay: 0.4s; /* 延迟动画 */
+}
+
+/* 表单标签 */
+.login-page .form-group label {
+    display: block;
+    font-size: 14px;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+/* 输入框和下拉框 */
+.login-page .form-group input,
+.login-page .form-group select {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* 输入框和下拉框聚焦样式 */
+.login-page .form-group input:focus,
+.login-page .form-group select:focus {
+    border-color: #3498db; /* 蓝色边框 */
+    outline: none;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5); /* 蓝色阴影 */
+    transform: scale(1.05); /* 聚焦时放大 */
+}
+
+/* 按钮样式 */
+.login-page .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    color: #ffffff; /* 按钮文字为白色 */
+    background-color: #2ecc71; /* 绿色按钮 */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden; /* 隐藏波纹效果超出部分 */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4); /* 按钮阴影 */
+}
+
+/* 按钮悬停样式 */
+.login-page .btn:hover {
+    background-color: #27ae60; /* 深绿色 */
+    transform: scale(1.05); /* 悬停时放大 */
+}
+
+/* 按钮点击波纹效果 */
+.login-page .btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.5s ease, height 0.5s ease, opacity 0.5s ease;
+    opacity: 0;
+}
+
+.login-page .btn:active::after {
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+}
+
+/* 错误消息 */
+.login-page .error-message {
+    color: #e74c3c; /* 红色错误 */
+    font-size: 14px;
+    margin-bottom: 15px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* 错误列表 */
+.login-page .error-list {
+    color: #d73a49;
+    font-size: 14px;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+/* 注册链接 */
+.login-page .register-link {
+    font-size: 14px;
+    color: #ffffff; /* 白色文字 */
+    margin-top: 15px;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.login-page .register-link a {
+    color: #3498db; /* 蓝色链接 */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.login-page .register-link a:hover {
+    text-decoration: underline;
+    color: #2980b9; /* 深蓝色 */
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes popInRotate {
+    from {
+        transform: rotateX(-10deg) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: rotateX(0deg) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

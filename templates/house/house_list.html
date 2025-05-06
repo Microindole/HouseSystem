@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/house/house_list.css') }}">
+<script src="{{ url_for('static', filename='js/house/show-news.js') }}"></script>
+{% endblock %}
+
+
+
+{% block title %}房源列表{% endblock %}
+
+{% block body %}
+<div class="container">
+{% if filters.city %}
+<p>当前选择地区：<strong>{{ filters.city}}</strong></p>
+{% endif %}
+
+    <!-- 新闻区 -->
+    <div class="news-section">
+        <h2>最新新闻</h2>
+        <div class="news-carousel" id="news-carousel">
+            {% for news in news_list[:7] %}
+            <div class="news-item">
+                <h3>{{ news.title }}</h3>
+                <p>{{ news.desc }}</p>
+                <p class="news-date">{{ news.time.strftime('%Y-%m-%d') }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <button id="load-more-news" class="btn btn-primary">查看更多新闻</button>
+    </div>
+
+<!-- house_list.html 中的筛选表单 -->
+<form method="get" action="{{ url_for('house.house_list') }}" class="filter-form">
+
+  <!-- 省市联动（只读展示，实际从导航栏已切换） -->
+  <input type="hidden" name="region" value="{{ selected_region }}">
+  <input type="hidden" name="city" value="{{ selected_city }}">
+
+<label>地址关键词：</label>
+<input type="text" name="address" placeholder="例如：朝阳、五道口" value="{{ filters.address or '' }}">
+  <label>户型：</label>
+  <select name="rooms">
+    <option value="">不限</option>
+    <option value="1室" {% if filters.rooms == '1室' %}selected{% endif %}>1室</option>
+    <option value="2室" {% if filters.rooms == '2室' %}selected{% endif %}>2室</option>
+    <option value="3室" {% if filters.rooms == '3室' %}selected{% endif %}>3室</option>
+    <option value="4室" {% if filters.rooms == '4室' %}selected{% endif %}>4室</option>
+    <option value="4室及以上" {% if filters.rooms == '4室及以上' %}selected{% endif %}>4室及以上</option>
+  </select>
+
+  <label>价格范围：</label>
+  <input type="number" name="min_price" placeholder="最低价" value="{{ filters.min_price }}">
+  -
+  <input type="number" name="max_price" placeholder="最高价" value="{{ filters.max_price }}">
+
+  <button type="submit">筛选</button>
+</form>
+    <!-- 房源列表 -->
+    <div class="house-list-section">
+        <h2>房源列表</h2>
+        <div class="house-cards">
+            {% if houses %}
+                {% for house in houses %}
+                <div class="house-card">
+                    <img src="{{ url_for('static', filename=house.image.split('static/')[1]) }}" class="house-image" alt="房屋图片">
+                    <div class="house-info">
+                        <h3 class="house-title">{{ house.house_name }}</h3>
+                        <p class="house-details">
+                            地区: {{ house.region }}<br>
+                            户型: {{ house.rooms }}<br>
+                            价格: {{ house.price }} 元/月<br>
+                            地址: {{ house.addr }}
+                        </p>
+                        <a href="{{ url_for('house.house_detail', house_id=house.house_id) }}" class="btn btn-primary">查看详情</a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-houses-message">暂无符合条件的房源。</p>
+            {% endif %}
+        </div>
+    </div>
+<!-- 分页控制 -->
+<div class="pagination">
+    {% if pagination.pages > 1 %}
+        <ul class="pagination-list">
+            {% if pagination.has_prev %}
+                <li><a href="{{ url_for('house.house_list', page=1, **filters) }}">首页</a></li>
+                <li><a href="{{ url_for('house.house_list', page=pagination.prev_num, **filters) }}">上一页</a></li>
+            {% endif %}
+            {% for p in range(1, pagination.pages + 1) %}
+                {% if p == pagination.page %}
+                    <li class="active"><span>{{ p }}</span></li>
+                {% else %}
+                    <li><a href="{{ url_for('house.house_list', page=p, **filters) }}">{{ p }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+                <li><a href="{{ url_for('house.house_list', page=pagination.next_num, **filters) }}">下一页</a></li>
+                <li><a href="{{ url_for('house.house_list', page=pagination.pages, **filters) }}">末页</a></li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</div>
+
+</div>
+{% endblock %}

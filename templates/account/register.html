@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}注册{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/account/register.css') }}">
+<script src="{{ url_for('static', filename='js/account/register.js') }}" defer></script>
+{% endblock %}
+
+{% block body %}
+<div class="register-page">
+    <div class="register-container">
+        <h1>注册到智能房屋租赁系统</h1>
+        {% if error %}
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
+        {% if success %}
+        <p class="success-message">{{ success }}</p>
+        {% endif %}
+        {% if errors %}
+        <ul class="error-list">
+            {% for field, messages in errors.items() %}
+                {% for message in messages %}
+                    <li>{{ field }}: {{ message }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form method="POST" class="register-form" id="register-form">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" placeholder="请输入密码" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm_password">确认密码</label>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="请再次输入密码" required>
+                <p id="password-error" class="error-message" style="display: none;">两次输入的密码不一致</p>
+            </div>
+            <div class="form-group">
+                <label for="phone">联系方式</label>
+                <input type="text" id="phone" name="phone" placeholder="请输入联系方式" required>
+            </div>
+            <div class="form-group">
+  <label for="province">地址</label>
+  <div class="address-select">
+    <select id="province" name="province" required>
+      <option value="">选择省</option>
+    </select>
+    <select id="city" name="city" required>
+      <option value="">选择市</option>
+    </select>
+    <select id="district" name="district" required>
+      <option value="">选择区/县</option>
+    </select>
+  </div>
+  <!-- 用于最终保存完整地址 -->
+  <input type="hidden" id="address" name="address">
+</div>
+
+            <div class="form-group">
+                <label for="user_type">角色选择</label>
+                <select id="user_type" name="user_type" required>
+                    <option value="1">租客</option>
+                    <option value="2">房东</option>
+                    <option value="0">管理员</option>
+                </select>
+            </div>
+            <button type="submit" class="btn">注册</button>
+        </form>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/select-region.js') }}" defer></script>
+
+{% endblock %}

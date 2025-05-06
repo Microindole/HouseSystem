@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}个人信息{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/account/profile.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="profile-page">
+    <div class="profile-container">
+        <h1>个人信息</h1>
+
+        <!-- 显示成功或失败的提示信息 -->
+        {% if success %}
+            <div class="alert alert-success">{{ success }}</div>
+        {% elif error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <!-- 未指定 action 默认提交到当前页面的路由 -->
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" value="{{ user.tenant_name if user_type == 1 else  user.landlord_name if user_type == 2 else user.username }}" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">联系方式</label>
+                <input type="text" id="phone" name="phone" value="{{ user.phone }}" required>
+            </div>
+            {% if user_type in [1, 2] %}
+           <div class="form-group">
+                <label for="province">地址</label>
+                <div id="region-select">
+                    <select id="province" name="province" required></select>
+                    <select id="city" name="city" required></select>
+                    <select id="district" name="district" required></select>
+                </div>
+            </div>
+            {% endif %}
+            <div class="form-group">
+                <label for="password">新密码（可选）</label>
+                <input type="password" id="password" name="password" placeholder="输入新密码">
+            </div>
+            <button type="submit" class="btn">保存修改</button>
+        </form>
+        <a href="{{ url_for('account.tenant_home') if user_type == 1 else url_for('account.landlord_home') if user_type == 2 else url_for('account.admin_dashboard') }}">返回首页</a>
+    </div>
+</div>
+    <script src="{{ url_for('static', filename='js/region-select.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 从后端传入的完整地址值
+        const fullAddr = "{{ user.addr }}";  // e.g. "北京市朝阳区"
+
+        // 从完整地址中提取 省 市 区（可以根据你实际格式修改解析逻辑）
+        let province = '', city = '', district = '';
+        if (fullAddr.length >= 3) {
+            province = fullAddr.substring(0, 3); // "北京市"
+            city = fullAddr.substring(0, 3);     // 直辖市一般省市相同
+            district = fullAddr.substring(3);    // "朝阳区"
+        }
+
+        // 初始化选择框
+        loadRegionSelect('province', 'city', 'district', province,city,district);
+    });
+</script>
+
+{% endblock %}

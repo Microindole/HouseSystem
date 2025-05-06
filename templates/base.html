@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}" defer></script>
+    {% block head %}
+    {% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+</head>
+
+<body>
+   <!-- 顶部导航栏 -->
+<div class="navbar animated-navbar">
+    <div>
+        <a href="{{ url_for('house.house_list') }}">房源首页</a>
+    </div>
+
+   <!-- 地区切换 -->
+<div>
+    <form method="get" action="{{ url_for('house.house_list') }}" style="display: inline;">
+    <label for="provinceSelect">切换地区：</label>
+    <select name="region" id="provinceSelect" onchange="updateCities();">
+        <option value="">选择省份</option>
+        {% for province in cities_data.keys() %}
+            <option value="{{ province }}" {% if province == selected_region %}selected{% endif %}>{{ province }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="citySelect">城市：</label>
+    <select name="city" id="citySelect" onchange="this.form.submit();">
+        <option value="">选择城市</option>
+        {% if selected_region %}
+            {% for city in cities_data[selected_region] %}
+              <option value="{{ city }}" {% if city == selected_city %} selected="selected" {% endif %}>{{ city }}</option>
+
+            {% endfor %}
+        {% endif %}
+    </select>
+</form>
+
+</div>
+
+<div class="search-box">
+   <form method="get" action="{{ url_for('house.house_list') }}">
+    <input type="text" name="keyword" placeholder="搜索房源" value="{{ filters.keyword }}">
+
+    <!-- 隐藏的省份和城市字段 -->
+    <input type="hidden" name="region" value="{{ filters.region }}">
+    <input type="hidden" name="city" value="{{ filters.city }}">
+
+    <button type="submit" class="git-search-button">搜索</button>
+</form>
+</div>
+
+<div class="auth-buttons">
+    {% if session.get('username') %}
+        <button id="user-menu-button" class="username-button">{{ session['username'] }}</button>
+    {% else %}
+        <a href="{{ url_for('account.login') }}" class="login-button">登录</a>
+    {% endif %}
+</div>
+
+<script>
+    // 省份选择变化时，动态更新城市选择框
+   function updateCities() {
+    var province = document.getElementById('provinceSelect').value;
+    var cities = {{ cities_data | tojson }};
+    var citySelect = document.getElementById('citySelect');
+    var selectedCity = "{{ selected_city }}";  // 从后端传来的当前选中城市
+
+    citySelect.innerHTML = '<option value="">选择城市</option>';
+
+    if (province && cities[province]) {
+        cities[province].forEach(function(city) {
+            var option = document.createElement('option');
+            option.value = city;
+            option.textContent = city;
+
+            // 如果当前城市是选中的城市，设置为选中状态
+            if (city === selectedCity) {
+                option.selected = true;
+            }
+
+            citySelect.appendChild(option);
+        });
+    }
+}
+
+
+    // 初始加载时，更新城市下拉框
+    window.onload = function() {
+        updateCities();
+    };
+</script>
+
+
+<script>
+    // 切换地区下拉框的显示与隐藏
+    document.getElementById('region-button').addEventListener('click', function() {
+        const dropdown = document.getElementById('region-dropdown');
+        dropdown.classList.toggle('hidden');
+    });
+</script>
+</div>
+
+    <!-- 用户侧边栏 -->
+    <div id="user-sidebar" class="user-sidebar hidden">
+        <div class="user-sidebar-header">
+            <h2>{{ session['username'] }}</h2>
+            <button id="close-sidebar" class="close-button">&times;</button>
+        </div>
+        <ul class="user-sidebar-menu">
+            <li>
+                <a href="{% if session.get('user_type') == 1 %}{{ url_for('account.tenant_home') }}{% elif session.get('user_type') == 2 %}{{ url_for('account.landlord_home') }}{% else %}{{ url_for('account.admin_dashboard') }}{% endif %}">
+                    我的主页
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('feedback.messages') }}">
+                    我的消息
+                    {% if unread_total and unread_total > 0 %}
+                    <span class="unread-badge" style="background:#f56c6c;color:#fff;border-radius:10px;padding:2px 6px;font-size:12px;margin-left:6px;">
+                        {{ unread_total }}
+                    </span>
+                    {% endif %}
+                </a>
+            </li>
+            <li><a href="{{ url_for('account.profile') }}">查看个人信息</a></li>
+            <li><a href="#">查看交易历史</a></li>
+            <li><a href="{{ url_for('account.logout') }}">退出登录</a></li>
+        </ul>
+    </div>
+
+   {# <!-- 搜索悬浮窗 -->
+    <div id="search-modal" class="search-modal hidden">
+        <div class="search-modal-content">
+            <span id="close-search-modal" class="close-button">&times;</span>
+            <form method="GET" action="{{ url_for('house.house_list') }}">
+                <div class="search-fields">
+                    <input type="text" name="region" placeholder="地区" value="{{ g.filters.region }}">
+                    <input type="text" name="rooms" placeholder="户型 (如 3室1厅)" value="{{ g.filters.rooms }}">
+                    <input type="number" name="min_price" placeholder="最低价格" value="{{ g.filters.min_price }}">
+                    <input type="number" name="max_price" placeholder="最高价格" value="{{ g.filters.max_price }}">
+                </div>
+                <button type="submit" class="search-submit-button">提交</button>
+            </form>
+        </div>
+    </div>#}
+
+    <!-- 主体内容 -->
+    <div class="container">
+        {% block body %}{% endblock %}
+    </div>
+
+    <!-- 底部栏 -->
+    <div class="footer animated-footer">
+        <p>© 2025 智能房屋租赁系统. 本项目仅用于学习与演示目的.</p>
+    </div>
+</body>
+
+</html>

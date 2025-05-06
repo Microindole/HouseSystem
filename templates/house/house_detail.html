@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/house/house_detail.css') }}">
+<script src="{{ url_for('static', filename='js/house/show-date.js') }}" defer></script> {# 使用 defer 确保 DOM 加载后执行 #}
+{% endblock %}
+
+{% block title %}房源详情{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="house-header">
+        <h1>{{ house.house_name }}</h1>
+        <h3>价格: {{ house.price }} 元/月</h3>
+    </div>
+    <div class="house-details">
+        <div class="house-info">
+            <img src="{{ url_for('static', filename=house.image.split('static/')[1]) }}" class="house-image" alt="房屋图片">
+            <p><strong>地址:</strong> {{ house.addr }}</p>
+            <p><strong>户型:</strong> {{ house.rooms }}</p>
+            <p><strong>押金:</strong> {{ house.deposit if house.deposit else '暂无信息' }}</p>
+            <p><strong>情况:</strong> {{ house.situation if house.situation else '暂无信息' }}</p>
+            <p><strong>亮点:</strong> {{ house.highlight if house.highlight else '暂无亮点' }}</p>
+            <p><strong>房源状态:</strong> 
+                {% if status.status == 0 %}
+                    空置
+                {% elif status.status == 1 %}
+                    出租中
+                {% elif status.status == 2 %}
+                    装修中
+                {% else %}
+                    未知状态
+                {% endif %}
+            </p>
+        </div>
+        <div class="house-actions">
+            <p><strong>房东信息:</strong> {{ status.landlord_name }}</p>
+            <p><strong>联系电话:</strong> <span id="landlord-phone">点击下方按钮查看</span></p>
+            <button class="btn btn-success" onclick="showPhone()">查看电话号码</button>
+
+
+            
+            {% if session.get('username') and session.get('user_type') == 1 %}
+            <a href="{{ url_for('feedback.start_or_get_channel', house_id=house.house_id) }}" class="btn btn-primary">联系房东</a>
+            {% endif %}
+
+
+
+            <a href="#" class="btn btn-secondary">预约看房</a>
+        </div>
+    </div>
+
+    <!-- 留言区 -->
+    <div class="comments-section">
+        <h2>留言区 ({{ pagination.total }}条)</h2>
+        <div class="at-info" style="display:none;">
+            <span id="at-text"></span>
+            <span id="cancel-at" style="cursor:pointer;color:#f56c6c;margin-left:8px;">×</span>
+        </div>
+        <div class="comment-form">
+            <textarea name="comment" class="comment-input" placeholder="留下您的评论..." required></textarea>
+            <button type="button" class="btn btn-primary" id="submit-comment-btn">提交评论</button>
+        </div>
+        <div class="comments-list">
+            {% for comment in comments %}
+            <div class="comment" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}" data-desc="{{ comment.desc }}">
+                <div class="comment-header">
+                    <span>
+                        <strong class="comment-username">{{ comment.username }}</strong>
+                        <span class="comment-type">({{ '房东' if comment.type == 2 else '租客' }})</span>
+                    </span>
+                    <span class="comment-time"
+                          {% if comment.time %}
+                          data-raw="{{ comment.time.strftime('%Y-%m-%d %H:%M:%S') }}"
+                          {% endif %}>
+                    </span>
+                    <button class="reply-btn" style="display:none;">回复</button>
+                </div>
+                <div class="comment-body">
+                    <p>{{ comment.desc }}</p>
+                    {% if comment.at_username and comment.at_desc %}
+                    <p class="comment-reply">@{{ comment.at_username }}: {{ comment.at_desc }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- 添加分页控件 -->
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <!-- 上一页 -->
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('house.house_detail', house_id=house.house_id, page=pagination.prev_num) if pagination.has_prev else '#' }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <!-- 中间页码 -->
+                {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if p %}
+                        {% if p == pagination.page %}
+                            <li class="page-item active" aria-current="page"><span class="page-link">{{ p }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('house.house_detail', house_id=house.house_id, page=p) }}">{{ p }}</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+                <!-- 下一页 -->
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('house.house_detail', house_id=house.house_id, page=pagination.next_num) if pagination.has_next else '#' }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- 分页控件结束 -->
+
+    </div>
+</div> <!-- container 结束 -->
+<script>
+window.houseId = {{ house.house_id }};
+
+// --- 添加 landlordPhone 定义 ---
+// 假设 status 对象有一个 phone 属性存储电话号码
+// 如果没有 phone 属性或值为 None，则设为 '获取失败'
+const landlordPhone = "{{ status.phone | default('获取失败', true) }}";
+// --- 添加结束 ---
+
+// 确保 show-date.js 在分页后也能正确执行时间格式化和回复功能
+// 如果 show-date.js 依赖于页面加载时就存在的元素，可能需要调整
+// 但目前的实现应该没问题，因为它是通过 DOMContentLoaded 触发的
+</script>
+{% endblock %}

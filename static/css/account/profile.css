@@ -1,0 +1,340 @@
+body {
+    margin: 0;
+    padding: 0;
+
+}
+
+/* 页面背景和布局 */
+.profile-page {
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-container {
+    max-width: 500px;
+    width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #d1d5da;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
+    padding: 36px 32px 28px 32px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.8s cubic-bezier(.68,-0.55,.27,1.55);
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+/* 标题样式 */
+.profile-container h1 {
+    font-size: 24px;
+    color: #333333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 2rem;
+    color: #4f3ca7;
+    margin-bottom: 28px;
+    text-align: center;
+    letter-spacing: 2px;
+    font-weight: bold;
+    text-shadow: 0 2px 8px #e0e0e0;
+    animation: popIn 0.7s;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0;}
+    100% { transform: scale(1); opacity: 1;}
+}
+
+/* 表单组 */
+.profile-container .form-group {
+    margin-bottom: 15px;
+    margin-bottom: 22px;
+    position: relative;
+}
+
+.profile-container .form-group label {
+    display: block;
+    font-size: 14px;
+    color: #555555;
+    margin-bottom: 5px;
+    font-size: 15px;
+    color: #5b5b5b;
+    margin-bottom: 7px;
+    display: block;
+    font-weight: 500;
+    letter-spacing: 1px;
+    transition: color 0.3s;
+}
+
+.profile-container .form-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #f3f3fa;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    background: #e9e6fa;
+    box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
+    animation: inputGlow 0.5s;
+}
+
+@keyframes inputGlow {
+    0% { box-shadow: 0 0 0 0 #764ba2;}
+    100% { box-shadow: 0 0 8px 2px #764ba2;}
+}
+
+/* 用户名只读样式 */
+.profile-container .form-group input[readonly] {
+    background: #f0f0f0;
+    color: #b0b0b0;
+    cursor: not-allowed;
+    border: none;
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: none;
+    opacity: 1;
+    outline: none;
+    transition: background 0.3s, color 0.3s;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* 地址输入框样式统一 */
+.profile-container .form-group input[type="text"].address,
+.profile-container .form-group textarea.address {
+    background: #f3f3fa;
+    border-radius: 6px;
+    border: none;
+    padding: 12px 14px;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+    resize: vertical;
+    min-height: 40px;
+}
+
+.profile-container .form-group input[type="text"].address:focus,
+.profile-container .form-group textarea.address:focus {
+    background: #e9e6fa;
+    box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
+    animation: inputGlow 0.5s;
+}
+
+/* 地址下拉框风格统一 */
+.profile-container .form-group select.address {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #f3f3fa;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+}
+
+/* 地址多级下拉框横向排列美化（不改html结构） */
+.profile-container .form-group label + select.address,
+.profile-container .form-group label + select.address + select.address,
+.profile-container .form-group label + select.address + select.address + select.address {
+    margin-right: 10px;
+}
+
+.profile-container .form-group select.address {
+    display: inline-block;
+    width: 32%;
+    min-width: 90px;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #f3f3fa;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.profile-container .form-group select.address:last-child {
+    margin-right: 0;
+}
+
+.profile-container .form-group select.address:focus {
+    background: #e9e6fa;
+    box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
+    animation: inputGlow 0.5s;
+}
+
+/* 按钮样式 */
+.profile-container .btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    padding: 13px 0;
+    font-size: 16px;
+    color: #fff;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 16px rgba(102,126,234,0.18);
+    transition: background 0.3s, transform 0.2s;
+    margin-top: 10px;
+    animation: btnPop 0.7s;
+}
+
+@keyframes btnPop {
+    0% { transform: scale(0.9);}
+    100% { transform: scale(1);}
+}
+
+.profile-container .btn:hover {
+    background-color: #0056b3;
+    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(102,126,234,0.22);
+}
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 18px;
+    color: #764ba2;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #4f3ca7;
+    text-decoration: underline;
+}
+
+/* 提示信息 */
+.profile-container .alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 12px;
+    margin-bottom: 18px;
+    border-radius: 6px;
+    font-size: 15px;
+    animation: fadeIn 0.7s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0;}
+    to { opacity: 1;}
+}
+
+.profile-container .alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    background: linear-gradient(90deg, #d4edda 0%, #b7e4c7 100%);
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.profile-container .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    background: linear-gradient(90deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* 下拉选择框动画 */
+.form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+}
+
+/* 地址选择区域横向排列美化 */
+#region-select {
+    display: flex;
+    gap: 12px;
+    margin-top: 2px;
+}
+
+#region-select select {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #f3f3fa;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+}
+
+#region-select select:focus {
+    background: #e9e6fa;
+    box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
+    animation: inputGlow 0.5s;
+}

@@ -1,0 +1,425 @@
+body {
+    background-color: #f6f8fa; /* GitHub 背景色 */
+    color: #24292f; /* GitHub 主字体颜色 */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff; /* 白色背景 */
+    border: 1px solid #d1d5da; /* 边框颜色 */
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.house-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e1e4e8;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.house-header h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.house-image {
+    max-width: 100%;
+    border-radius: 6px;
+}
+
+.house-details {
+    display: flex;
+    gap: 20px;
+}
+
+.house-info {
+    flex: 2;
+}
+
+.house-actions {
+    flex: 1;
+    background-color: #f6f8fa;
+    padding: 15px;
+    border: 1px solid #d1d5da;
+    border-radius: 6px;
+}
+
+.actions {
+    margin-top: 20px;
+}
+
+.actions .btn {
+    margin-right: 10px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+}
+
+.actions .btn-primary {
+    background-color: #007bff;
+}
+
+.actions .btn-secondary {
+    background-color: #6c757d;
+}
+
+.actions .btn-success {
+    background-color: #28a745;
+}
+
+.actions .btn:hover {
+    opacity: 0.9;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 5px 0;
+    font-size: 14px;
+    text-align: center;
+    color: #ffffff;
+    background-color: #0366d6; /* GitHub 蓝色 */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: #005cc5;
+}
+
+.btn-secondary {
+    background-color: #6a737d; /* GitHub 灰色 */
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Bilibili风格评论区样式 */
+.comments-section {
+    background: #fff; /* B站评论区通常是白色背景 */
+    border-radius: 4px; /* 轻微圆角 */
+    padding: 16px 24px; /* 调整内边距 */
+    margin-top: 24px;
+    /* border: 1px solid #e3e5e7; */ /* 可以取消或保留边框 */
+    box-shadow: 0 0 0 1px #eee; /* 更细的边框效果 */
+}
+
+.comments-section h2 {
+    font-size: 18px; /* 标题字号 */
+    color: #18191c; /* 深色标题 */
+    margin-bottom: 16px;
+    font-weight: 600; /* 加粗 */
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e3e5e7; /* 标题下划线 */
+}
+
+.comment-form {
+    display: flex;
+    align-items: flex-start; /* 头像（如果未来添加）和输入框顶部对齐 */
+    gap: 15px;
+    margin-bottom: 20px;
+    position: relative; /* 为按钮定位提供基础 */
+}
+
+.comment-input {
+    flex-grow: 1; /* 输入框占据剩余空间 */
+    border: 1px solid #e3e5e7;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px; /* 调整字号 */
+    resize: vertical;
+    min-height: 64px; /* 调整最小高度 */
+    background: #f1f2f3; /* 输入框背景色 */
+    color: #18191c;
+    transition: background 0.2s, border-color 0.2s;
+    line-height: 1.6;
+}
+
+.comment-input:focus {
+    background: #fff;
+    border-color: #00a1d6;
+    outline: none;
+    animation: inputFocusGlow 0.3s ease-out forwards;
+}
+
+@keyframes inputFocusGlow {
+    from {
+        box-shadow: 0 0 0 0px rgba(0, 161, 214, 0.2);
+        border-color: #e3e5e7;
+    }
+    to {
+        box-shadow: 0 0 0 4px rgba(0, 161, 214, 0.2);
+        border-color: #00a1d6;
+    }
+}
+
+#submit-comment-btn { /* 直接使用 ID 选择器 */
+    background: #00a1d6;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 0 15px; /* 调整内边距 */
+    height: 32px; /* 固定高度 */
+    line-height: 32px; /* 垂直居中文本 */
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease; /* 添加 transform 过渡 */
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
+#submit-comment-btn:hover {
+    background: #00b5e5;
+    transform: translateY(-1px); /* 轻微上移 */
+}
+
+#submit-comment-btn:active {
+    background: #008bb5; /* 点击时颜色加深 */
+    transform: scale(0.98); /* 轻微缩小 */
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    /* gap: 18px; */ /* 取消 gap，使用 border-bottom 分隔 */
+}
+
+.comment {
+    background: #fff; /* 评论背景 */
+    /* border-radius: 6px; */ /* B站评论通常没有明显圆角 */
+    padding: 16px 0; /* 上下内边距，左右为0 */
+    /* box-shadow: 0 1px 4px rgba(0,0,0,0.03); */ /* 移除阴影 */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-bottom: 1px solid #e3e5e7; /* 分隔线 */
+    opacity: 0; /* 初始透明 */
+    transform: translateY(10px); /* 初始下移 */
+    animation: commentFadeInUp 0.4s ease-out forwards;
+}
+
+@keyframes commentFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.comment:last-child {
+    border-bottom: none; /* 最后一条评论无下边框 */
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px; /* 减小间距 */
+}
+
+.comment-username {
+    font-weight: 500; /* B站用户名通常不是特别粗 */
+    color: #5090cc; /* B站用户名颜色 */
+    font-size: 13px; /* 调整字号 */
+    margin-right: 4px;
+    cursor: pointer; /* 暗示可点击 */
+    transition: color 0.2s;
+}
+.comment-username:hover {
+    color: #00a1d6;
+}
+
+.comment-type {
+    font-size: 12px;
+    color: #99a2aa; /* 时间和类型颜色统一 */
+    margin-left: 0;
+}
+
+.comment-time {
+    font-size: 12px;
+    color: #99a2aa; /* 时间颜色 */
+    margin-left: auto; /* 时间推到最右边 */
+}
+
+.comment-body {
+    padding-left: 0; /* 如果未来有头像，这里可能需要左边距 */
+    margin-top: 2px;
+}
+
+.comment-body p {
+    margin: 0;
+    font-size: 14px; /* 正文字号 */
+    color: #18191c; /* 正文颜色 */
+    line-height: 1.6;
+    word-wrap: break-word; /* 自动换行 */
+    white-space: pre-wrap; /* 保留换行符 */
+}
+
+.comment-reply {
+    background: #f1f2f3; /* 回复引用背景 */
+    border-radius: 4px;
+    padding: 6px 10px; /* 调整内边距 */
+    color: #6d757a; /* 回复引用文字颜色 */
+    font-size: 13px;
+    margin-top: 8px;
+    display: block; /* 块级显示 */
+    border-left: 2px solid #ddd; /* 左边框强调 */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.reply-btn {
+    margin-left: 15px; /* 与时间保持距离 */
+    font-size: 12px;
+    color: #5090cc; /* 回复按钮颜色 */
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0; /* 默认隐藏 */
+    transform: scale(0.9) translateY(2px); /* 初始缩小下移 */
+    transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease; /* 添加 transform 过渡 */
+    padding: 2px 4px; /* 轻微增加点击区域 */
+}
+
+.comment:hover .reply-btn {
+    opacity: 1; /* 悬停时显示 */
+    transform: scale(1) translateY(0); /* 悬停时恢复 */
+}
+.reply-btn:hover {
+    color: #00a1d6; /* 悬停时变色 */
+    transform: scale(1.1) translateY(0); /* 悬停时轻微放大 */
+}
+
+.at-info {
+    background: #f1f2f3; /* @信息背景 */
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-bottom: 10px; /* 与输入框的距离 */
+    color: #6d757a;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 让叉号靠右 */
+    max-height: 0; /* 初始高度为0 */
+    opacity: 0; /* 初始透明 */
+    overflow: hidden; /* 隐藏溢出内容 */
+    margin-bottom: 0; /* 初始无下边距 */
+    padding-top: 0; /* 初始无上内边距 */
+    padding-bottom: 0; /* 初始无下内边距 */
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease;
+}
+.at-info[style*="display: flex"] { /* 当JS设置display:flex时触发动画 */
+    max-height: 50px; /* 展开到足够的高度 */
+    opacity: 1;
+    margin-bottom: 10px; /* 恢复下边距 */
+    padding-top: 6px; /* 恢复上内边距 */
+    padding-bottom: 6px; /* 恢复下内边距 */
+}
+
+#cancel-at {
+    cursor: pointer;
+    color: #99a2aa; /* 叉号颜色 */
+    font-size: 16px; /* 稍微放大叉号 */
+    transition: color 0.2s;
+}
+#cancel-at:hover {
+    color: #f56c6c; /* 悬停时变红 */
+}
+
+/* --- Bilibili 风格分页控件优化 --- */
+.pagination { /* ul 元素 */
+    display: flex; /* 新增：使 li 水平排列 */
+    justify-content: center; /* 保留：水平居中 */
+    padding-left: 0;
+    list-style: none;
+    border-radius: 4px;
+    margin-top: 24px; /* 与评论列表的距离 */
+}
+
+.page-item { /* li 元素 */
+    margin: 0 2px; /* 页码间距 */
+}
+
+.page-link { /* a 或 span 元素 */
+    position: relative;
+    display: block;
+    padding: 6px 12px; /* 内边距 */
+    margin-left: -1px;
+    line-height: 1.42857143;
+    color: #5090cc; /* 链接颜色 */
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px; /* 圆角 */
+    transition: color .15s ease-in-out,
+                background-color .15s ease-in-out,
+                border-color .15s ease-in-out,
+                transform 0.15s ease-out, /* 添加 transform 过渡 */
+                box-shadow 0.15s ease-out; /* 添加阴影过渡 */
+    font-size: 13px; /* 字号 */
+}
+
+.page-link:hover {
+    z-index: 2;
+    color: #00a1d6; /* 悬停颜色 */
+    background-color: #f8f8f8; /* 悬停背景更亮一点 */
+    border-color: #ccc;
+    transform: translateY(-2px); /* 悬停时上移 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加轻微阴影 */
+}
+
+.page-item.active .page-link {
+    z-index: 3;
+    color: #fff;
+    cursor: default;
+    background-color: #00a1d6; /* 激活背景色 */
+    border-color: #00a1d6;
+    box-shadow: 0 1px 3px rgba(0, 161, 214, 0.3); /* 给激活状态加点阴影 */
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; /* 优化激活状态过渡 */
+}
+
+.page-item.disabled .page-link {
+    color: #aaa; /* 禁用颜色 */
+    cursor: not-allowed;
+    background-color: #fff;
+    border-color: #ddd;
+    pointer-events: none; /* 禁用点击 */
+}
+
+/* 特殊处理省略号 */
+.page-item.disabled span.page-link {
+    padding: 6px 8px; /* 省略号的padding可以小一点 */
+}
+
+/* 特殊处理上一页/下一页符号 */
+.page-link[aria-label="Previous"],
+.page-link[aria-label="Next"] {
+    padding: 6px 10px;
+}
+
+.page-item:not(.disabled):active .page-link { /* 点击非禁用按钮时 */
+    transform: translateY(0px); /* 按下时恢复位置 */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* 添加内阴影模拟按下效果 */
+    background-color: #eee; /* 按下时背景 */
+}

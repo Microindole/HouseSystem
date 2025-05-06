@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}私信 - {{ channel.tenant_username if session.username == channel.landlord_username else channel.landlord_username }}{% endblock %}
+
+{% block head %}
+{{ super() }} {# 继承 base.html 的 head 内容 #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feedback/message.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="chat-container">
+
+    {# 左侧聊天列表 #}
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <h2>聊天列表</h2>
+        </div>
+        <div class="chat-list">
+            {% for item in channels %}
+            <a href="{{ url_for('feedback.chat', channel_id=item.channel.channel_id) }}"
+               class="chat-list-item {% if channel and item.channel.channel_id == channel.channel_id %}active{% endif %}">
+                <div class="chat-info">
+                    <div class="chat-info-header">
+                        <span class="chat-name">
+                            {{ item.channel.tenant_username if session.username == item.channel.landlord_username else item.channel.landlord_username }}
+                        </span>
+                        {% if item.last_message %}
+                        <span class="chat-time">{{ item.last_message.timestamp.strftime('%H:%M') }}</span>
+                        {% endif %}
+                        {% if item.unread_count > 0 %}
+                        <span class="unread-badge" style="background:#f56c6c;color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;margin-left:8px;">
+                            {{ item.unread_count }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="last-message">
+                        {% if item.last_message %}
+                            {{ item.last_message.content }}
+                        {% else %}
+                            暂无消息
+                        {% endif %}
+                    </p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# 右侧聊天窗口 #}
+    <div class="chat-main">
+        {% if channel %}
+        {# 聊天窗口头部 #}
+        <div class="chat-header">
+            <h2>
+                {# 显示对方用户名 #}
+                {{ channel.tenant_username if session.username == channel.landlord_username else channel.landlord_username }}
+                <span style="font-size: 12px; color: #666; font-weight: normal;">
+                    ({{ '租客' if session.username == channel.landlord_username else '房东' }})
+                </span>
+                {# 显示房源名称 #}
+                <span style="font-size: 13px; color: #888; margin-left: 16px;">
+                    房源：{{ house.house_name if house else '未知房源' }}
+                </span>
+            </h2>
+        </div>
+
+        {# 消息显示区域 #}
+        <div id="message-container" class="message-area">
+            {% for message in messages %}
+                {% set is_sent = message.sender_username == session.username %}
+                {# --- 移除 message-avatar div --- #}
+                <div class="message-item {{ 'sent' if is_sent else 'received' }}" data-timestamp="{{ message.timestamp.isoformat() }}Z"> {# 添加 data-timestamp #}
+                    {# 消息内容区现在是 message-item 的直接子元素 #}
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            {{ message.content }}
+                        </div>
+                        <span class="message-timestamp">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                </div>
+            {% else %}
+                {# 添加类以便 JS 可以选择和移除它 #}
+                <p class="no-messages-placeholder">开始你们的对话吧！</p>
+            {% endfor %}
+        </div>
+
+        {# 输入区域 #}
+        <div class="input-area">
+            <div style="display: flex; width: 100%; height: 100%; align-items: center;">
+                <textarea id="message-input" placeholder="输入消息..." required class="message-input"></textarea>
+                <button id="send-button" class="send-button">发送</button>
+            </div>
+        </div>
+        {% else %}
+        <div class="chat-header">
+            <h2>请选择一个聊天</h2>
+        </div>
+        <div class="message-area" style="text-align:center;color:#888;padding:40px 0;">
+            暂未选择聊天，请在左侧选择一个会话
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // 将后端变量传递给 JavaScript
+    window.currentUsername = "{{ session.username | e }}";
+    window.tenantUsername = "{{ channel.tenant_username | e }}";
+    window.landlordUsername = "{{ channel.landlord_username | e }}";
+    window.channelId = "{{ channel.channel_id }}";
+</script>
+
+<script src="{{ url_for('static', filename='js/feedback/message.js') }}"></script>
+{% endblock %}
