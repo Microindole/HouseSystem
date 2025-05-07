@@ -13,7 +13,15 @@ body {
     animation: fadeIn 1s ease-in-out; /* 页面淡入动画 */
     overflow: hidden;
 }
+/*错误样式*/
+.error-message {
+    color: red;
+    /* 可根据需要添加更多样式，如字体大小、边距等 */
+    font-size: 0.9em;
+    margin: 5px 0;
+}
 
+/* ... 已有代码 ... */
 /* 登录容器 */
 .login-page .login-container {
     max-width: 360px;

@@ -1,3 +1,56 @@
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block title %}登录{% endblock %}#}
+{#{% block head %}#}
+{#<link rel="stylesheet" href="{{ url_for('static', filename='css/account/login.css') }}">#}
+{#<!-- <script src="{{ url_for('static', filename='js/account/login.js') }}" defer></script> -->#}
+{#{% endblock %}#}
+{##}
+{#{% block body %}#}
+{#<div class="login-page">#}
+{#    <div class="login-container">#}
+{#        <div class="login-header">#}
+{#            <h1>登录到智能房屋租赁系统</h1>#}
+{#        </div>#}
+{#        {% if error %}#}
+{#        <p class="error-message">{{ error }}</p>#}
+{#        {% endif %}#}
+{#        {% if errors %}#}
+{#        <ul class="error-list">#}
+{#            {% for field, messages in errors.items() %}#}
+{#                {% for message in messages %}#}
+{#                    <li>{{ field }}: {{ message }}</li>#}
+{#                {% endfor %}#}
+{#            {% endfor %}#}
+{#        </ul>#}
+{#        {% endif %}#}
+{#        <form method="POST" action="/account/login" class="login-form">#}
+{#            <div class="form-group">#}
+{#                <label for="username">用户名</label>#}
+{#                <input type="text" id="username" name="username" placeholder="请输入用户名" required>#}
+{#            </div>#}
+{#            <div class="form-group">#}
+{#                <label for="password">密码</label>#}
+{#                <input type="password" id="password" name="password" placeholder="请输入密码" required>#}
+{#            </div>#}
+{#            <div class="form-group">#}
+{#                <label for="role">角色</label>#}
+{#                <select id="role" name="role" required>#}
+{#                    <option value="tenant">租客</option>#}
+{#                    <option value="landlord">房东</option>#}
+{#                </select>#}
+{#            </div>#}
+{#            <button type="submit" class="btn">登录</button>#}
+{#        </form>#}
+{#        <p class="register-link">#}
+{#            若无账号，请 <a href="{{ url_for('account.register') }}">点我注册</a>#}
+{#        </p>#}
+{#        <div style="text-align: right; font-size: 0.8em; margin-top: 30px; opacity: 0.5;">#}
+{#            <a href="{{ url_for('account.admin_login') }}" style="color: #777; text-decoration: none;">管理员入口</a>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#{% endblock %}#}
 {% extends 'base.html' %}
 
 {% block title %}登录{% endblock %}
@@ -12,6 +65,16 @@
         <div class="login-header">
             <h1>登录到智能房屋租赁系统</h1>
         </div>
+        <!-- 处理 flash 消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                {% for category, message in messages %}
+                    <li class="error-message">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
         {% if error %}
         <p class="error-message">{{ error }}</p>
         {% endif %}
@@ -19,7 +82,7 @@
         <ul class="error-list">
             {% for field, messages in errors.items() %}
                 {% for message in messages %}
-                    <li>{{ field }}: {{ message }}</li>
+                    <li class="error-message">{{ field }}: {{ message }}</li>
                 {% endfor %}
             {% endfor %}
         </ul>
