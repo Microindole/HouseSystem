@@ -1,15 +1,19 @@
 import json
 
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, abort, flash # 导入 flash
-from sqlalchemy import or_
+from sqlalchemy import or_, and_ 
 from datetime import datetime, timedelta
+from flask_wtf import FlaskForm
 
 # 导入所需模型
 from models import HouseInfoModel, HouseStatusModel, LandlordModel, db, PrivateChannelModel, LoginModel, MessageModel, ComplaintModel, TenantModel # 加入ComplaintModel, TenantModel
-from decorators import login_required
+from decorators import login_required, admin_required 
 
 
 feedback_bp = Blueprint('feedback', __name__, url_prefix='/feedback')
+
+class CSRFOnlyForm(FlaskForm):
+    pass
 
 @feedback_bp.route('/start_chat/<int:house_id>')
 @login_required
@@ -195,6 +199,39 @@ def set_read(channel_id):
 @feedback_bp.route('/complaint', methods=['GET', 'POST'])
 @login_required
 def complaint():
+
+    if request.method == 'POST':
+        sender = session['username']
+        receiver = request.form.get('receiver', '').strip()
+        content = request.form.get('content', '').strip()
+        complaint_type = request.form.get('type', '投诉') # 获取信息类型
+        # house_id = request.form.get('house_id') # 获取 house_id
+
+        if content:
+            # 如果是投诉且选择了房东作为被投诉人，并且选择了房源
+            # 确保 house_id 只有在 complaint_type 为 '投诉' 且 receiver 是房东时才可能被使用
+            # 实际保存时，ComplaintModel 可能没有 house_id 字段，需要确认
+            # 如果 ComplaintModel 有 house_id 字段，并且您想保存它：
+            # selected_house_id = request.form.get('house_id') if complaint_type == '投诉' else None
+
+            complaint_to_save = ComplaintModel(
+                sender=sender,
+                # 只有当类型是“投诉”时，才真正考虑 receiver，否则反馈通常没有明确的被投诉人
+                receiver=receiver if complaint_type == '投诉' and receiver else None,
+                content=content,
+                time=datetime.utcnow(), # 最好使用 UTC 时间存储
+                type=complaint_type
+                # 如果 ComplaintModel 有 house_id 并且您想保存:
+                # house_id=selected_house_id if selected_house_id else None
+            )
+            db.session.add(complaint_to_save)
+            db.session.commit()
+            flash(f'{complaint_type}已提交！', 'success')
+            return redirect(url_for('feedback.my_complaints')) # 跳转到我的投诉记录页面
+        else:
+            flash('内容不能为空！', 'danger')
+
+    # ... (existing GET request rendering logic) ...
     landlord_objs = LandlordModel.query.all()
     tenant_objs = TenantModel.query.all()
     user_list = []
@@ -203,49 +240,26 @@ def complaint():
     for t in tenant_objs:
         user_list.append({'username': t.tenant_name, 'type': '租客'})
 
-    houses = []
-    my_houses = []
+    my_houses = [] # 如果当前用户是房东，其名下的房源
     user_type = session.get('user_type')
-    username = session.get('username')
-    # 如果当前用户是房东，查找其房源
+    current_username = session.get('username')
+
     if user_type == 2:
-        my_houses = HouseInfoModel.query.join(HouseStatusModel, HouseInfoModel.house_id == HouseStatusModel.house_id)\
-            .filter(HouseStatusModel.landlord_name == username).all()
+        my_houses_query = HouseInfoModel.query.join(
+            HouseStatusModel, HouseInfoModel.house_id == HouseStatusModel.house_id
+        ).filter(HouseStatusModel.landlord_name == current_username).all()
+        my_houses = [{'house_id': h.house_id, 'house_name': h.house_name} for h in my_houses_query]
 
-    if request.method == 'POST':
-        sender = session['username']
-        receiver = request.form.get('receiver', '').strip()
-        content = request.form.get('content', '').strip()
-        house_id = request.form.get('house_id') or None
+    houses_for_template = []
 
-        # 判断被投诉人是否为房东，若是则获取其房源
-        if receiver and any(u['username'] == receiver and u['type'] == '房东' for u in user_list):
-            houses = HouseInfoModel.query.filter_by(landlord_name=receiver).all()
-        else:
-            houses = []
-
-        # 提交表单时保存投诉
-        if content:
-            complaint = ComplaintModel(
-                sender=sender,
-                receiver=receiver if receiver else None,
-                content=content,
-                time=datetime.utcnow(),
-                type='投诉'
-            )
-            db.session.add(complaint)
-            db.session.commit()
-            flash('投诉已提交！', 'success')
-            return redirect(url_for('feedback.complaint'))
 
     return render_template(
         'feedback/complaint.html',
         user_list=user_list,
-        houses=houses,
+        houses=houses_for_template,
         my_houses=my_houses,
         user_type=user_type
     )
-
 
 @feedback_bp.route('/get_houses_by_landlord')
 @login_required
@@ -258,4 +272,101 @@ def get_houses_by_landlord():
     houses = HouseInfoModel.query.filter(HouseInfoModel.house_id.in_(house_ids)).all()
     house_list = [{'house_id': h.house_id, 'house_name': h.house_name} for h in houses]
     return jsonify({'houses': house_list})
+
+@feedback_bp.route('/manage_complaints')
+@login_required # 或者 @admin_required 如果只有管理员能处理
+def manage_complaints():
+    username = session.get('username')
+    user_type = session.get('user_type')
+
+    query = ComplaintModel.query.order_by(ComplaintModel.last_updated_time.desc())
+
+    if user_type != 0: # 非管理员
+        query = query.filter(ComplaintModel.receiver == username)
+    
+    complaints_raw = query.all()
+    
+    complaints_list_for_template = []
+    for complaint_obj in complaints_raw:
+        complaint_dict = {
+            'complaint_id': complaint_obj.complaint_id,
+            'sender': complaint_obj.sender,
+            'receiver': complaint_obj.receiver,
+            'content': complaint_obj.content,
+            'time': complaint_obj.time.strftime('%Y-%m-%d %H:%M:%S') if complaint_obj.time else None,
+            'type': complaint_obj.type,
+            'status': complaint_obj.status,
+            'handler_username': complaint_obj.handler_username,
+            'last_updated_time': complaint_obj.last_updated_time.strftime('%Y-%m-%d %H:%M:%S') if complaint_obj.last_updated_time else None,
+            'update_seen_by_sender': complaint_obj.update_seen_by_sender
+        }
+        complaints_list_for_template.append(complaint_dict)
+    
+    csrf_form = CSRFOnlyForm() # Create an instance of the CSRF form
+
+    return render_template(
+        'feedback/manage_complaints.html',
+        complaints_list=complaints_list_for_template,
+        form=csrf_form # Pass the form to the template
+    )
+
+@feedback_bp.route('/update_complaint_status/<int:complaint_id>', methods=['POST'])
+@login_required # 或者 @admin_required
+def update_complaint_status(complaint_id):
+    complaint = ComplaintModel.query.get_or_404(complaint_id)
+    username = session.get('username')
+    user_type = session.get('user_type')
+
+    if user_type != 0 and complaint.receiver != username:
+        flash('您没有权限修改此投诉的状态。', 'danger')
+        return redirect(url_for('feedback.manage_complaints'))
+
+    new_status = request.form.get('status')
+
+    if new_status not in ['待处理', '处理中', '已解决', '已关闭']:
+        flash('无效的状态。', 'danger')
+        return redirect(url_for('feedback.manage_complaints'))
+
+    # 只有当状态真正发生改变时，才标记为需要通知发送者
+    if complaint.status != new_status:
+        complaint.status = new_status
+        complaint.handler_username = username
+        complaint.update_seen_by_sender = False # 标记为发送者未查看此更新
+        # last_updated_time 会自动更新
+
+        try:
+            db.session.commit()
+            flash(f'投诉 #{complaint_id} 状态已更新为 "{new_status}"。', 'success')
+            # 此处可以添加主动通知发送者的逻辑 (邮件、系统消息等)
+        except Exception as e:
+            db.session.rollback()
+            flash(f'更新投诉状态失败: {e}', 'danger')
+    else:
+        flash(f'投诉 #{complaint_id} 状态未发生变化。', 'info')
+        
+    return redirect(url_for('feedback.manage_complaints'))
+
+@feedback_bp.route('/my_complaints')
+@login_required
+def my_complaints():
+    current_username = session['username']
+    my_complaints_list = ComplaintModel.query.filter_by(sender=current_username)\
+        .order_by(ComplaintModel.last_updated_time.desc()).all() # 按最后更新时间排序更好
+
+    # 将当前用户发送的、状态已更新且用户尚未查看的投诉标记为已查看
+    # 只标记那些状态不是“待处理”的，因为“待处理”是初始状态，不需要特别“查看更新”
+    ComplaintModel.query.filter(
+        ComplaintModel.sender == current_username,
+        ComplaintModel.update_seen_by_sender == False,
+        ComplaintModel.status != '待处理' # 确保是状态被处理过的
+    ).update({'update_seen_by_sender': True})
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        # 可以记录错误，但不应阻止页面加载
+        print(f"Error updating complaint seen status: {e}")
+
+    return render_template('feedback/my_complaints.html', my_complaints_list=my_complaints_list)
 

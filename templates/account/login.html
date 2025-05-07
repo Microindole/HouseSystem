@@ -45,6 +45,9 @@
         <p class="register-link">
             若无账号，请 <a href="{{ url_for('account.register') }}">点我注册</a>
         </p>
+        <div style="text-align: right; font-size: 0.8em; margin-top: 30px; opacity: 0.5;">
+            <a href="{{ url_for('account.admin_login') }}" style="color: #777; text-decoration: none;">管理员入口</a>
+        </div>
     </div>
 </div>
 {% endblock %}

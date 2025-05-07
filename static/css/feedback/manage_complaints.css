@@ -1,0 +1,177 @@
+/* filepath: c:\Users\15139\Desktop\house-system\static\css\feedback\manage_complaints.css */
+.manage-complaints-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.complaints-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.complaints-table th, .complaints-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.complaints-table th {
+    background-color: #e9ecef;
+    font-weight: bold;
+}
+
+.complaints-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* 表格行悬停动画 */
+.complaints-table tr {
+    transition: box-shadow 0.2s, transform 0.2s, background-color 0.2s;
+}
+.complaints-table tr:hover {
+    background-color: #e2e6ea;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transform: scale(1.01);
+}
+
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: white;
+    white-space: nowrap;
+}
+.status-待处理 { background-color: #ffc107; color: #212529;} /* 黄色 */
+.status-处理中 { background-color: #17a2b8; } /* 青色 */
+.status-已解决 { background-color: #28a745; } /* 绿色 */
+.status-已关闭 { background-color: #6c757d; } /* 灰色 */
+
+/* 按钮点击动画 */
+.complaints-table button {
+    padding: 6px 12px;
+    font-size: 13px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+.complaints-table button:hover {
+    background-color: #0056b3;
+}
+.complaints-table button:active {
+    transform: scale(0.96);
+}
+
+/* Modal Styles */
+.modal {
+    display: block;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+.modal.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 25px;
+    border: 1px solid #888;
+    width: 60%;
+    max-width: 700px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    animation: modalPopIn 0.35s cubic-bezier(.68,-0.55,.27,1.55);
+}
+@keyframes modalPopIn {
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h3 { margin-top: 0; }
+.modal-content p { margin: 8px 0; font-size: 15px; }
+.modal-content .content-box {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.modal-content pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: inherit;
+    font-size: 14px;
+    margin: 0;
+}
+.modal-content hr { margin: 20px 0; }
+.modal-content .form-group { margin-bottom: 15px; }
+.modal-content label { display: block; margin-bottom: 5px; font-weight: bold;}
+.modal-content select, .modal-content textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+.modal-content .btn-submit {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.modal-content .btn-submit:hover { background-color: #218838; }
+
+.alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-success { color: #155724; background-color: #d4edda; border-color: #c3e6cb; }
+.alert-danger { color: #721c24; background-color: #f8d7da; border-color: #f5c6cb; }

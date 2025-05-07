@@ -59,20 +59,33 @@
     <!-- 房源列表 -->
     <div class="house-list-section">
         <h2>房源列表</h2>
-        <div class="house-cards">
+        <div class="house-cards-horizontal">
             {% if houses %}
                 {% for house in houses %}
-                <div class="house-card">
-                    <img src="{{ url_for('static', filename=house.image.split('static/')[1]) }}" class="house-image" alt="房屋图片">
-                    <div class="house-info">
-                        <h3 class="house-title">{{ house.house_name }}</h3>
-                        <p class="house-details">
-                            地区: {{ house.region }}<br>
-                            户型: {{ house.rooms }}<br>
-                            价格: {{ house.price }} 元/月<br>
-                            地址: {{ house.addr }}
-                        </p>
-                        <a href="{{ url_for('house.house_detail', house_id=house.house_id) }}" class="btn btn-primary">查看详情</a>
+                <div class="house-card-horizontal">
+                    <img src="{{ url_for('static', filename=house.image.split('static/')[1]) }}" class="house-image-horizontal" alt="房屋图片">
+                    <div class="house-info-horizontal">
+                        <div class="house-title-row">
+                            <span class="house-title-horizontal">{{ house.house_name }}</span>
+                            <span class="house-price-horizontal">{{ house.price }} 元/月</span>
+                        </div>
+                        <div class="house-detail-row">
+                            <span>户型：{{ house.rooms }}</span>
+                            <span>地区：{{ house.region }}</span>
+                        </div>
+                        <div class="house-detail-row">
+                            <span>地址：{{ house.addr }}</span>
+                        </div>
+                        {% if house.highlight %}
+                        <div class="house-highlight">亮点：{{ house.highlight }}</div>
+                        {% endif %}
+                        {% if house.situation %}
+                        <div class="house-situation">装修：{{ house.situation }}</div>
+                        {% endif %}
+                        {% if house.deposit %}
+                        <div class="house-deposit">押金：{{ house.deposit }} 元</div>
+                        {% endif %}
+                        <a href="{{ url_for('house.house_detail', house_id=house.house_id) }}" class="btn-detail-horizontal">查看详情</a>
                     </div>
                 </div>
                 {% endfor %}

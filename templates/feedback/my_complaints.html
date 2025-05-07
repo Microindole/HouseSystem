@@ -1,0 +1,49 @@
+<!-- filepath: c:\Users\15139\Desktop\house-system\templates\feedback\my_complaints.html -->
+{% extends "base.html" %}
+{% block title %}我的投诉与反馈{% endblock %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feedback/manage_complaints.css') }}"> {# 可以复用部分样式 #}
+<style>
+    /* 特定于此页面的额外样式 */
+</style>
+{% endblock %}
+{% block body %}
+<div class="manage-complaints-container"> <!-- 复用容器样式 -->
+    <h2>我的投诉与反馈记录</h2>
+    {% if my_complaints_list %}
+    <table class="complaints-table"> <!-- 复用表格样式 -->
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>类型</th>
+                <th>接收人</th>
+                <th>内容摘要</th>
+                <th>提交时间</th>
+                <th>处理状态</th>
+                <th>处理人</th>
+                <th>最后更新</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for complaint in my_complaints_list %}
+            <tr>
+                <td>{{ complaint.complaint_id }}</td>
+                <td>{{ complaint.type }}</td>
+                <td>{{ complaint.receiver if complaint.receiver else '管理员' }}</td>
+                <td>{{ complaint.content[:50] }}{% if complaint.content|length > 50 %}...{% endif %}</td>
+                <td>{{ complaint.time.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    <span class="status-badge status-{{ complaint.status.replace(' ', '-') }}">{{ complaint.status }}</span>
+                </td>
+                <td>{{ complaint.handler_username if complaint.handler_username else 'N/A' }}</td>
+                <td>{{ complaint.last_updated_time.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>您还没有提交任何投诉或反馈。</p>
+    {% endif %}
+</div>
+{% endblock %}

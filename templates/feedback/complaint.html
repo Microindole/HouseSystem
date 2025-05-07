@@ -1,9 +1,12 @@
 {% extends "base.html" %}
-{% block title %}投诉/反馈{% endblock %}
+{% block title %}投诉&反馈{% endblock %}
 {% block body %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/feedback/complaint.css') }}">
 <div class="complaint-simple-container">
-    <h2 class="complaint-simple-title">投诉 / 反馈</h2>
+    <div class="complaint-header-actions"> <!-- 新增一个容器用于放置标题和按钮 -->
+        <h2 class="complaint-simple-title">投诉 & 反馈</h2>
+        <a href="{{ url_for('feedback.my_complaints') }}" class="view-my-complaints-btn">查看我的记录</a> <!-- 新增跳转按钮 -->
+    </div>
     <form method="post" action="{{ url_for('feedback.complaint') }}" class="complaint-simple-form">
         <div class="form-group">
             <label for="type-select">信息类型</label>

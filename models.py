@@ -61,7 +61,6 @@ class PrivateChannelModel(db.Model):
     __table_args__ = (UniqueConstraint('tenant_username', 'landlord_username', 'house_id', name='uq_tenant_landlord_house'),)
 
 
-
 class MessageModel(db.Model):
     __tablename__ = 'message'
     message_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -117,3 +116,20 @@ class ComplaintModel(db.Model):
     content = db.Column(db.Text, nullable=False, comment='消息/投诉内容')
     time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='发送时间')
     type = db.Column(db.String(20), nullable=False, default='投诉', comment='类型：投诉/反馈')
+    status = db.Column(db.String(20), nullable=False, default='待处理', comment='处理状态：待处理/处理中/已解决/已关闭')
+    handler_username = db.Column(db.String(100), db.ForeignKey('login.username'), nullable=True, comment='处理人用户名')
+    last_updated_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow, comment='最后更新时间')
+    update_seen_by_sender = db.Column(db.Boolean, nullable=False, default=False, comment='发送者是否已查看最新状态更新') # 新增字段
+
+    # 可选：与处理记录表建立关系
+    # handling_records = db.relationship('ComplaintHandlingRecordModel', backref='complaint', lazy=True)
+
+# 可选：处理记录模型
+# class ComplaintHandlingRecordModel(db.Model):
+#     __tablename__ = 'complaint_handling_record'
+#     record_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     complaint_id = db.Column(db.Integer, db.ForeignKey('complaint.complaint_id'), nullable=False)
+#     handler_username = db.Column(db.String(100), db.ForeignKey('login.username'), nullable=False)
+#     action_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+#     action_description = db.Column(db.Text, nullable=False, comment='处理动作描述，如：已联系用户，正在调查')
+#     new_status = db.Column(db.String(20), nullable=False, comment='处理后的状态')

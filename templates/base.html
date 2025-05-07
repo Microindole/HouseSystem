@@ -133,9 +133,21 @@
             <li><a href="{{ url_for('house.view_appointments') }}">查看预约</a></li> <!-- 新增按钮 -->
             
             
-            <li><a href="{{ url_for('feedback.complaint') }}">投诉&反馈</a></li>
+            <li>
+                <a href="{{ url_for('feedback.complaint') }}">
+                    投诉&反馈
+                    {% if unread_complaint_updates and unread_complaint_updates > 0 %} {# 使用新的变量 #}
+                    <span class="unread-badge" style="background:#ff9800;color:#fff;border-radius:10px;padding:2px 6px;font-size:12px;margin-left:6px;">
+                        {{ unread_complaint_updates }} {# 显示未查看更新的数量 #}
+                    </span>
+                    {% endif %}
+                </a>
+            </li>
             
-            
+            {% if session.get('user_type') == 0 %}
+            <li><a href="{{ url_for('feedback.manage_complaints') }}">管理投诉</a></li>
+            {% endif %}
+
             <li><a href="{{ url_for('account.logout') }}">退出登录</a></li>
         </ul>
     </div>

@@ -13,13 +13,23 @@ if (typeof userType !== 'undefined' && userType === 2 && myHouseSelectDiv) {
 // 自动补全功能
 receiverInput.addEventListener('input', function() {
     const val = this.value.trim();
+
+    // 动态定位和设置宽度
+    const rect = receiverInput.getBoundingClientRect();
+    // 对于 position: fixed 的元素，直接使用 getBoundingClientRect 的值，因为它们都是相对于视口的
+    autocompleteDiv.style.left = rect.left + 'px';
+    autocompleteDiv.style.top = rect.bottom + 'px'; // autocompleteDiv 的顶部紧随 receiverInput 的底部
+    autocompleteDiv.style.width = rect.width + 'px'; // 确保宽度与输入框一致
+
     if (val.length === 0) {
         autocompleteDiv.style.display = 'none';
+        autocompleteDiv.innerHTML = ''; // 清空内容
         receiverTypeDiv.textContent = '';
         houseSelectDiv.style.display = 'none';
         houseSelect.value = '';
         return;
     }
+
     const matches = userList.filter(u => u.username.includes(val));
     if (matches.length > 0) {
         autocompleteDiv.innerHTML = matches.map(u =>
@@ -27,9 +37,11 @@ receiverInput.addEventListener('input', function() {
         ).join('');
         autocompleteDiv.style.display = 'block';
     } else {
+        autocompleteDiv.innerHTML = ''; // 清空内容
         autocompleteDiv.style.display = 'none';
     }
-    // 类型显示
+
+    // 类型显示逻辑 (保持不变)
     const exact = userList.find(u => u.username === val && u.type === '房东');
     if (exact) {
         receiverTypeDiv.textContent = `用户类型：${exact.type}`;
@@ -43,8 +55,14 @@ receiverInput.addEventListener('input', function() {
                 houseSelectDiv.style.display = '';
             });
     } else {
-        houseSelectDiv.style.display = 'none';
-        houseSelect.value = '';
+        // 如果不是房东或没有精确匹配，也可能需要隐藏房源选择
+        const matchedUser = userList.find(u => u.username === val);
+        if (!matchedUser || matchedUser.type !== '房东') {
+             houseSelectDiv.style.display = 'none';
+             houseSelect.value = '';
+        }
+        // 如果只是没有精确匹配到房东，但可能匹配到其他用户，receiverTypeDiv 可以不清空
+        // receiverTypeDiv.textContent = ''; // 根据需求决定是否清空
     }
 });
 
