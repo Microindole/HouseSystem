@@ -2,6 +2,9 @@ from flask import Blueprint, render_template, jsonify, request, redirect, url_fo
 from models import LoginModel, db, TenantModel, LandlordModel
 from blueprints.forms import LoginForm, RegisterForm
 from decorators import login_required
+from argon2 import PasswordHasher, exceptions as argon2_exceptions
+
+ph = PasswordHasher()
 
 # 后面模版引擎的重定向account.login的account就是来自这里
 account_bp = Blueprint("account", __name__, url_prefix="/account") # 建议为蓝图添加 url_prefix
@@ -24,7 +27,10 @@ def login():
                 flash("用户名不存在！", "error")
                 return render_template("account/login.html", form=form)
 
-            if user_login.password != password: # 注意：实际项目中应使用哈希密码比较
+            # 使用argon2校验密码
+            try:
+                ph.verify(user_login.password, password)
+            except argon2_exceptions.VerifyMismatchError:
                 flash("密码错误！", "error")
                 return render_template("account/login.html", form=form)
 
@@ -73,22 +79,24 @@ def admin_login():
     if request.method == 'GET':
         return render_template('account/admin_login.html')
     else:
-        # 可以复用 LoginForm，或者为管理员创建一个特定的表单
-        form = LoginForm(request.form) # 假设管理员登录也只需要用户名和密码
+        form = LoginForm(request.form)
         if form.validate():
             username = form.username.data
             password = form.password.data
 
-            admin_user = LoginModel.query.filter_by(username=username, type=0).first() # 假设管理员 type 为 0
-
-            if admin_user and admin_user.password == password: # 实际应使用哈希密码比较
-                session['username'] = admin_user.username
-                session['user_type'] = admin_user.type # 应该是 0
-                # flash('管理员登录成功！', 'success') # 可选的成功提示
-                return redirect(url_for('account.admin_dashboard')) # 或者其他管理员后台首页
-            else:
+            admin_user = LoginModel.query.filter_by(username=username, type=0).first()
+            if not admin_user:
                 flash('管理员用户名或密码错误，或非管理员账户。', 'error')
                 return render_template('account/admin_login.html', form=form)
+            try:
+                ph.verify(admin_user.password, password)
+            except argon2_exceptions.VerifyMismatchError:
+                flash('管理员用户名或密码错误，或非管理员账户。', 'error')
+                return render_template('account/admin_login.html', form=form)
+
+            session['username'] = admin_user.username
+            session['user_type'] = admin_user.type
+            return redirect(url_for('account.admin_dashboard'))
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -98,9 +106,6 @@ def admin_login():
 
 @account_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    # ... (您的注册逻辑) ...
-    # 注意：注册逻辑不应该允许用户直接注册为管理员 (type=0)
-    # 管理员账户通常由系统初始化或通过特定管理接口创建
     if request.method == "GET":
         return render_template("account/register.html")
     else:
@@ -108,18 +113,19 @@ def register():
         if form.validate():
             username = form.username.data
             password = form.password.data
-            phone = form.phone.data  # 获取联系方式
-            address = form.address.data  # 获取地址信息
-            user_type = int(form.user_type.data)  # 获取角色选择并转换为整数
+            phone = form.phone.data
+            address = form.address.data
+            user_type = int(form.user_type.data)
 
-            # 检查用户名是否已存在
             existing_user = LoginModel.query.filter_by(username=username).first()
             if existing_user:
                 error="用户名已存在!"
                 return render_template("account/register.html", error="用户名已存在！")
 
-            # 创建新用户并保存到 login 表
-            new_user = LoginModel(username=username, password=password, type=user_type)
+            # 使用argon2加密密码
+            hashed_password = ph.hash(password)
+
+            new_user = LoginModel(username=username, password=hashed_password, type=user_type)
             db.session.add(new_user)
 
             # 根据角色类型保存到 tenant 或 landlord 表
@@ -132,11 +138,8 @@ def register():
 
             # 提交所有更改
             db.session.commit()
-
-            print("注册成功！")
             return redirect(url_for('account.login'))
         else:
-            print(form.errors)
             return render_template("account/register.html", errors=form.errors)
 
 
@@ -185,7 +188,7 @@ def profile():
                     if login_user:
                         login_user.username = new_username
                         if password:
-                            login_user.password = password
+                            login_user.password = ph.hash(password)
 
             elif user_type == 2:  # 房东
                 user = LandlordModel.query.filter_by(landlord_name=username).first()
@@ -198,7 +201,7 @@ def profile():
                     if login_user:
                         login_user.username = new_username
                         if password:
-                            login_user.password = password
+                            login_user.password = ph.hash(password)
 
             else:  # 管理员
                 user = LoginModel.query.filter_by(username=username).first()
@@ -206,7 +209,7 @@ def profile():
                     user.username = new_username  # 更新用户名
                     user.phone = phone
                     if password:
-                        user.password = password
+                        user.password = ph.hash(password)
 
             # 提交更改到数据库
             db.session.commit()
