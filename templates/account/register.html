@@ -10,68 +10,93 @@
 <div class="register-page">
     <div class="register-container">
         <h1>注册到智能房屋租赁系统</h1>
-        {% if error %}
-        <p class="error-message">{{ error }}</p>
-        {% endif %}
-        {% if success %}
-        <p class="success-message">{{ success }}</p>
-        {% endif %}
-        {% if errors %}
-        <ul class="error-list">
-            {% for field, messages in errors.items() %}
-                {% for message in messages %}
-                    <li>{{ field }}: {{ message }}</li>
+        
+        {# 显示通过 flash 传递的一般错误或成功消息 (来自服务器) #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}-message global-server-message">{{ message }}</p> {# Added class for distinction #}
                 {% endfor %}
-            {% endfor %}
-        </ul>
-        {% endif %}
-        <form method="POST" class="register-form" id="register-form">
+            {% endif %}
+        {% endwith %}
+
+        {# Placeholder for general JS form error #}
+        <p id="general-form-error" class="error-message global-error" style="display: none;"></p>
+
+        <form method="POST" class="register-form" id="register-form" novalidate> {# novalidate disables browser's default validation #}
+            {# CSRF token - still important if your backend expects it #}
+            {# You might need to pass csrf_token separately if not using WTForms rendering #}
+            {# Example: <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> #}
+            {# For now, assuming your backend might not strictly require it if you remove WTForms validation #}
+
             <div class="form-group">
                 <label for="username">用户名</label>
                 <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+                <p class="error-text" style="display: none;"></p> {# For JS error #}
             </div>
+
             <div class="form-group">
                 <label for="password">密码</label>
                 <input type="password" id="password" name="password" placeholder="请输入密码" required>
+                <p class="error-text" style="display: none;"></p> {# For JS error #}
             </div>
+
             <div class="form-group">
                 <label for="confirm_password">确认密码</label>
                 <input type="password" id="confirm_password" name="confirm_password" placeholder="请再次输入密码" required>
-                <p id="password-error" class="error-message" style="display: none;">两次输入的密码不一致</p>
+                <p class="error-text" style="display: none;"></p> {# For JS error (replaces the old #password-error) #}
             </div>
+
+            <div class="form-group">
+                <label for="email">邮箱</label>
+                <div class="email-code-row">
+                    <input type="email" id="email" name="email" placeholder="请输入邮箱地址" required>
+                    <button type="button" id="send-email-code-btn" class="btn btn-secondary" style="margin-left:10px;">发送验证码</button>
+                </div>
+                <p class="error-text" style="display: none;"></p>
+            </div>
+            <div class="form-group">
+                <label for="email_code">邮箱验证码</label>
+                <input type="text" id="email_code" name="email_code" placeholder="请输入收到的验证码" required>
+                <p class="error-text" style="display: none;"></p>
+            </div>
+
             <div class="form-group">
                 <label for="phone">联系方式</label>
                 <input type="text" id="phone" name="phone" placeholder="请输入联系方式" required>
+                <p class="error-text" style="display: none;"></p> {# For JS error #}
             </div>
+            
             <div class="form-group">
-  <label for="province">地址</label>
-  <div class="address-select">
-    <select id="province" name="province" required>
-      <option value="">选择省</option>
-    </select>
-    <select id="city" name="city" required>
-      <option value="">选择市</option>
-    </select>
-    <select id="district" name="district" required>
-      <option value="">选择区/县</option>
-    </select>
-  </div>
-  <!-- 用于最终保存完整地址 -->
-  <input type="hidden" id="address" name="address">
-</div>
+                <label for="province">地址</label>
+                <div class="address-select-row">
+                    <select id="province" name="province" required>
+                        <option value="">选择省</option>
+                    </select>
+                    <select id="city" name="city" required>
+                        <option value="">选择市</option>
+                    </select>
+                    <select id="district" name="district" required>
+                        <option value="">选择区/县</option>
+                    </select>
+                </div>
+                <input type="hidden" id="address" name="address">
+                <p class="error-text address-error" style="display: none;"></p> {# For JS address error #}
+            </div>
 
             <div class="form-group">
                 <label for="user_type">角色选择</label>
                 <select id="user_type" name="user_type" required>
+                    <option value="">选择角色</option> {# Add a default empty option #}
                     <option value="1">租客</option>
                     <option value="2">房东</option>
-                    <option value="0">管理员</option>
                 </select>
+                <p class="error-text" style="display: none;"></p> {# For JS error #}
             </div>
             <button type="submit" class="btn">注册</button>
         </form>
     </div>
 </div>
-<script src="{{ url_for('static', filename='js/select-region.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/select-region.js') }}" defer></script> {# Ensure this is loaded #}
 
 {% endblock %}

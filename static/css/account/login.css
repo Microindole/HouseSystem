@@ -144,7 +144,7 @@ body {
 /* 注册链接 */
 .login-page .register-link {
     font-size: 14px;
-    color: #ffffff; /* 白色文字 */
+    color: #2c3e50;
     margin-top: 15px;
     animation: fadeIn 1s ease-in-out;
 }
@@ -201,4 +201,86 @@ body {
         transform: translateY(0);
         opacity: 1;
     }
+}
+/* 找回密码按钮同一行布局 */
+.fp-btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+/* 返回登录按钮样式，类似管理员入口 */
+.fp-back-link {
+    background: none;
+    border: none;
+    color: #777;
+    font-size: 0.95em;
+    opacity: 0.7;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+    margin: 0;
+    transition: color 0.2s;
+}
+.fp-back-link:hover {
+    color: #0366d6;
+    opacity: 1;
+}
+
+/* 下一步按钮小巧，和输入框高度一致 */
+.fp-btn-row .btn {
+    width: auto;           /* 宽度自适应内容 */
+    min-width: 0;          /* 取消最小宽度 */
+    height: 36px;
+    padding: 0 18px;
+    font-size: 15px;
+    border-radius: 4px;
+    background: #2ea44f;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 6px rgba(27, 31, 35, 0.04);
+    margin-left: 10px;
+    display: inline-block;
+}
+.fp-btn-row .btn:hover {
+    background: #24913b;
+}
+
+/* 验证码输入框和按钮同一行 */
+.code-row {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 输入框和按钮之间的间距 */
+}
+
+.code-row input[type="text"] {
+    flex: 1; /* 输入框占据剩余空间 */
+    height: 36px; /* 高度与按钮一致 */
+    padding: 0 10px;
+    font-size: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.code-row .btn {
+    width: auto;
+    min-width: 0;
+    height: 36px; /* 高度与输入框一致 */
+    padding: 0 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    background: #2ea44f;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 6px rgba(27, 31, 35, 0.04);
+}
+
+.code-row .btn:hover {
+    background: #24913b;
 }

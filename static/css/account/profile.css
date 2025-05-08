@@ -6,8 +6,8 @@ body {
 
 /* 页面背景和布局 */
 .profile-page {
-    padding: 20px;
-    background-color: #f9f9f9;
+    padding: 20px; /* 这个内边距可以保留，用于profile-container的外部空间 */
+    /* background-color: #f9f9f9; */ /* 将此行注释掉或删除 */
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -46,7 +46,7 @@ body {
     margin-bottom: 20px;
     text-align: center;
     font-size: 2rem;
-    color: #4f3ca7;
+    color: #28a745;
     margin-bottom: 28px;
     text-align: center;
     letter-spacing: 2px;
@@ -112,12 +112,13 @@ body {
 }
 
 /* 用户名只读样式 */
-.profile-container .form-group input[readonly] {
+.profile-container .form-group input[readonly],
+.profile-container .form-group input.readonly-field { /* 新增 .readonly-field 类 */
     background: #f0f0f0;
-    color: #b0b0b0;
+    color: #777777; /* 调整颜色使其更清晰一些 */
     cursor: not-allowed;
-    border: none;
-    font-weight: bold;
+    border: 1px solid #e0e0e0; /* 添加一个细边框 */
+    font-weight: normal; /* 可以设为 normal，如果不需要加粗 */
     letter-spacing: 1px;
     box-shadow: none;
     opacity: 1;
@@ -213,23 +214,20 @@ body {
     padding: 10px;
     font-size: 14px;
     color: #ffffff;
-    background-color: #007bff;
+    background-color: #28a745; /* 简约绿色 */
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
     width: 100%;
     padding: 13px 0;
     font-size: 16px;
-    color: #fff;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
     letter-spacing: 2px;
-    box-shadow: 0 4px 16px rgba(102,126,234,0.18);
-    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2); /* 绿色阴影 */
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; /* 更新过渡属性 */
     margin-top: 10px;
     animation: btnPop 0.7s;
 }
@@ -240,25 +238,30 @@ body {
 }
 
 .profile-container .btn:hover {
-    background-color: #0056b3;
-    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+    background-color: #218838; /* 深一点的绿色 */
     transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 8px 24px rgba(102,126,234,0.22);
+    box-shadow: 0 6px 18px rgba(40, 167, 69, 0.3); /* 绿色悬停阴影 */
 }
 
-a {
-    display: block;
+/* 返回首页按钮特定样式 */
+.profile-container .btn-return-home {
+    display: inline-block; /* 或者 block，根据你想要的布局 */
+    padding: 8px 15px;
+    margin-top: 20px; /* 与上方表单的间距 */
+    font-size: 14px;
+    color: #495057; /* 深灰色文字 */
+    background-color: #f8f9fa; /* 浅灰色背景 */
+    border: 1px solid #ced4da; /* 边框颜色 */
+    border-radius: 4px;
+    text-decoration: none; /* 去除下划线 */
     text-align: center;
-    margin-top: 18px;
-    color: #764ba2;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
-a:hover {
-    color: #4f3ca7;
-    text-decoration: underline;
+.profile-container .btn-return-home:hover {
+    background-color: #e9ecef; /* 悬停时背景变深一点 */
+    color: #343a40; /* 悬停时文字颜色变深 */
+    border-color: #adb5bd;
 }
 
 /* 提示信息 */
@@ -338,3 +341,40 @@ a:hover {
     box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
     animation: inputGlow 0.5s;
 }
+
+.code-row {
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+    gap: 10px; /* 输入框和按钮之间的间距 */
+}
+
+.code-row input[type="text"] {
+    flex: 1; /* 输入框占据剩余空间 */
+    height: 36px; /* 高度与按钮一致 */
+    padding: 0 10px;
+    font-size: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.code-row .btn {
+    width: auto;
+    min-width: 0;
+    height: 36px; /* 高度与输入框一致 */
+    padding: 0 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    background: #2ea44f;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 6px rgba(27, 31, 35, 0.04);
+}
+
+.code-row .btn:hover {
+    background: #24913b;
+}
+
+

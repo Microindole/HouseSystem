@@ -95,8 +95,11 @@ body {
 
 /* 错误消息 */
 .register-container .error-message {
-    color: #d73a49; /* GitHub 错误红色 */
-    font-size: 14px;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
     margin-bottom: 15px;
     animation: fadeIn 0.5s ease-in-out;
 }
@@ -104,7 +107,10 @@ body {
 /* 成功消息 */
 .register-container .success-message {
     color: #28a745; /* GitHub 成功绿色 */
-    font-size: 14px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 4px;
     margin-bottom: 15px;
     animation: fadeIn 0.5s ease-in-out;
 }
@@ -115,6 +121,117 @@ body {
     font-size: 14px;
     text-align: left;
     margin-bottom: 15px;
+}
+
+.error-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+    color: #dc3545; /* 红色，表示错误 */
+    font-size: 0.9em;
+}
+
+.error-list li {
+    margin-bottom: 5px;
+}
+
+.field-error { /* 特定于字段的错误列表 */
+    margin-top: 5px; /* 与输入框的间距 */
+    /* 你可以添加更多特定样式 */
+}
+
+.form-group .error-text {
+    color: #dc3545; /* Red for errors */
+    font-size: 0.875em;
+    margin-top: 5px;
+    display: none; /* Hidden by default */
+}
+
+.form-group input.input-error,
+.form-group select.input-error {
+    border-color: #dc3545 !important; /* Highlight input with error */
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.global-error { /* For general form error or server flash messages */
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.global-server-message.success-message { /* For server-side success flash */
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+/* Ensure flash messages from server are distinct if needed */
+.global-server-message {
+    margin-bottom: 15px;
+}
+
+/* 邮箱输入和发送验证码按钮同一行 */
+.email-code-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.email-code-row input[type="email"] {
+    flex: 1 1 auto;
+    margin-right: 0;
+}
+
+.email-code-row button {
+    flex-shrink: 0;
+    white-space: nowrap;
+    height: 36px;
+}
+
+/* 让发送验证码按钮风格与主按钮一致，但宽度自适应 */
+.email-code-row .btn {
+    width: auto;
+    min-width: 90px;
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #2ea44f;
+    border: 1px solid rgba(27, 31, 35, 0.15);
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: 0 4px 8px rgba(27, 31, 35, 0.08);
+    margin-left: 10px;
+}
+
+.email-code-row .btn:hover {
+    background-color: #2c974b;
+    transform: scale(1.05);
+}
+
+.address-select-row {
+    display: flex;
+    gap: 12px;
+}
+
+.address-select-row select {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 4px;
+    background: #f6f8fa;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.address-select-row select:focus {
+    border-color: #0366d6;
+    box-shadow: 0 0 8px rgba(3, 102, 214, 0.2);
 }
 
 /* 动画效果 */

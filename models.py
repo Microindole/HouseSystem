@@ -133,3 +133,12 @@ class ComplaintModel(db.Model):
 #     action_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 #     action_description = db.Column(db.Text, nullable=False, comment='处理动作描述，如：已联系用户，正在调查')
 #     new_status = db.Column(db.String(20), nullable=False, comment='处理后的状态')
+
+class EmailUsernameMapModel(db.Model):
+    __tablename__ = 'user_email'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(255), nullable=False, index=True, comment='用户邮箱')
+    username = db.Column(db.String(100), db.ForeignKey('login.username', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, comment='关联的用户名')
+
+    # 添加唯一约束，确保同一个邮箱和用户名的组合是唯一的
+    __table_args__ = (db.UniqueConstraint('email', 'username', name='uq_email_username_map'),)

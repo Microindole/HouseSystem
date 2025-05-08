@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, render_template, g, session
 import config
-from exts import db
+from exts import db, mail
 from flask_migrate import Migrate
 from blueprints.account import account_bp
 from blueprints.house import house_bp
@@ -13,6 +13,7 @@ app = Flask(__name__)
 # 绑定配置文件
 app.config.from_object(config)
 db.init_app(app)
+mail.init_app(app)
 
 migrate = Migrate(app, db)
 
@@ -25,13 +26,15 @@ with open('static/json/cities.json', 'r', encoding='utf-8') as f:
     cities_data = json.load(f)
 
 
-
 @app.context_processor
 def inject_cities_data():
     return dict(cities_data=cities_data)
+
+
 @app.context_processor
 def inject_default_filters():
     return dict(filters={"keyword": "", "region": "", "city": ""})
+
 
 @app.context_processor
 def inject_unread_counts():
@@ -51,6 +54,7 @@ def inject_unread_counts():
         ).count()
 
     return dict(unread_total=unread_total, unread_complaint_updates=unread_complaint_updates)
+
 
 @app.before_request
 def set_default_filters():

@@ -1,10 +1,20 @@
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, session, flash # 确保导入 flash
-from models import LoginModel, db, TenantModel, LandlordModel
+from models import LoginModel, TenantModel, LandlordModel, EmailUsernameMapModel # 新增导入 EmailUsernameMapModel
 from blueprints.forms import LoginForm, RegisterForm
 from decorators import login_required
 from argon2 import PasswordHasher, exceptions as argon2_exceptions
+from flask_mail import Message
+from exts import mail, db
+import string
+import random
+from flask import current_app
 
 ph = PasswordHasher()
+
+
+def generate_code(length=6):
+    """生成随机数字验证码"""
+    return ''.join(random.choices(string.digits, k=length))
 
 # 后面模版引擎的重定向account.login的account就是来自这里
 account_bp = Blueprint("account", __name__, url_prefix="/account") # 建议为蓝图添加 url_prefix
@@ -107,123 +117,284 @@ def admin_login():
 @account_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == "GET":
-        return render_template("account/register.html")
+        return render_template("account/register.html") 
     else:
-        form = RegisterForm(request.form)
-        if form.validate():
-            username = form.username.data
-            password = form.password.data
-            phone = form.phone.data
-            address = form.address.data
-            user_type = int(form.user_type.data)
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        address = request.form.get('address', '').strip()
+        user_type_str = request.form.get('user_type', '')
+        email_code = request.form.get('email_code', '').strip()
 
-            existing_user = LoginModel.query.filter_by(username=username).first()
-            if existing_user:
-                error="用户名已存在!"
-                return render_template("account/register.html", error="用户名已存在！")
-
-            # 使用argon2加密密码
-            hashed_password = ph.hash(password)
-
-            new_user = LoginModel(username=username, password=hashed_password, type=user_type)
-            db.session.add(new_user)
-
-            # 根据角色类型保存到 tenant 或 landlord 表
-            if user_type == 1:  # 租客
-                new_tenant = TenantModel(tenant_name=username, phone=phone, addr=address)
-                db.session.add(new_tenant)
-            elif user_type == 2:  # 房东
-                new_landlord = LandlordModel(landlord_name=username, phone=phone, addr=address)
-                db.session.add(new_landlord)
-
-            # 提交所有更改
-            db.session.commit()
-            return redirect(url_for('account.login'))
+        errors = []
+        if not username or len(username) < 3 or len(username) > 20 or not username.isalnum() and '_' not in username:
+             errors.append("用户名格式不正确或长度不符合要求。")
         else:
-            return render_template("account/register.html", errors=form.errors)
+            temp_form = RegisterForm()
+            username_error = temp_form.validate_username_on_server(username)
+            if username_error:
+                errors.append(username_error)
+
+        if not password or len(password) < 6 or len(password) > 20:
+            errors.append("密码长度必须在6到20个字符之间。")
+        
+        if not email or '@' not in email or '.' not in email.split('@')[-1]: # Basic server check
+            errors.append("请输入有效的邮箱地址。")
+
+        if not phone or not (phone.isdigit() and len(phone) == 11):
+            errors.append("请输入11位有效手机号。")
+        
+        if not address: # Address is combined by JS, check if it's present
+            errors.append("地址不能为空，请选择省市区。")
+
+        user_type = None
+        if user_type_str in ['1', '2']:
+            user_type = int(user_type_str)
+        else:
+            errors.append("请选择有效的用户角色。")
+
+        # 校验邮箱验证码
+        real_code = session.get('email_code')
+        real_email = session.get('email_code_email')
+        if not real_code or not real_email or email_code != real_code or email != real_email:
+            errors.append("邮箱验证码错误或已过期，请重新获取。")
+        
+        if errors:
+            for error in errors:
+                flash(error, "error")
+            return render_template("account/register.html", submitted_data=request.form)
+        hashed_password = ph.hash(password)
+        new_user_login = LoginModel(username=username, password=hashed_password, type=user_type)
+        db.session.add(new_user_login)
+
+        if user_type == 1:
+            new_tenant = TenantModel(tenant_name=username, phone=phone, addr=address)
+            db.session.add(new_tenant)
+        elif user_type == 2:
+            new_landlord = LandlordModel(landlord_name=username, phone=phone, addr=address)
+            db.session.add(new_landlord)
+        try:
+            db.session.flush() 
+        except Exception as e:
+            db.session.rollback()
+            flash(f"注册时发生内部错误 (flush阶段): {str(e)}", "error")
+            return render_template("account/register.html", submitted_data=request.form)
+        new_email_map = EmailUsernameMapModel(email=email, username=username)
+        db.session.add(new_email_map)
+
+        try:
+            db.session.commit()
+            flash("注册成功！现在可以登录了。", "success")
+            return redirect(url_for('account.login'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"注册失败，发生数据库错误: {str(e)}", "error")
+            return render_template("account/register.html", submitted_data=request.form)
 
 
 @account_bp.route('/profile', methods=['GET', 'POST'])
-@login_required # 确保个人信息页面需要登录
+@login_required
 def profile():
     """个人信息修改页面"""
     if 'username' not in session:
-        # 如果用户未登录，重定向到登录页面
         return redirect(url_for('account.login'))
-
     username = session['username']
     user_type = session.get('user_type')
-    #GEI和POST分别代表跳转该页面和点击按钮所执行的代码
-    if request.method == 'GET':
-        # 根据用户角色加载对应的个人信息
-        if user_type == 1:  # 租客
-            user = TenantModel.query.filter_by(tenant_name=username).first()
-        elif user_type == 2:  # 房东
-            user = LandlordModel.query.filter_by(landlord_name=username).first()
-        else:  # 管理员
-            user = LoginModel.query.filter_by(username=username).first()
+    user_email_obj = EmailUsernameMapModel.query.filter_by(username=username).first()
+    user_email = user_email_obj.email if user_email_obj else "未绑定邮箱"
 
-        return render_template('account/profile.html', user=user, user_type=user_type)
+    if request.method == 'GET':
+        # 加载用户信息
+        user = None
+        if user_type == 1:
+            user = TenantModel.query.filter_by(tenant_name=username).first()
+        elif user_type == 2:
+            user = LandlordModel.query.filter_by(landlord_name=username).first()
+        elif user_type == 0:
+            user = LoginModel.query.filter_by(username=username).first()
+        return render_template('account/profile.html', user=user, user_type=user_type, user_email=user_email)
 
     elif request.method == 'POST':
         # 获取表单数据
-        new_username = request.form.get('username')  # 新用户名
-        phone = request.form.get('phone')  # 联系方式
-        province = request.form.get('province')  # 省份
-        city = request.form.get('city')  # 城市
-        district = request.form.get('district')  # 区县
-        password = request.form.get('password')  # 新密码
+        new_username = request.form.get('username')
+        phone = request.form.get('phone')
+        password = request.form.get('password')
+        verification_code = request.form.get('verification_code')
+        address = None
 
-        address = f"{province}{city}{district}"
+        # 校验验证码
+        real_code = session.get('email_code')
+        real_email = session.get('email_code_email')
+        if not real_code or not real_email or verification_code != real_code:
+            flash("验证码错误或已过期，请重新获取。", "error")
+            return redirect(url_for('account.profile'))
+
+        # 验证通过后清除验证码
+        session.pop('email_code', None)
+        session.pop('email_code_email', None)
+
+        if user_type in [1, 2]:
+            province = request.form.get('province')
+            city = request.form.get('city')
+            district = request.form.get('district')
+            if province and city and district:
+                address = f"{province}{city}{district}"
+
         try:
-            # 根据用户角色更新对应的表
-            if user_type == 1:  # 租客
-                user = TenantModel.query.filter_by(tenant_name=username).first()
-                if user:
-                    user.tenant_name = new_username  # 更新用户名
-                    user.phone = phone
-                    user.addr = address
-                    # 同时更新 login 表中的用户名和密码
-                    login_user = LoginModel.query.filter_by(username=username).first()
-                    if login_user:
-                        login_user.username = new_username
-                        if password:
-                            login_user.password = ph.hash(password)
+            # 修改用户信息逻辑（保持原有逻辑）
+            if user_type == 1:
+                user_to_update = TenantModel.query.filter_by(tenant_name=username).first()
+                if user_to_update:
+                    if address:
+                        user_to_update.addr = address
+                    user_to_update.phone = phone
+                    if new_username != username:
+                        if LoginModel.query.filter_by(username=new_username).first():
+                            flash(f"用户名 '{new_username}' 已被占用。", "error")
+                            return redirect(url_for('account.profile'))
+                        user_to_update.tenant_name = new_username
 
-            elif user_type == 2:  # 房东
-                user = LandlordModel.query.filter_by(landlord_name=username).first()
-                if user:
-                    user.landlord_name = new_username  # 更新用户名
-                    user.phone = phone
-                    user.addr = address
-                    # 同时更新 login 表中的用户名和密码
-                    login_user = LoginModel.query.filter_by(username=username).first()
-                    if login_user:
-                        login_user.username = new_username
-                        if password:
-                            login_user.password = ph.hash(password)
+            elif user_type == 2:
+                user_to_update = LandlordModel.query.filter_by(landlord_name=username).first()
+                if user_to_update:
+                    if address:
+                        user_to_update.addr = address
+                    user_to_update.phone = phone
+                    if new_username != username:
+                        if LoginModel.query.filter_by(username=new_username).first():
+                            flash(f"用户名 '{new_username}' 已被占用。", "error")
+                            return redirect(url_for('account.profile'))
+                        user_to_update.landlord_name = new_username
 
-            else:  # 管理员
-                user = LoginModel.query.filter_by(username=username).first()
-                if user:
-                    user.username = new_username  # 更新用户名
-                    user.phone = phone
-                    if password:
-                        user.password = ph.hash(password)
+            elif user_type == 0:
+                user_to_update = LoginModel.query.filter_by(username=username).first()
+                if new_username != username:
+                    if LoginModel.query.filter_by(username=new_username).first():
+                        flash(f"用户名 '{new_username}' 已被占用。", "error")
+                        return redirect(url_for('account.profile'))
+                user_to_update.username = new_username
 
-            # 提交更改到数据库
+            login_user = LoginModel.query.filter_by(username=username).first()
+            if login_user:
+                if new_username != username:
+                    login_user.username = new_username
+                if password:
+                    login_user.password = ph.hash(password)
+
             db.session.commit()
-
-            # 更新 session 中的用户名
-            session['username'] = new_username
-            return render_template('account/profile.html', success="用户信息修改成功！", user=user, user_type=user_type)
+            flash("用户信息修改成功！", "success")
+            return redirect(url_for('account.profile'))
 
         except Exception as e:
             db.session.rollback()
-            return render_template('account/profile.html', error=f"用户信息修改失败：{str(e)}", user=user, user_type=user_type)
+            flash(f"用户信息修改失败：{str(e)}", "error")
+            return redirect(url_for('account.profile'))
 
 
-@account_bp.route('/logout',methods=['GET','POST'])
+@account_bp.route('/send_email_code', methods=['POST'])
+def send_email_code():
+    email = request.form.get('email')
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'msg': '请输入有效邮箱'}), 400
+
+    code = generate_code()
+    # 用 session 存储验证码和邮箱
+    session['email_code'] = code
+    session['email_code_email'] = email
+
+    try:
+        msg = Message("智能房屋租赁系统验证码",
+                      recipients=[email],
+                      body=f"您的验证码是：{code}，5分钟内有效。")
+        mail.send(msg)
+        return jsonify({'success': True, 'msg': '验证码已发送'})
+    except Exception as e:
+        current_app.logger.error(f"邮件发送失败: {e}")
+        return jsonify({'success': False, 'msg': '邮件发送失败，请稍后重试'}), 500
+
+
+from flask import request, jsonify, session
+from flask_mail import Message
+import time
+
+# 发送重置验证码
+@account_bp.route('/send_reset_code', methods=['POST'])
+def send_reset_code():
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    # 校验用户名和邮箱是否匹配
+    user = LoginModel.query.filter_by(username=username).first()
+    email_map = EmailUsernameMapModel.query.filter_by(username=username, email=email).first()
+    if not user or not email_map:
+        return jsonify({'success': False, 'msg': '用户名和邮箱不匹配'})
+    # 生成验证码
+    code = generate_code()
+    session['reset_code'] = code
+    session['reset_code_email'] = email
+    session['reset_code_username'] = username
+    session['reset_code_time'] = int(time.time())
+    try:
+        msg = Message("重置密码验证码", recipients=[email], body=f"您的验证码是：{code}，5分钟内有效。")
+        mail.send(msg)
+        return jsonify({'success': True, 'msg': '验证码已发送，请查收邮箱'})
+    except Exception as e:
+        current_app.logger.error(f"重置密码邮件发送失败: {e}")
+        return jsonify({'success': False, 'msg': '邮件发送失败，请稍后重试'})
+
+# 校验验证码
+@account_bp.route('/verify_reset_code', methods=['POST'])
+def verify_reset_code():
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    code = data.get('code', '').strip()
+    real_code = session.get('reset_code')
+    real_email = session.get('reset_code_email')
+    real_username = session.get('reset_code_username')
+    code_time = session.get('reset_code_time')
+    if not real_code or not real_email or not real_username or not code_time:
+        return jsonify({'success': False, 'msg': '请先获取验证码'})
+    if int(time.time()) - code_time > 300:
+        return jsonify({'success': False, 'msg': '验证码已过期'})
+    if code != real_code or email != real_email or username != real_username:
+        return jsonify({'success': False, 'msg': '验证码错误'})
+    return jsonify({'success': True, 'msg': '验证通过'})
+
+# 重置密码
+@account_bp.route('/reset_password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    email = data.get('email', '').strip()
+    code = data.get('code', '').strip()
+    password = data.get('password', '').strip()
+    real_code = session.get('reset_code')
+    real_email = session.get('reset_code_email')
+    real_username = session.get('reset_code_username')
+    code_time = session.get('reset_code_time')
+    if not real_code or not real_email or not real_username or not code_time:
+        return jsonify({'success': False, 'msg': '请先获取验证码'})
+    if int(time.time()) - code_time > 300:
+        return jsonify({'success': False, 'msg': '验证码已过期'})
+    if code != real_code or email != real_email or username != real_username:
+        return jsonify({'success': False, 'msg': '验证码错误'})
+    # 修改密码
+    user = LoginModel.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({'success': False, 'msg': '用户不存在'})
+    user.password = ph.hash(password)
+    db.session.commit()
+    # 清除验证码
+    session.pop('reset_code', None)
+    session.pop('reset_code_email', None)
+    session.pop('reset_code_username', None)
+    session.pop('reset_code_time', None)
+    return jsonify({'success': True, 'msg': '密码重置成功，请重新登录'})
+
+
+@account_bp.route('/logout', methods=['GET', 'POST'])
 @login_required # 登出也应该是在登录状态下操作
 def logout():
     """登出功能"""
@@ -261,3 +432,5 @@ def admin_dashboard():
         flash("无权访问管理员后台。", "danger")
         return redirect(url_for('account.login')) # 或者首页
     return render_template('admin_dashboard.html')
+
+
