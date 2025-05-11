@@ -7,7 +7,8 @@ from flask_migrate import Migrate
 from blueprints.account import account_bp
 from blueprints.house import house_bp
 from blueprints.feedback import feedback_bp
-from models import MessageModel, ComplaintModel
+from models import MessageModel, ComplaintModel, DailyRentRateModel, HouseStatusModel
+
 
 app = Flask(__name__)
 # 绑定配置文件

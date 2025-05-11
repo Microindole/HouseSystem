@@ -8,5 +8,73 @@
         <a href="#" class="btn btn-primary">管理房源</a>
         <a href="#" class="btn btn-secondary">查看租赁情况</a>
     </div>
+
+
+
+ <h3 class="mt-5">我的房源</h3>
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>房源ID</th>
+                <th>房源名称</th>
+                <th>地址</th>
+                <th>描述</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for house in houses %}
+            <tr>
+                <td>{{ house.house_id }}</td>
+                <td>{{ house.house_name }}</td>
+                <td>{{ house.address }}</td>
+                <td>{{ house.description }}</td>
+                <td>
+
+                    {% if house.status == 0 %}
+                        已上架
+                    {% elif house.status == 2 %}
+                        未上架
+                    {% elif house.status == 4 %}
+                        待审核
+                    {% elif house.status == 5 %}
+                        审核未通过
+                        {% if house.latest_audit and house.latest_audit.reason %}
+            <br><small class="text-danger">原因：{{ house.latest_audit.reason }}</small>
+        {% endif %}
+                    {% else %}
+                        未知状态
+                    {% endif %}
+                </td>
+                <td>
+                    {% if house.status == 2 %}
+                        <form action="{{ url_for('account.submit_listing') }}" method="post" class="d-inline">
+                            <input type="hidden" name="house_id" value="{{ house.house_id }}">
+                            <button type="submit" class="btn btn-success btn-sm">申请上架</button>
+                        </form>
+                    {% elif house.status == 5 %}
+                        <form action="{{ url_for('account.submit_listing') }}" method="post" class="d-inline">
+                            <input type="hidden" name="house_id" value="{{ house.house_id }}">
+                            <button type="submit" class="btn btn-success btn-sm">重新申请上架</button>
+                        </form>
+                    {% else %}
+                        <span class="text-muted">无可用操作</span>
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+
+
+
+
+
+
 </div>
 {% endblock %}

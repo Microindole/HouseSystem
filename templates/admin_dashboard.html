@@ -5,9 +5,9 @@
     <h1 class="text-center">欢迎来到管理员后台</h1>
     <p class="text-center">这里是管理员的专属页面，您可以管理用户、审核房源等。</p>
     <div class="text-center mt-4">
-        <a href="#" class="btn btn-primary">管理用户</a>
-        <a href="#" class="btn btn-secondary">审核房源</a>
-        <a href="#" class="btn btn-danger">系统设置</a>
+        <a href="{{ url_for('account.manage_users') }}" class="btn btn-primary">管理用户</a>
+        <a href="{{ url_for('account.audit_list') }}" class="btn btn-secondary">审核房源</a>
+        <a href="/account/admin/system_setting" class="btn btn-danger">系统设置</a>
     </div>
 </div>
 {% endblock %}

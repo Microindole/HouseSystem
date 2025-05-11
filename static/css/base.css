@@ -492,3 +492,197 @@
     background-color: #1f2327;
 }
 
+.user-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+}
+
+.user-box {
+  width: 48%;
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #24292e;
+}
+
+.table-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* 表头固定样式 */
+.fixed-header-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fixed-header-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f6f8fa;
+  color: #24292e;
+  font-weight: bold;
+  padding: 8px;
+  border-bottom: 2px solid #e3e1e1;
+  z-index: 1;
+}
+
+.fixed-header-table td {
+  padding: 8px;
+  border-bottom: 2px solid #cdcccc;
+  text-align: center;
+}
+/* 滚动条样式可选 */
+.table-container::-webkit-scrollbar {
+  width: 6px;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 3px;
+}
+
+/* GitHub 风格按钮 */
+.gh-btn {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #ffffff;
+  background-color: #24292e; /* GitHub 深黑 */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 4px 2px;
+  transition: background-color 0.2s ease;
+}
+
+.gh-btn:hover {
+  background-color: #57606a;
+}
+
+/* 警告类（黄色） */
+.gh-btn-warning {
+  background-color: #c59f0f;
+}
+
+.gh-btn-warning:hover {
+  background-color: #8c6e4c;
+}
+
+/* 成功类（绿色） */
+.gh-btn-success {
+  background-color: #1f71e0;
+}
+
+.gh-btn-success:hover {
+  background-color: #5a7eb3;
+}
+
+/* 按钮组布局 */
+.gh-btn-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+    justify-content: center;
+  gap: 8px;
+}
+
+.search-section {
+  margin: 10px 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px;
+}
+
+.search-btn, .reset-btn {
+  padding: 6px 12px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.search-btn:hover, .reset-btn:hover {
+  background-color: #555;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5); /* 半透明黑色 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* 弹出框主体 */
+.modal-content {
+  background-color: #fff;
+  width: 95%;
+  max-height: 80%;
+  padding: 20px;
+  border-radius: 10px;
+  overflow-y: auto; /* 滚动条 */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+    margin-top: 5%;
+}
+
+/* 关闭按钮 */
+.close-btn {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}
+
+.btn-view {
+  background-color: #00aaff;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.btn-view:hover {
+  background-color: #008fcc;
+}
+
+/* 下架按钮 - 红色警告 */
+.btn-dangerous {
+  background-color: #e74c3c;
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.btn-dangerous:hover {
+  background-color: #c0392b;
+}
+

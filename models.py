@@ -35,6 +35,7 @@ class HouseStatusModel(db.Model):
     phone = db.Column(db.String(255), nullable=False, comment='房屋联系方式')
     update_time = db.Column(db.DateTime, nullable=False, comment='房屋发布时间（之后状态有变化都更新一次时间）')
 
+    house_info = db.relationship('HouseInfoModel', backref='status')
 
 class LandlordModel(db.Model):
     __tablename__ = 'landlord'
@@ -133,6 +134,31 @@ class ComplaintModel(db.Model):
 #     action_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 #     action_description = db.Column(db.Text, nullable=False, comment='处理动作描述，如：已联系用户，正在调查')
 #     new_status = db.Column(db.String(20), nullable=False, comment='处理后的状态')
+
+
+class DailyRentRateModel(db.Model):
+    __tablename__ = 'daily_rent_rate'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment='自增ID')
+    date = db.Column(db.Date, nullable=False, unique=True, comment='统计日期')
+    total_count = db.Column(db.Integer, nullable=False, default=0, comment='上架总数（状态为0）')
+    rented_count = db.Column(db.Integer, nullable=False, default=0, comment='出租数（状态为1）')
+    rent_rate = db.Column(db.Numeric(5, 2), nullable=False, comment='出租率百分比（如 66.67）')
+
+    def __repr__(self):
+        return f'<DailyRentRate {self.date} - {self.rent_rate}%>'
+
+
+class HouseListingAuditModel(db.Model):
+    __tablename__ = 'house_listing_audit'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment='审核记录ID')
+    house_id = db.Column(db.Integer, db.ForeignKey('house_status.house_id'), nullable=False, comment='房源ID')
+    house_name = db.Column(db.String(255), nullable=False, comment='房源名称')
+    landlord_name = db.Column(db.String(100), db.ForeignKey('landlord.landlord_name'), nullable=False, comment='房东名字')
+    audit_status = db.Column(db.Integer, nullable=False, default=0, comment='审核状态：0-审核中，1-已通过，2-已拒绝')
+    reason = db.Column(db.String(255), comment='拒绝理由')
+    create_time = db.Column(db.DateTime, server_default=db.func.now(), nullable=False, comment='申请时间')
+    update_time = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now(), nullable=False, comment='回复时间')
 
 class EmailUsernameMapModel(db.Model):
     __tablename__ = 'user_email'
