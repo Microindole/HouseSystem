@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}系统设置{% endblock %}
+{% block body %}
+
+    <div style="width: 80%; margin: 0 auto; padding: 20px;">
+  <h2>每日出租率统计</h2>
+        <div>
+  <label for="startDate">开始日期:</label>
+  <input type="date" id="startDate" name="startDate">
+
+  <label for="endDate">结束日期:</label>
+  <input type="date" id="endDate" name="endDate">
+
+  <button class="git-search-button" onclick="fetchRentRateData()">查询</button>
+            <button id="updateRentRateBtn" class="git-search-button">获取今日出租率</button>
+
+<div style="display: flex; justify-content: center; align-items: center; margin: 100px;">
+  <canvas id="rentRateChart" width="800" height="400" ></canvas>
+</div>
+    <!-- 日期选择器 -->
+
+ <div id="rentRateChart" style="width: 100%; height: 400px;"></div>
+<!-- 引入 Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .chart-container {
+      width: 80%;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+    }
+  </style>
+  <script>
+      function fetchRentRateData() {
+    // 获取开始和结束日期
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (!startDate || !endDate) {
+      alert('请填写开始和结束日期');
+      return;
+    }
+    // 获取并绘制出租率数据
+    fetch(`/account/api/rent_rate_history?start_date=${startDate}&end_date=${endDate}`)
+      .then(response => response.json())
+      .then(data => {
+        // 图表配置
+        const option = {
+          title: {
+            text: '出租率变化'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          xAxis: {
+            type: 'category',
+            data: data.dates
+          },
+          yAxis: {
+            type: 'value',
+            name: '出租率 (%)'
+          },
+          series: [{
+            name: '出租率',
+            type: 'line',
+            data: data.rates
+          }]
+        };
+
+        // 初始化图表并设置配置
+        echarts.init(document.getElementById('rentRateChart')).setOption(option);
+      })
+      .catch(error => {
+        console.error('获取出租率数据失败:', error);
+      });
+  }
+</script>
+
+<script>
+  document.getElementById("updateRentRateBtn").addEventListener("click", function () {
+    fetch("/account/admin/manual_rent_rate_update")
+      .then(response => {
+        if (!response.ok) throw new Error("网络错误");
+        return response.json();
+      })
+      .then(data => {
+        alert(`操作成功：${data.message}\n出租率为 ${data.rent_rate}%`);
+      })
+      .catch(error => {
+        alert("手动更新失败：" + error.message);
+        console.error("更新失败:", error);
+      });
+  });
+</script>
+
+
+</div>
+    </div>
+{% endblock %}
