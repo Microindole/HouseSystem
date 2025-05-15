@@ -436,6 +436,10 @@ def landlord_home():
     return render_template('landlord_home.html',houses=houses)
 
 
+
+
+
+
 @account_bp.route('/admin/dashboard')
 @login_required # 并且应该有 admin_required 装饰器
 # @admin_required # 假设您已经定义了这个装饰器

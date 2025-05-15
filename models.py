@@ -30,12 +30,16 @@ class HouseInfoModel(db.Model):
 class HouseStatusModel(db.Model):
     __tablename__ = 'house_status'
     house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, comment='有一个外键指向house_info表')
-    landlord_name = db.Column(db.String(100), primary_key=True)
+    landlord_name = db.Column(db.String(100), nullable=False)  # landlord_name 变为普通列
     status = db.Column(db.Integer, nullable=False, comment='0为空置，1为出租中，2为装修中')
     phone = db.Column(db.String(255), nullable=False, comment='房屋联系方式')
     update_time = db.Column(db.DateTime, nullable=False, comment='房屋发布时间（之后状态有变化都更新一次时间）')
 
     house_info = db.relationship('HouseInfoModel', backref='status')
+
+    __table_args__ = (
+        db.UniqueConstraint('house_id', 'landlord_name', name='uq_house_landlord'),  # 添加唯一约束
+    )
 
 class LandlordModel(db.Model):
     __tablename__ = 'landlord'
@@ -152,13 +156,21 @@ class HouseListingAuditModel(db.Model):
     __tablename__ = 'house_listing_audit'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment='审核记录ID')
-    house_id = db.Column(db.Integer, db.ForeignKey('house_status.house_id'), nullable=False, comment='房源ID')
+    house_id = db.Column(db.Integer, nullable=False, comment='房源ID')  # 移除单列的外键引用
     house_name = db.Column(db.String(255), nullable=False, comment='房源名称')
     landlord_name = db.Column(db.String(100), db.ForeignKey('landlord.landlord_name'), nullable=False, comment='房东名字')
     audit_status = db.Column(db.Integer, nullable=False, default=0, comment='审核状态：0-审核中，1-已通过，2-已拒绝')
     reason = db.Column(db.String(255), comment='拒绝理由')
     create_time = db.Column(db.DateTime, server_default=db.func.now(), nullable=False, comment='申请时间')
     update_time = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now(), nullable=False, comment='回复时间')
+
+    # 添加复合外键约束，引用 house_status 的复合主键
+    __table_args__ = (
+        db.ForeignKeyConstraint(
+            ['house_id', 'landlord_name'], 
+            ['house_status.house_id', 'house_status.landlord_name']
+        ),
+    )
 
 class EmailUsernameMapModel(db.Model):
     __tablename__ = 'user_email'
