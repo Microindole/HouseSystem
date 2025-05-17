@@ -38,7 +38,12 @@
             <div class="form-group">
                 <label for="password">密码</label>
                 <input type="password" id="password" name="password" placeholder="请输入密码" required>
-                <p class="error-text" style="display: none;"></p> {# For JS error #}
+                <div id="password-strength-container" style="margin-top: 4px; display: none;">
+                    <span id="password-strength-label">密码强度：</span>
+                    <div id="password-strength-bar" style="height: 24px; background: #eee; border-radius: 4px; margin-top: 4px; position: relative;">
+                        <div id="password-strength-bar-inner" style="height: 100%; width: 0; background: #d9534f; border-radius: 4px; color: #fff; text-align: center; line-height: 24px; transition: width 0.3s, background 0.3s;"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group">
