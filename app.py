@@ -2,6 +2,7 @@ import json
 
 from flask import Flask, render_template, g, session
 import config
+from blueprints.contract import contract_bp
 from exts import db, mail
 from flask_migrate import Migrate
 from blueprints.account import account_bp
@@ -23,6 +24,7 @@ migrate = Migrate(app, db)
 app.register_blueprint(account_bp, url_prefix='/account')
 app.register_blueprint(house_bp, url_prefix='/house')
 app.register_blueprint(feedback_bp, url_prefix='/feedback')
+app.register_blueprint(contract_bp, url_prefix='/contract')
 app.register_blueprint(pay_bp, url_prefix='/') # 注册 pay_bp
 
 with open('static/json/cities.json', 'r', encoding='utf-8') as f:

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}交易历史{% endblock %}
+
+{% block body %}
+<h2 style="margin-bottom: 20px;">交易历史</h2>
+
+<div class="contract-list">
+    {% for c in contracts %}
+    <div class="contract-card">
+        <div class="contract-header">
+            <strong>房屋：{{ c.house_name }}</strong>
+            <span class="status-badge
+                {% if c.status == 0 %}status-pending
+                {% elif c.status == 1 %}status-success
+                {% elif c.status == 2 %}status-cancelled
+                {% elif c.status == 3 %}status-revoked
+                {% endif %}">
+                {% if c.status == 0 %}进行中
+                {% elif c.status == 1 %}支付成功
+                {% elif c.status == 2 %}已取消
+                {% elif c.status == 3 %}已撤销
+                {% endif %}
+            </span>
+        </div>
+        <div class="contract-body">
+            <p><strong>地址：</strong>{{ c.addr }}</p>
+            <p><strong>房东：</strong>{{ c.landlord }}</p>
+            <p><strong>租客：</strong>{{ c.tenant }}</p>
+            <p><strong>金额：</strong>{{ c.amount }} 元</p>
+            <p><strong>创建时间：</strong>{{ c.created_at }}</p>
+        </div>
+        <div class="contract-actions">
+            {% if current_user == c.landlord and c.status == 0 %}
+            <form method="POST" action="{{ url_for('contract.cancel_contract', contract_id=c.contract_id) }}">
+                <button class="btn btn-danger" type="submit" onclick="return confirm('确认撤销此合同？')">撤销</button>
+            </form>
+            {% endif %}
+
+            {% if current_user == c.tenant and c.status == 0 %}
+            <form method="POST" action="{{ url_for('pay.start_contract_payment') }}">
+                <input type="hidden" name="contract_id" value="{{ c.contract_id }}">
+                <button class="btn btn-primary" type="submit" onclick="return confirm('确认支付该合同？')">支付</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <p>暂无合同记录。</p>
+    {% endfor %}
+</div>
+
+<!-- 分页导航 -->
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="{{ url_for('contract.contract_list', page=page-1) }}">&laquo; 上一页</a>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+        {% if p == page %}
+            <span class="current-page">{{ p }}</span>
+        {% else %}
+            <a href="{{ url_for('contract.contract_list', page=p) }}">{{ p }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page < total_pages %}
+   <a href="{{ url_for('contract.view_contracts', page=page+1) }}">下一页 &raquo;</a>
+    {% endif %}
+</div>
+
+<style>
+.contract-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.contract-card {
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #fafafa;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.contract-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.contract-body p {
+    margin: 4px 0;
+}
+.contract-actions {
+    margin-top: 15px;
+}
+.status-badge {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+}
+.status-pending { background-color: orange; }
+.status-success { background-color: green; }
+.status-cancelled { background-color: gray; }
+.status-revoked { background-color: red; }
+.btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* 分页样式 */
+.pagination {
+    margin-top: 30px;
+    text-align: center;
+}
+.pagination a, .pagination span {
+    display: inline-block;
+    margin: 0 6px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+}
+.pagination a:hover {
+    background-color: #007bff;
+    color: white;
+}
+.current-page {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+}
+</style>
+
+{% endblock %}

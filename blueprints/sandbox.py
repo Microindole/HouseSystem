@@ -2,7 +2,7 @@ from flask import render_template, request, jsonify, Blueprint, redirect, url_fo
 from blueprints.pay import alipay_obj, ALIPAY_SETTING
 from decorators import login_required # 导入 login_required 装饰器
 import time 
-import random 
+import random
 
 pay_bp = Blueprint('pay', __name__)
 
@@ -92,3 +92,46 @@ def alipay_fail_result():
         return redirect(url_for('account.tenant_home')) # 例如，让租客返回其首页
     # 对于其他类型或通用情况，可以渲染一个特定的失败页面
     return render_template('pay_fail_result.html')
+
+
+@pay_bp.route('/contract_pay', methods=['POST'])
+@login_required
+def start_contract_payment():
+    contract_id = request.form.get('contract_id')
+    if not contract_id:
+        flash("无效的合同 ID", "error")
+        return redirect(url_for('contract.view_contracts'))
+
+    from models import RentalContract
+    contract = RentalContract.query.get(contract_id)
+    if not contract:
+        flash("合同不存在", "error")
+        return redirect(url_for('contract.view_contracts'))
+
+    # 只能由租客发起自己的支付
+    if contract.tenant_username != session.get('username'):
+        flash("无权限操作该合同支付", "error")
+        return redirect(url_for('contract.view_contracts'))
+
+    # 合同状态必须为0
+    if contract.status != 0:
+        flash("该合同已支付或已撤销", "error")
+        return redirect(url_for('contract.view_contracts'))
+
+    alipay = alipay_obj()
+
+    # 金额（转为字符串），可以根据你的合同字段
+    total_amount = str(contract.total_amount)
+    subject = f"租房合同支付 - 合同ID {contract_id}"
+    out_trade_no = str(int(time.time() * 1000)) + str(random.randint(1000, 9999))
+
+    order_string = alipay.api_alipay_trade_page_pay(
+        out_trade_no=out_trade_no,
+        total_amount=total_amount,
+        subject=subject,
+        return_url=ALIPAY_SETTING.get('ALIPAY_RETURN_URL'),
+        notify_url=ALIPAY_SETTING.get('ALIPAY_NOTIFY_URL')
+    )
+
+    url = ALIPAY_SETTING.get('APIPAY_GATEWAY') + '?' + order_string
+    return redirect(url)

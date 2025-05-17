@@ -61,6 +61,22 @@
                 <span style="font-size: 13px; color: #888; margin-left: 16px;">
                     房源：{{ house.house_name if house else '未知房源' }}
                 </span>
+
+                  {% if channel.house_status == 0 %}
+                       <span style=" top:16px; left:16px; color:green;">可出租</span>
+                      {% if session.username == channel.landlord_username %}
+                       <button id="send-contract-btn" class="send-button" style="top:16px;right:16px;">发送合同</button>
+                      {% endif %}
+
+                {% elif channel.house_status == 1 %}
+                  <span style=" top:16px; left:16px; color:orange;">出租中</span>
+                {% elif channel.house_status == 2 or 4 or 5 %}
+                  <span style=" top:16px; left:16px; color:red;">未上架</span>
+                {% endif %}
+
+
+
+
             </h2>
         </div>
 
@@ -101,6 +117,35 @@
         {% endif %}
     </div>
 </div>
+<div id="contract-modal" class="contract-modal" style="display:none;">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/order/order_submit.css') }}">
+  <div class="contract-modal-content">
+    <span class="close-btn">&times;</span>
+    <h2>发送租房合同</h2>
+    <form id="contract-form">
+        <label>租客：<strong>{{ channel.tenant_username }}</strong></label><br>
+        <label>房源：<strong>{{ house.house_name if house else '未知' }}</strong></label><br><br>
+
+        <label for="start-date">开始日期：</label>
+        <input type="date" id="start-date" required><br><br>
+
+        <label for="months">出租月数：</label>
+        <input type="number" id="months" min="1" required><br><br>
+
+        <label>结束日期：</label>
+        <span id="calculated-end-date">--</span><br><br>
+
+        <label>总金额（元）：</label>
+        <span id="calculated-amount">--</span><br><br>
+
+        <!-- 隐藏字段用于提交 -->
+        <input type="hidden" id="end-date">
+        <input type="hidden" id="amount">
+
+        <button type="submit" class="send-button">确认发送合同</button>
+    </form>
+  </div>
+</div>
 
 <script>
     // 将后端变量传递给 JavaScript
@@ -108,6 +153,100 @@
     window.tenantUsername = "{{ channel.tenant_username | e }}";
     window.landlordUsername = "{{ channel.landlord_username | e }}";
     window.channelId = "{{ channel.channel_id }}";
+</script>
+
+
+<script>
+// 打开弹窗
+document.getElementById('send-contract-btn')?.addEventListener('click', () => {
+    document.getElementById('contract-modal').style.display = 'block';
+});
+
+// 关闭弹窗
+document.querySelector('.close-btn')?.addEventListener('click', () => {
+    document.getElementById('contract-modal').style.display = 'none';
+});
+
+// 监听日期和月数变动，自动计算
+document.getElementById('start-date')?.addEventListener('change', updateCalculation);
+document.getElementById('months')?.addEventListener('input', updateCalculation);
+
+// 房租和押金（通过模板传给 JS）
+{% if house %}
+  window.housePrice = {{ house.price or 0 }};
+  window.deposit = {{ house.deposit or 0 }};
+{% else %}
+  window.housePrice = 0;
+  window.deposit=0;
+{% endif %}
+
+
+function updateCalculation() {
+    const startDateStr = document.getElementById('start-date').value;
+    const months = parseInt(document.getElementById('months').value);
+
+    if (!startDateStr || isNaN(months) || months <= 0) return;
+
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + months);
+
+    // 修正月份溢出问题（比如 Jan 31 + 1 月 = March 3）
+    if (endDate.getDate() !== startDate.getDate()) {
+        endDate.setDate(0); // 回退到上月最后一天
+    }
+
+    const endDateStr = endDate.toISOString().split('T')[0];
+    const totalAmount = (window.housePrice * months + window.deposit).toFixed(2);
+
+    document.getElementById('calculated-end-date').textContent = endDateStr;
+    document.getElementById('calculated-amount').textContent = totalAmount;
+
+    document.getElementById('end-date').value = endDateStr;
+    document.getElementById('amount').value = totalAmount;
+}
+
+// 表单提交
+document.getElementById('contract-form')?.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    const amount = document.getElementById('amount').value;
+
+    if (!startDate || !endDate || !amount) {
+        alert("请填写完整信息");
+        return;
+    }
+
+    fetch("/feedback/send_contract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            channel_id: window.channelId,
+            start_date: startDate,
+            end_date: endDate,
+            amount: amount,
+            receiver_username: window.tenantUsername
+        })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("网络或服务器错误：" + res.status);
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert("合同已发送");
+            location.reload();
+        } else {
+            alert("发送失败：" + data.msg);
+        }
+    })
+    .catch(err => {
+        console.error("请求出错：", err);
+        alert("请求失败：" + err.message);
+    });
+});
 </script>
 
 <script src="{{ url_for('static', filename='js/feedback/message.js') }}"></script>

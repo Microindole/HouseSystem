@@ -180,3 +180,28 @@ class EmailUsernameMapModel(db.Model):
 
     # 添加唯一约束，确保同一个邮箱和用户名的组合是唯一的
     __table_args__ = (db.UniqueConstraint('email', 'username', name='uq_email_username_map'),)
+
+
+class RentalContract(db.Model):
+    __tablename__ = 'rental_contract'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # 与聊天频道绑定
+    channel_id = db.Column(db.Integer, nullable=False)
+
+    landlord_username = db.Column(db.String(100), nullable=False)
+    tenant_username = db.Column(db.String(100), nullable=False)
+
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+
+    total_amount = db.Column(db.Numeric(10, 2), nullable=False)
+
+    status = db.Column(db.Integer, nullable=False, default=0, comment='0：待支付，1：支付成功，2：取消订单')
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<RentalContract {self.id} - {self.landlord_username} → {self.tenant_username}>'

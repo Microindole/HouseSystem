@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
 
 # 导入所需模型
-from models import HouseInfoModel, HouseStatusModel, LandlordModel, db, PrivateChannelModel, LoginModel, MessageModel, ComplaintModel, TenantModel # 加入ComplaintModel, TenantModel
+from models import HouseInfoModel, HouseStatusModel, LandlordModel, db, PrivateChannelModel, LoginModel, MessageModel, \
+    ComplaintModel, TenantModel, RentalContract  # 加入ComplaintModel, TenantModel
 from decorators import login_required, admin_required 
 
 
@@ -138,7 +139,11 @@ def chat(channel_id):
 
     current_channel = PrivateChannelModel.query.get_or_404(channel_id)
     house = HouseInfoModel.query.get(current_channel.house_id)
+    house_status = HouseStatusModel.query.get(current_channel.house_id)
+
     messages = MessageModel.query.filter_by(channel_id=channel_id).order_by(MessageModel.timestamp.asc()).all()
+    if house_status:
+        current_channel.house_status = house_status.status
 
     return render_template(
         'feedback/message.html',
@@ -370,3 +375,58 @@ def my_complaints():
 
     return render_template('feedback/my_complaints.html', my_complaints_list=my_complaints_list)
 
+@feedback_bp.route('/send_contract', methods=['POST'])
+def send_contract():
+    data = request.get_json()
+    channel_id = data.get('channel_id')
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
+    amount = data.get('amount')
+    receiver = data.get('receiver_username')
+
+    sender = session.get('username')
+    channel = PrivateChannelModel.query.get(channel_id)
+
+    # 身份校验：必须是房东，且频道存在
+    if not channel or sender != channel.landlord_username:
+        return jsonify({'success': False, 'msg': '无权限发送合同'})
+
+
+    house_id = channel.house_id
+    existing_active_contract = RentalContract.query.join(PrivateChannelModel, RentalContract.channel_id == PrivateChannelModel.channel_id)\
+        .filter(PrivateChannelModel.house_id == house_id, RentalContract.status == 0).first()
+
+    if existing_active_contract:
+        return jsonify({'success': False, 'msg': '该房源已有正在进行的合同，不能重复发送'})
+
+    try:
+        new_contract = RentalContract(
+            channel_id=channel_id,
+            landlord_username=sender,
+            tenant_username=receiver,
+            start_date=datetime.strptime(start_date, '%Y-%m-%d'),
+            end_date=datetime.strptime(end_date, '%Y-%m-%d'),
+            total_amount=amount,
+            status=0
+        )
+        db.session.add(new_contract)
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'msg': '合同保存失败: ' + str(e)})
+
+    content = f"【租房合同】租期：{start_date} 至 {end_date}，金额：¥{amount}。请确认合同信息。"
+    message = MessageModel(
+        channel_id=channel_id,
+        sender_username=sender,
+        receiver_username=receiver,
+        content=content,
+        timestamp=datetime.utcnow() + timedelta(hours=8),  # 设置为北京时间
+    )
+    db.session.add(message)
+
+    try:
+        db.session.commit()
+        return jsonify({'success': True, 'msg': '合同已发送'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'msg': '发送失败: ' + str(e)})
