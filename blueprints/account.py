@@ -234,7 +234,7 @@ def profile():
         real_code = session.get('email_code')
         real_email = session.get('email_code_email')
         if not real_code or not real_email or verification_code != real_code:
-            flash("验证码错误或已过期，请重新获取。", "error")
+            flash("验证码错误或已过期，请重新获取。", "profile_error")
             return redirect(url_for('account.profile'))
 
         # 验证通过后清除验证码
@@ -258,7 +258,7 @@ def profile():
                     user_to_update.phone = phone
                     if new_username != username:
                         if LoginModel.query.filter_by(username=new_username).first():
-                            flash(f"用户名 '{new_username}' 已被占用。", "error")
+                            flash(f"用户名 '{new_username}' 已被占用。", "profile_error")
                             return redirect(url_for('account.profile'))
                         user_to_update.tenant_name = new_username
 
@@ -270,7 +270,7 @@ def profile():
                     user_to_update.phone = phone
                     if new_username != username:
                         if LoginModel.query.filter_by(username=new_username).first():
-                            flash(f"用户名 '{new_username}' 已被占用。", "error")
+                            flash(f"用户名 '{new_username}' 已被占用。", "profile_error")
                             return redirect(url_for('account.profile'))
                         user_to_update.landlord_name = new_username
 
@@ -278,7 +278,7 @@ def profile():
                 user_to_update = LoginModel.query.filter_by(username=username).first()
                 if new_username != username:
                     if LoginModel.query.filter_by(username=new_username).first():
-                        flash(f"用户名 '{new_username}' 已被占用。", "error")
+                        flash(f"用户名 '{new_username}' 已被占用。", "profile_error")
                         return redirect(url_for('account.profile'))
                 user_to_update.username = new_username
 
@@ -290,12 +290,12 @@ def profile():
                     login_user.password = ph.hash(password)
 
             db.session.commit()
-            flash("用户信息修改成功！", "success")
+            flash("用户信息修改成功！", "profile")
             return redirect(url_for('account.profile'))
 
         except Exception as e:
             db.session.rollback()
-            flash(f"用户信息修改失败：{str(e)}", "error")
+            flash(f"用户信息修改失败：{str(e)}", "profile_error")
             return redirect(url_for('account.profile'))
 
 

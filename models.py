@@ -86,13 +86,13 @@ class NewsModel(db.Model):
     desc = db.Column(db.String(255), nullable=True, comment='新闻内容')
 
 
-class OrderModel(db.Model):
-    __tablename__ = 'order'
-    order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    tenant_name = db.Column(db.String(100), nullable=False, comment='写在用户租赁历史中，用户可对租赁状态进行修改，注意：只能归还')
-    house_id = db.Column(db.Integer, nullable=False)
-    time = db.Column(db.String(100), nullable=False, comment='租赁时间，按月算，需要前端或者后端计算时间(是否超出日期)')
-    status = db.Column(db.Integer, nullable=False, comment='与house_status中的status对应,这里0:归还,1:租赁中\r\n注意：这里修改要影响house_status，那里修改不会影响这里')
+# class OrderModel(db.Model):
+#     __tablename__ = 'order'
+#     order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+#     tenant_name = db.Column(db.String(100), nullable=False, comment='写在用户租赁历史中，用户可对租赁状态进行修改，注意：只能归还')
+#     house_id = db.Column(db.Integer, nullable=False)
+#     time = db.Column(db.String(100), nullable=False, comment='租赁时间，按月算，需要前端或者后端计算时间(是否超出日期)')
+#     status = db.Column(db.Integer, nullable=False, comment='与house_status中的status对应,这里0:归还,1:租赁中\r\n注意：这里修改要影响house_status，那里修改不会影响这里')
 
 
 class TenantModel(db.Model):
@@ -198,7 +198,7 @@ class RentalContract(db.Model):
 
     total_amount = db.Column(db.Numeric(10, 2), nullable=False)
 
-    status = db.Column(db.Integer, nullable=False, default=0, comment='0：待支付，1：支付成功，2：取消订单')
+    status = db.Column(db.Integer, nullable=False, default=0, comment='0：待支付，1：支付成功，2：取消订单,3：撤销订单')
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

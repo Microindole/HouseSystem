@@ -67,7 +67,22 @@ def alipay_success_result():
     flash("支付成功！", "success")
     user_type = session.get('user_type')
 
+    # 新增：租客支付成功后，修改合同和房屋状态
     if user_type == 1: # 租客
+        from models import db, RentalContract, PrivateChannelModel, HouseStatusModel
+        username = session.get('username')
+        # 获取租客最新的待支付合同
+        contract = RentalContract.query.filter_by(tenant_username=username, status=0).order_by(RentalContract.created_at.desc()).first()
+        if contract:
+            # 修改合同状态为已支付
+            contract.status = 1
+            # 找到对应房屋
+            channel = PrivateChannelModel.query.get(contract.channel_id)
+            if channel:
+                house_status = HouseStatusModel.query.filter_by(house_id=channel.house_id, landlord_name=contract.landlord_username).first()
+                if house_status:
+                    house_status.status = 1  # 1为出租中
+            db.session.commit()
         return redirect(url_for('account.tenant_home'))
     elif user_type == 2: # 房东
         # 理论上房东不直接支付，但按要求添加逻辑
@@ -122,7 +137,9 @@ def start_contract_payment():
 
     # 金额（转为字符串），可以根据你的合同字段
     total_amount = str(contract.total_amount)
-    subject = f"租房合同支付 - 合同ID {contract_id}"
+    # subject = f"租房合同支付 - 合同ID {contract_id}"
+    subject = f"租房合同支付 - {contract.house_name}（{contract.addr}）"
+
     out_trade_no = str(int(time.time() * 1000)) + str(random.randint(1000, 9999))
 
     order_string = alipay.api_alipay_trade_page_pay(
