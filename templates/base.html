@@ -131,8 +131,6 @@
             <li><a href="{{ url_for('account.profile') }}">查看个人信息</a></li>
             <li><a href="{{ url_for('contract.view_contracts') }}">查看交易历史</a></li>
             <li><a href="{{ url_for('house.view_appointments') }}">查看预约</a></li> <!-- 新增按钮 -->
-            <li><a href="{{ url_for('contract.view_contracts') }}">查看交易历史</a></li>
-            <li><a href="{{ url_for('house.view_appointments') }}">查看预约</a></li>
             
             {% if session.get('user_type') == 1 %}
             <li><a href="{{ url_for('house.manage_repair_requests') }}">我的维修请求</a></li>
