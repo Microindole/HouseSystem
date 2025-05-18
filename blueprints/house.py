@@ -576,15 +576,18 @@ def create_repair_request():
 @house_bp.route('/repair/manage')
 @login_required
 def manage_repair_requests():
-    if session.get('user_type') == 1:  # 租客查看自己发起的请求
+    user_type = session.get('user_type')
+    username = session.get('username')
+
+    if user_type == 1:  # 租客查看自己发起的请求
         requests = RepairRequestModel.query.filter_by(
-            tenant_username=session.get('username')
+            tenant_username=username
         ).order_by(RepairRequestModel.request_time.desc()).all()
         return render_template('house/tenant_repair_requests.html', requests=requests)
     
-    elif session.get('user_type') == 2:  # 房东查看收到的请求
+    elif user_type == 2:  # 房东查看收到的请求
         requests = RepairRequestModel.query.filter_by(
-            landlord_username=session.get('username')
+            landlord_username=username
         ).order_by(RepairRequestModel.request_time.desc()).all()
         return render_template('house/landlord_repair_requests.html', requests=requests)
     
