@@ -1,581 +1,574 @@
-body {
-    background-color: #f6f8fa; /* GitHub 背景色 */
-    color: #24292f; /* GitHub 主字体颜色 */
-}
-
+/* 房源详情页样式 */
 .container {
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 0 auto;
     padding: 20px;
-    background-color: #ffffff; /* 白色背景 */
-    border: 1px solid #d1d5da; /* 边框颜色 */
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.img-fluid {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
+/* 房源头部信息 */
 .house-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e1e4e8;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 10px;
 }
 
 .house-header h1 {
-    font-size: 24px;
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.house-header h3 {
     margin: 0;
+    color: #007bff;
+    font-size: 20px;
 }
 
-.house-image {
-    max-width: 100%;
-    border-radius: 6px;
-}
-
+/* 房源详情主体 */
 .house-details {
-    display: flex;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 30px;
+    margin-bottom: 40px;
 }
 
 .house-info {
-    flex: 2;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-.house-actions {
-    flex: 1;
-    background-color: #f6f8fa;
-    padding: 15px;
-    border: 1px solid #d1d5da;
-    border-radius: 6px;
+/* 房源信息列表样式 */
+.house-details-info p {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    margin: 0;
 }
 
-.actions {
-    margin-top: 20px;
+.house-details-info p:last-child {
+    border-bottom: none;
 }
 
-.actions .btn {
-    margin-right: 10px;
-    padding: 10px 15px;
+.house-details-info strong {
+    display: inline-block;
+    width: 100px;
+    color: #555;
+}
+
+/* 房源图片样式 */
+.house-image {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.house-image-placeholder {
+    width: 100%;
+    height: 200px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: #6c757d;
     font-size: 16px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: white;
 }
 
-.actions .btn-primary {
-    background-color: #007bff;
+/* 房源操作区域 */
+.house-actions {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: fit-content;
 }
 
-.actions .btn-secondary {
-    background-color: #6c757d;
+/* 房东信息样式 */
+.landlord-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
 }
 
-.actions .btn-success {
-    background-color: #28a745;
+.landlord-info h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 18px;
 }
 
-.actions .btn:hover {
-    opacity: 0.9;
+.landlord-info p {
+    margin: 8px 0;
+    color: #555;
+}
+
+/* 操作按钮样式 */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .btn {
-    display: inline-block;
-    padding: 10px 15px;
-    margin: 5px 0;
-    font-size: 14px;
-    text-align: center;
-    color: #ffffff;
-    background-color: #0366d6; /* GitHub 蓝色 */
+    padding: 12px 20px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     text-decoration: none;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-.btn:hover {
-    background-color: #005cc5;
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
 }
 
 .btn-secondary {
-    background-color: #6a737d; /* GitHub 灰色 */
+    background: #6c757d;
+    color: white;
 }
 
 .btn-secondary:hover {
-    background-color: #5a6268;
+    background: #545b62;
 }
 
-/* Bilibili风格评论区样式 */
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+/* 状态标签样式 */
+.status-available {
+    color: #28a745;
+    font-weight: bold;
+    background: #d4edda;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.status-rented {
+    color: #004085;
+    font-weight: bold;
+    background: #cce7ff;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.status-unlisted {
+    color: #721c24;
+    font-weight: bold;
+    background: #f8d7da;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.status-pending {
+    color: #856404;
+    font-weight: bold;
+    background: #fff3cd;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.status-rejected {
+    color: #721c24;
+    font-weight: bold;
+    background: #f8d7da;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.status-unknown {
+    color: #6c757d;
+    font-weight: bold;
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* 留言区样式 */
 .comments-section {
-    background: #fff; /* B站评论区通常是白色背景 */
-    border-radius: 4px; /* 轻微圆角 */
-    padding: 16px 24px; /* 调整内边距 */
-    margin-top: 24px;
-    /* border: 1px solid #e3e5e7; */ /* 可以取消或保留边框 */
-    box-shadow: 0 0 0 1px #eee; /* 更细的边框效果 */
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .comments-section h2 {
-    font-size: 18px; /* 标题字号 */
-    color: #18191c; /* 深色标题 */
-    margin-bottom: 16px;
-    font-weight: 600; /* 加粗 */
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e3e5e7; /* 标题下划线 */
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 24px;
 }
 
-.comment-form {
-    display: flex;
-    align-items: flex-start; /* 头像（如果未来添加）和输入框顶部对齐 */
-    gap: 15px;
+/* 登录提示样式 */
+.login-prompt {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
     margin-bottom: 20px;
-    position: relative; /* 为按钮定位提供基础 */
+}
+
+.login-prompt a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-prompt a:hover {
+    text-decoration: underline;
+}
+
+/* @信息提示 */
+.at-info {
+    background: #e7f3ff;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #0066cc;
+}
+
+/* 评论表单样式 */
+.comment-form {
+    margin-bottom: 30px;
 }
 
 .comment-input {
-    flex-grow: 1; /* 输入框占据剩余空间 */
-    border: 1px solid #e3e5e7;
-    border-radius: 4px;
-    padding: 8px 12px;
-    font-size: 14px; /* 调整字号 */
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
     resize: vertical;
-    min-height: 64px; /* 调整最小高度 */
-    background: #f1f2f3; /* 输入框背景色 */
-    color: #18191c;
-    transition: background 0.2s, border-color 0.2s;
-    line-height: 1.6;
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
 .comment-input:focus {
-    background: #fff;
-    border-color: #00a1d6;
     outline: none;
-    animation: inputFocusGlow 0.3s ease-out forwards;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-@keyframes inputFocusGlow {
-    from {
-        box-shadow: 0 0 0 0px rgba(0, 161, 214, 0.2);
-        border-color: #e3e5e7;
-    }
-    to {
-        box-shadow: 0 0 0 4px rgba(0, 161, 214, 0.2);
-        border-color: #00a1d6;
-    }
+#submit-comment-btn {
+    margin-top: 10px;
 }
 
-#submit-comment-btn { /* 直接使用 ID 选择器 */
-    background: #00a1d6;
-    border: none;
-    color: #fff;
-    border-radius: 4px;
-    padding: 0 15px; /* 调整内边距 */
-    height: 32px; /* 固定高度 */
-    line-height: 32px; /* 垂直居中文本 */
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease; /* 添加 transform 过渡 */
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-}
-
-#submit-comment-btn:hover {
-    background: #00b5e5;
-    transform: translateY(-1px); /* 轻微上移 */
-}
-
-#submit-comment-btn:active {
-    background: #008bb5; /* 点击时颜色加深 */
-    transform: scale(0.98); /* 轻微缩小 */
-}
-
+/* 评论列表样式 */
 .comments-list {
-    display: flex;
-    flex-direction: column;
-    /* gap: 18px; */ /* 取消 gap，使用 border-bottom 分隔 */
+    border-top: 1px solid #eee;
+    padding-top: 20px;
 }
 
 .comment {
-    background: #fff; /* 评论背景 */
-    /* border-radius: 6px; */ /* B站评论通常没有明显圆角 */
-    padding: 16px 0; /* 上下内边距，左右为0 */
-    /* box-shadow: 0 1px 4px rgba(0,0,0,0.03); */ /* 移除阴影 */
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    border-bottom: 1px solid #e3e5e7; /* 分隔线 */
-    opacity: 0; /* 初始透明 */
-    transform: translateY(10px); /* 初始下移 */
-    animation: commentFadeInUp 0.4s ease-out forwards;
-}
-
-@keyframes commentFadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .comment:last-child {
-    border-bottom: none; /* 最后一条评论无下边框 */
+    border-bottom: none;
 }
 
 .comment-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 4px; /* 减小间距 */
+    margin-bottom: 10px;
 }
 
 .comment-username {
-    font-weight: 500; /* B站用户名通常不是特别粗 */
-    color: #5090cc; /* B站用户名颜色 */
-    font-size: 13px; /* 调整字号 */
-    margin-right: 4px;
-    cursor: pointer; /* 暗示可点击 */
-    transition: color 0.2s;
-}
-.comment-username:hover {
-    color: #00a1d6;
+    color: #333;
+    font-weight: 600;
 }
 
 .comment-type {
+    color: #666;
     font-size: 12px;
-    color: #99a2aa; /* 时间和类型颜色统一 */
-    margin-left: 0;
+    margin-left: 5px;
 }
 
 .comment-time {
+    color: #999;
     font-size: 12px;
-    color: #99a2aa; /* 时间颜色 */
-    margin-left: auto; /* 时间推到最右边 */
-}
-
-.comment-body {
-    padding-left: 0; /* 如果未来有头像，这里可能需要左边距 */
-    margin-top: 2px;
-}
-
-.comment-body p {
-    margin: 0;
-    font-size: 14px; /* 正文字号 */
-    color: #18191c; /* 正文颜色 */
-    line-height: 1.6;
-    word-wrap: break-word; /* 自动换行 */
-    white-space: pre-wrap; /* 保留换行符 */
-}
-
-.comment-reply {
-    background: #f1f2f3; /* 回复引用背景 */
-    border-radius: 4px;
-    padding: 6px 10px; /* 调整内边距 */
-    color: #6d757a; /* 回复引用文字颜色 */
-    font-size: 13px;
-    margin-top: 8px;
-    display: block; /* 块级显示 */
-    border-left: 2px solid #ddd; /* 左边框强调 */
-    white-space: pre-wrap;
-    word-wrap: break-word;
 }
 
 .reply-btn {
-    margin-left: 15px; /* 与时间保持距离 */
-    font-size: 12px;
-    color: #5090cc; /* 回复按钮颜色 */
-    background: none;
+    background: #007bff;
+    color: white;
     border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
     cursor: pointer;
-    opacity: 0; /* 默认隐藏 */
-    transform: scale(0.9) translateY(2px); /* 初始缩小下移 */
-    transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease; /* 添加 transform 过渡 */
-    padding: 2px 4px; /* 轻微增加点击区域 */
+    font-size: 12px;
 }
 
-.comment:hover .reply-btn {
-    opacity: 1; /* 悬停时显示 */
-    transform: scale(1) translateY(0); /* 悬停时恢复 */
-}
 .reply-btn:hover {
-    color: #00a1d6; /* 悬停时变色 */
-    transform: scale(1.1) translateY(0); /* 悬停时轻微放大 */
+    background: #0056b3;
 }
 
-.at-info {
-    background: #f1f2f3; /* @信息背景 */
-    border-radius: 4px;
-    padding: 6px 10px;
-    margin-bottom: 10px; /* 与输入框的距离 */
-    color: #6d757a;
+.comment-body {
+    color: #555;
+    line-height: 1.6;
+}
+
+.comment-reply {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-left: 3px solid #007bff;
+    margin-top: 10px;
     font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* 让叉号靠右 */
-    max-height: 0; /* 初始高度为0 */
-    opacity: 0; /* 初始透明 */
-    overflow: hidden; /* 隐藏溢出内容 */
-    margin-bottom: 0; /* 初始无下边距 */
-    padding-top: 0; /* 初始无上内边距 */
-    padding-bottom: 0; /* 初始无下内边距 */
-    transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease;
-}
-.at-info[style*="display: flex"] { /* 当JS设置display:flex时触发动画 */
-    max-height: 50px; /* 展开到足够的高度 */
-    opacity: 1;
-    margin-bottom: 10px; /* 恢复下边距 */
-    padding-top: 6px; /* 恢复上内边距 */
-    padding-bottom: 6px; /* 恢复下内边距 */
+    color: #666;
 }
 
-#cancel-at {
-    cursor: pointer;
-    color: #99a2aa; /* 叉号颜色 */
-    font-size: 16px; /* 稍微放大叉号 */
-    transition: color 0.2s;
-}
-#cancel-at:hover {
-    color: #f56c6c; /* 悬停时变红 */
-}
-
-/* --- Bilibili 风格分页控件优化 --- */
-.pagination { /* ul 元素 */
-    display: flex; /* 新增：使 li 水平排列 */
-    justify-content: center; /* 保留：水平居中 */
-    padding-left: 0;
+/* 分页样式 */
+.pagination {
     list-style: none;
-    border-radius: 4px;
-    margin-top: 24px; /* 与评论列表的距离 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin: 30px 0 0 0;
+    padding: 0;
 }
 
-.page-item { /* li 元素 */
-    margin: 0 2px; /* 页码间距 */
+.page-item {
+    display: flex;
 }
 
-.page-link { /* a 或 span 元素 */
-    position: relative;
+.page-link {
     display: block;
-    padding: 6px 12px; /* 内边距 */
-    margin-left: -1px;
-    line-height: 1.42857143;
-    color: #5090cc; /* 链接颜色 */
+    padding: 8px 12px;
     text-decoration: none;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px; /* 圆角 */
-    transition: color .15s ease-in-out,
-                background-color .15s ease-in-out,
-                border-color .15s ease-in-out,
-                transform 0.15s ease-out, /* 添加 transform 过渡 */
-                box-shadow 0.15s ease-out; /* 添加阴影过渡 */
-    font-size: 13px; /* 字号 */
+    color: #007bff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    transition: all 0.3s;
 }
 
 .page-link:hover {
-    z-index: 2;
-    color: #00a1d6; /* 悬停颜色 */
-    background-color: #f8f8f8; /* 悬停背景更亮一点 */
-    border-color: #ccc;
-    transform: translateY(-2px); /* 悬停时上移 */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加轻微阴影 */
+    background: #f8f9fa;
+    color: #0056b3;
 }
 
 .page-item.active .page-link {
-    z-index: 3;
-    color: #fff;
-    cursor: default;
-    background-color: #00a1d6; /* 激活背景色 */
-    border-color: #00a1d6;
-    box-shadow: 0 1px 3px rgba(0, 161, 214, 0.3); /* 给激活状态加点阴影 */
-    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; /* 优化激活状态过渡 */
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
 }
 
 .page-item.disabled .page-link {
-    color: #aaa; /* 禁用颜色 */
+    color: #6c757d;
+    background: #fff;
+    border-color: #dee2e6;
     cursor: not-allowed;
-    background-color: #fff;
-    border-color: #ddd;
-    pointer-events: none; /* 禁用点击 */
 }
 
-/* 特殊处理省略号 */
-.page-item.disabled span.page-link {
-    padding: 6px 8px; /* 省略号的padding可以小一点 */
-}
-
-/* 特殊处理上一页/下一页符号 */
-.page-link[aria-label="Previous"],
-.page-link[aria-label="Next"] {
-    padding: 6px 10px;
-}
-
-.page-item:not(.disabled):active .page-link { /* 点击非禁用按钮时 */
-    transform: translateY(0px); /* 按下时恢复位置 */
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* 添加内阴影模拟按下效果 */
-    background-color: #eee; /* 按下时背景 */
-}
-
-/* 优化预约看房模态框样式，蓝白简约风+动画 */
+/* 模态框样式 */
 .modal {
     display: none;
     position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(33, 150, 243, 0.10);
-    justify-content: center;
-    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    animation: fadeInModalBg 0.4s;
-}
-
-@keyframes fadeInModalBg {
-    from { background: rgba(33,150,243,0); }
-    to   { background: rgba(33,150,243,0.10);}
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-content {
-    background: #fff;
-    padding: 32px 28px 22px 28px;
-    border-radius: 14px;
-    width: 95%;
-    max-width: 400px;
-    box-shadow: 0 8px 32px 0 rgba(33,150,243,0.18);
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     position: relative;
-    animation: popInModal 0.5s cubic-bezier(.4,2,.6,1);
-    border: 1.5px solid #2196f3;
-}
-
-@keyframes popInModal {
-    from { opacity: 0; transform: scale(0.85) translateY(40px);}
-    to   { opacity: 1; transform: scale(1) translateY(0);}
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .close-button {
     position: absolute;
-    top: 16px;
-    right: 18px;
-    font-size: 22px;
-    color: #2196f3;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
     cursor: pointer;
-    transition: color 0.2s, transform 0.2s;
-    z-index: 10;
-}
-.close-button:hover {
-    color: #1565c0;
-    transform: rotate(90deg) scale(1.2);
+    color: #aaa;
+    line-height: 1;
 }
 
-.modal-content h3 {
-    text-align: center;
-    color: #2196f3;
-    margin-bottom: 22px;
-    font-size: 1.3rem;
-    font-weight: 600;
-    letter-spacing: 1px;
+.close-button:hover {
+    color: #000;
+}
+
+.modal h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 20px;
 }
 
 .form-group {
-    margin-bottom: 18px;
-    animation: fadeIn 0.5s;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 6px;
-    color: #1565c0;
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea {
     width: 100%;
-    padding: 9px 12px;
-    border: 1.5px solid #bbdefb;
-    border-radius: 7px;
-    background: #f7faff;
-    color: #222;
-    font-size: 15px;
-    transition: border 0.2s, box-shadow 0.2s, background 0.2s;
-    outline: none;
-    animation: inputPop 0.5s;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+    font-family: inherit;
 }
 
-.form-group input:focus {
-    border: 1.5px solid #2196f3;
-    background: #e3f2fd;
-    box-shadow: 0 0 0 2px #bbdefb;
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .form-actions {
     display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: 10px;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
 }
 
 .form-actions button {
-    flex: 1;
-    padding: 9px 0;
-    border: none;
-    border-radius: 7px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s, transform 0.18s;
-    margin: 0 2px;
-    box-shadow: 0 2px 8px rgba(33,150,243,0.06);
-    background: #2196f3;
-    color: #fff;
-    letter-spacing: 1px;
-    animation: popIn 0.5s;
+    min-width: 80px;
 }
 
-.form-actions button[type="button"] {
-    background: #fff;
-    color: #2196f3;
-    border: 1.5px solid #2196f3;
-}
-
-.form-actions button[type="button"]:hover {
-    background: #e3f2fd;
-    color: #1565c0;
-    transform: translateY(-2px) scale(1.04);
-}
-
-.form-actions button[type="submit"]:hover {
-    background: #1565c0;
-    color: #fff;
-    transform: translateY(-2px) scale(1.04);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(24px);}
-    to { opacity: 1; transform: none;}
-}
-@keyframes inputPop {
-    from { box-shadow: 0 0 0 0 #bbdefb; }
-    to { box-shadow: 0 2px 8px rgba(33,150,243,0.04);}
-}
-@keyframes popIn {
-    from { opacity: 0; transform: scale(0.8);}
-    to { opacity: 1; transform: scale(1);}
-}
-
-/* 响应式 */
-@media (max-width: 600px) {
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .house-details {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .house-header h1 {
+        font-size: 24px;
+    }
+    
+    .house-header h3 {
+        font-size: 18px;
+    }
+    
+    .container {
+        padding: 15px;
+    }
+    
+    .house-info,
+    .house-actions,
+    .comments-section {
+        padding: 20px;
+    }
+    
+    .action-buttons {
+        gap: 8px;
+    }
+    
+    .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    
+    .comment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
     .modal-content {
-        width: 98vw;
-        min-width: 0;
-        padding: 18px 6vw 16px 6vw;
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .pagination {
+        gap: 2px;
+    }
+    
+    .page-link {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .house-header {
+        padding: 15px;
+    }
+    
+    .house-header h1 {
+        font-size: 20px;
+    }
+    
+    .house-header h3 {
+        font-size: 16px;
+    }
+    
+    .house-details-info strong {
+        width: 80px;
+        font-size: 13px;
+    }
+    
+    .comments-section h2 {
+        font-size: 20px;
     }
 }

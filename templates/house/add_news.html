@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% block title %}发布新闻{% endblock %}
+{% block head %}
+<style>
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.required {
+    color: red;
+}
+
+.btn-container {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn {
+    background: #28a745;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0 10px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn:hover {
+    background: #218838;
+    text-decoration: none;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.help-text {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.no-houses {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.no-houses h3 {
+    color: #999;
+    margin-bottom: 15px;
+}
+
+.char-count {
+    text-align: right;
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.form-header p {
+    color: #666;
+    font-size: 14px;
+}
+</style>
+{% endblock %}
+{% block body %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>发布房源新闻</h1>
+        <p>发布房源相关新闻和通知，增加房源曝光度</p>
+    </div>
+    
+    {% if not houses %}
+    <div class="no-houses">
+        <h3>暂无房源</h3>
+        <p>您还没有发布任何房源，请先 <a href="{{ url_for('house.add_house') }}">发布房源</a> 再来发布新闻。</p>
+        <a href="{{ url_for('account.landlord_home') }}" class="btn btn-secondary">返回首页</a>
+    </div>
+    {% else %}
+    <form method="POST" action="{{ url_for('house.add_news') }}" id="newsForm">
+        <div class="form-group">
+            <label for="house_id">选择房源 <span class="required">*</span></label>
+            <select id="house_id" name="house_id" required>
+                <option value="">请选择要发布新闻的房源</option>
+                {% for house in houses %}
+                <option value="{{ house.house_id }}" data-house-name="{{ house.house_info.house_name if house.house_info else '未知房源' }}">
+                    {{ house.house_info.house_name if house.house_info else '未知房源' }} - {{ house.house_info.region if house.house_info else '未知地区' }}
+                </option>
+                {% endfor %}
+            </select>
+            <div class="help-text">选择要发布新闻的房源，新闻将与该房源关联</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="title">新闻标题 <span class="required">*</span></label>
+            <input type="text" id="title" name="title" required maxlength="255" 
+                   placeholder="例如：精装修两居室开始招租">
+            <div class="char-count">
+                <span id="title-count">0</span>/255 字符
+            </div>
+            <div class="help-text">简洁明了的新闻标题，让租客快速了解新闻内容</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="desc">新闻内容</label>
+            <textarea id="desc" name="desc" maxlength="1000" 
+                      placeholder="详细描述新闻内容，如房源特色、周边环境、交通便利性、最新优惠等..."></textarea>
+            <div class="char-count">
+                <span id="desc-count">0</span>/1000 字符
+            </div>
+            <div class="help-text">详细的新闻描述，可以包含房源特色、周边环境、交通等信息（可选）</div>
+        </div>
+        
+        <div class="btn-container">
+            <button type="submit" class="btn">发布新闻</button>
+            <a href="{{ url_for('house.manage_news') }}" class="btn btn-secondary">管理新闻</a>
+            <a href="{{ url_for('account.landlord_home') }}" class="btn btn-secondary">返回首页</a>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
+<script>
+// 字符计数功能
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('title');
+    const descInput = document.getElementById('desc');
+    const titleCount = document.getElementById('title-count');
+    const descCount = document.getElementById('desc-count');
+    
+    // 标题字符计数
+    if (titleInput && titleCount) {
+        titleInput.addEventListener('input', function() {
+            const length = this.value.length;
+            titleCount.textContent = length;
+            
+            // 接近限制时改变颜色
+            if (length > 200) {
+                titleCount.style.color = '#dc3545';
+            } else if (length > 150) {
+                titleCount.style.color = '#ffc107';
+            } else {
+                titleCount.style.color = '#666';
+            }
+        });
+    }
+    
+    // 内容字符计数
+    if (descInput && descCount) {
+        descInput.addEventListener('input', function() {
+            const length = this.value.length;
+            descCount.textContent = length;
+            
+            // 接近限制时改变颜色
+            if (length > 800) {
+                descCount.style.color = '#dc3545';
+            } else if (length > 600) {
+                descCount.style.color = '#ffc107';
+            } else {
+                descCount.style.color = '#666';
+            }
+        });
+    }
+    
+    // 房源选择变化时的提示
+    const houseSelect = document.getElementById('house_id');
+    if (houseSelect) {
+        houseSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                const houseName = selectedOption.getAttribute('data-house-name');
+                console.log('选择了房源:', houseName);
+            }
+        });
+    }
+});
+
+// 表单验证
+document.getElementById('newsForm')?.addEventListener('submit', function(e) {
+    const houseId = document.getElementById('house_id').value;
+    const title = document.getElementById('title').value.trim();
+    
+    if (!houseId) {
+        e.preventDefault();
+        alert('请选择要发布新闻的房源');
+        document.getElementById('house_id').focus();
+        return false;
+    }
+    
+    if (!title) {
+        e.preventDefault();
+        alert('请输入新闻标题');
+        document.getElementById('title').focus();
+        return false;
+    }
+    
+    if (title.length > 255) {
+        e.preventDefault();
+        alert('新闻标题过长，请控制在255个字符以内');
+        document.getElementById('title').focus();
+        return false;
+    }
+    
+    const desc = document.getElementById('desc').value.trim();
+    if (desc.length > 1000) {
+        e.preventDefault();
+        alert('新闻内容过长，请控制在1000个字符以内');
+        document.getElementById('desc').focus();
+        return false;
+    }
+    
+    // 确认发布
+    if (!confirm('确定要发布这条新闻吗？')) {
+        e.preventDefault();
+        return false;
+    }
+});
+
+// 自动保存草稿（可选功能）
+let draftTimer;
+function saveDraft() {
+    const title = document.getElementById('title').value;
+    const desc = document.getElementById('desc').value;
+    const houseId = document.getElementById('house_id').value;
+    
+    if (title || desc) {
+        localStorage.setItem('news_draft', JSON.stringify({
+            title: title,
+            desc: desc,
+            house_id: houseId,
+            timestamp: Date.now()
+        }));
+    }
+}
+
+// 加载草稿
+function loadDraft() {
+    const draft = localStorage.getItem('news_draft');
+    if (draft) {
+        try {
+            const draftData = JSON.parse(draft);
+            // 只加载24小时内的草稿
+            if (Date.now() - draftData.timestamp < 24 * 60 * 60 * 1000) {
+                if (confirm('检测到未发布的新闻草稿，是否恢复？')) {
+                    document.getElementById('title').value = draftData.title || '';
+                    document.getElementById('desc').value = draftData.desc || '';
+                    if (draftData.house_id) {
+                        document.getElementById('house_id').value = draftData.house_id;
+                    }
+                    
+                    // 触发字符计数更新
+                    document.getElementById('title').dispatchEvent(new Event('input'));
+                    document.getElementById('desc').dispatchEvent(new Event('input'));
+                }
+            }
+        } catch (e) {
+            console.log('加载草稿失败:', e);
+        }
+    }
+}
+
+// 页面加载时加载草稿
+document.addEventListener('DOMContentLoaded', loadDraft);
+
+// 输入时自动保存草稿
+document.getElementById('title')?.addEventListener('input', function() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(saveDraft, 2000);
+});
+
+document.getElementById('desc')?.addEventListener('input', function() {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(saveDraft, 2000);
+});
+
+// 发布成功后清除草稿
+window.addEventListener('beforeunload', function() {
+    // 检查是否是提交表单，如果是则清除草稿
+    // 这个逻辑在实际提交成功后会清除
+});
+</script>
+{% endblock %}

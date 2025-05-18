@@ -1,0 +1,392 @@
+
+{% extends 'base.html' %}
+{% block title %}维修请求管理{% endblock %}
+{% block head %}
+<style>
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header-section {
+    margin-bottom: 30px;
+}
+
+.btn {
+    background: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn:hover {
+    background: #0056b3;
+}
+
+.btn-success {
+    background: #28a745;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-secondary {
+    background: #6c757d;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+    margin: 2px;
+}
+
+.request-list {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.request-item {
+    border-bottom: 1px solid #eee;
+    padding: 20px;
+}
+
+.request-item:last-child {
+    border-bottom: none;
+}
+
+.request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.house-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-processing {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.request-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.request-content {
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.action-section {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    margin-top: 15px;
+}
+
+.action-buttons {
+    margin-bottom: 15px;
+}
+
+.notes-form {
+    display: none;
+    margin-top: 15px;
+}
+
+.notes-form textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.notes-form .form-actions {
+    margin-top: 10px;
+}
+
+.handler-notes {
+    margin-top: 15px;
+    padding: 15px;
+    background: #e7f3ff;
+    border-left: 4px solid #007bff;
+    border-radius: 4px;
+}
+
+.handler-notes h5 {
+    margin: 0 0 10px 0;
+    color: #007bff;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.empty-state h3 {
+    margin-bottom: 15px;
+    color: #999;
+}
+
+.stats-section {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+}
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+    <div class="header-section">
+        <h1>维修请求管理</h1>
+        <a href="{{ url_for('account.landlord_home') }}" class="btn btn-secondary">返回首页</a>
+    </div>
+    
+    {% if requests %}
+    <!-- 统计信息 -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <div class="stat-number">{{ requests|selectattr('status', 'equalto', '请求中')|list|count }}</div>
+            <div class="stat-label">待处理</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ requests|selectattr('status', 'equalto', '处理中')|list|count }}</div>
+            <div class="stat-label">处理中</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ requests|selectattr('status', 'equalto', '已完成')|list|count }}</div>
+            <div class="stat-label">已完成</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ requests|count }}</div>
+            <div class="stat-label">总计</div>
+        </div>
+    </div>
+    
+    <div class="request-list">
+        {% for request in requests %}
+        <div class="request-item">
+            <div class="request-header">
+                <span class="house-name">{{ request.house.house_name }}</span>
+                <span class="status-badge status-{{ request.status.replace('请求中', 'pending').replace('已同意', 'approved').replace('处理中', 'processing').replace('已完成', 'completed').replace('已拒绝', 'rejected') }}">
+                    {{ request.status }}
+                </span>
+            </div>
+            
+            <div class="request-meta">
+                <span>租客：{{ request.tenant_username }}</span>
+                <span>申请时间：{{ request.request_time.strftime('%Y-%m-%d %H:%M') }}</span>
+                {% if request.handled_time %}
+                <span>处理时间：{{ request.handled_time.strftime('%Y-%m-%d %H:%M') }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="request-content">
+                <strong>维修内容：</strong><br>
+                {{ request.content }}
+            </div>
+            
+            {% if request.status == '请求中' %}
+            <div class="action-section">
+                <div class="action-buttons">
+                    <button class="btn btn-success btn-sm" onclick="showNotesForm({{ request.id }}, '已同意')">同意</button>
+                    <button class="btn btn-warning btn-sm" onclick="handleRequest({{ request.id }}, '处理中')">开始处理</button>
+                    <button class="btn btn-danger btn-sm" onclick="showNotesForm({{ request.id }}, '已拒绝')">拒绝</button>
+                </div>
+                
+                <div id="notes-form-{{ request.id }}" class="notes-form">
+                    <textarea id="notes-{{ request.id }}" placeholder="请填写备注信息（可选）"></textarea>
+                    <div class="form-actions">
+                        <button class="btn btn-success btn-sm" onclick="handleRequestWithNotes({{ request.id }})">确认</button>
+                        <button class="btn btn-secondary btn-sm" onclick="hideNotesForm({{ request.id }})">取消</button>
+                    </div>
+                </div>
+            </div>
+            {% elif request.status == '处理中' %}
+            <div class="action-section">
+                <div class="action-buttons">
+                    <button class="btn btn-success btn-sm" onclick="showNotesForm({{ request.id }}, '已完成')">标记完成</button>
+                </div>
+                
+                <div id="notes-form-{{ request.id }}" class="notes-form">
+                    <textarea id="notes-{{ request.id }}" placeholder="请填写完成情况说明（可选）"></textarea>
+                    <div class="form-actions">
+                        <button class="btn btn-success btn-sm" onclick="handleRequestWithNotes({{ request.id }})">确认完成</button>
+                        <button class="btn btn-secondary btn-sm" onclick="hideNotesForm({{ request.id }})">取消</button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if request.handler_notes %}
+            <div class="handler-notes">
+                <h5>处理备注：</h5>
+                {{ request.handler_notes }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>暂无维修请求</h3>
+        <p>目前没有收到任何维修请求</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+let currentRequestId = null;
+let currentStatus = null;
+
+function showNotesForm(requestId, status) {
+    currentRequestId = requestId;
+    currentStatus = status;
+    
+    // 隐藏所有表单
+    document.querySelectorAll('.notes-form').forEach(form => {
+        form.style.display = 'none';
+    });
+    
+    // 显示当前表单
+    const form = document.getElementById(`notes-form-${requestId}`);
+    if (form) {
+        form.style.display = 'block';
+    }
+}
+
+function hideNotesForm(requestId) {
+    const form = document.getElementById(`notes-form-${requestId}`);
+    if (form) {
+        form.style.display = 'none';
+    }
+    currentRequestId = null;
+    currentStatus = null;
+}
+
+function handleRequest(requestId, status) {
+    handleRequestWithNotes(requestId, status, '');
+}
+
+function handleRequestWithNotes(requestId, status = null, notes = null) {
+    const finalStatus = status || currentStatus;
+    const finalNotes = notes !== null ? notes : (document.getElementById(`notes-${currentRequestId || requestId}`)?.value || '');
+    
+    fetch(`/house/repair/handle/${currentRequestId || requestId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: finalStatus,
+            notes: finalNotes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('处理失败：' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('处理失败，请稍后重试');
+    });
+}
+</script>
+{% endblock %}

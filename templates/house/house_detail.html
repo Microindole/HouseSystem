@@ -2,65 +2,120 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/house/house_detail.css') }}">
-<script src="{{ url_for('static', filename='js/house/show-date.js') }}" defer></script> {# 使用 defer 确保 DOM 加载后执行 #}
+<script src="{{ url_for('static', filename='js/house/show-date.js') }}" defer></script>
 {% endblock %}
 
-{% block title %}房源详情{% endblock %}
+{% block title %}{{ house.house_name }} - 房源详情{% endblock %}
 
 {% block body %}
 <div class="container">
+    <!-- 房源基本信息 -->
     <div class="house-header">
         <h1>{{ house.house_name }}</h1>
-        <h3>价格: {{ house.price }} 元/月</h3>
+        <h3>价格: {{ "%.2f"|format(house.price) }} 元/月</h3>
     </div>
+    
     <div class="house-details">
         <div class="house-info">
-            <img src="{{ url_for('static', filename=house.image.split('static/')[1]) }}" class="house-image" alt="房屋图片">
-            <p><strong>地址:</strong> {{ house.addr }}</p>
-            <p><strong>户型:</strong> {{ house.rooms }}</p>
-            <p><strong>押金:</strong> {{ house.deposit if house.deposit else '暂无信息' }}</p>
-            <p><strong>情况:</strong> {{ house.situation if house.situation else '暂无信息' }}</p>
-            <p><strong>亮点:</strong> {{ house.highlight if house.highlight else '暂无亮点' }}</p>
-            <p><strong>房源状态:</strong> 
-                {% if status.status == 0 %}
-                    空置
-                {% elif status.status == 1 %}
-                    出租中
-                {% elif status.status == 2 %}
-                    装修中
+            <!-- 房源图片显示 -->
+            {% if house.image %}
+                {% if house.image.startswith('static/') %}
+                    <img src="{{ url_for('static', filename=house.image.split('static/')[1]) }}" class="house-image" alt="{{ house.house_name }}">
                 {% else %}
-                    未知状态
+                    <img src="{{ house.image }}" class="house-image" alt="{{ house.house_name }}">
                 {% endif %}
-            </p>
-        </div>
-        <div class="house-actions">
-            <p><strong>房东信息:</strong> {{ status.landlord_name }}</p>
-            <p><strong>联系电话:</strong> <span id="landlord-phone">点击下方按钮查看</span></p>
-            <button class="btn btn-success" onclick="showPhone()">查看电话号码</button>
-
-
-            
-            {% if session.get('username') and session.get('user_type') == 1 %}
-            <a href="{{ url_for('feedback.start_or_get_channel', house_id=house.house_id) }}" class="btn btn-primary">联系房东</a>
+            {% else %}
+                <div class="house-image-placeholder">
+                    <span>暂无图片</span>
+                </div>
             {% endif %}
-
-
-
-            <a href="#" class="btn btn-secondary" onclick="showAppointmentModal()">预约看房</a>
+            
+            <!-- 房源详细信息 -->
+            <div class="house-details-info">
+                <p><strong>房源名称:</strong> {{ house.house_name }}</p>
+                <p><strong>地址:</strong> {{ house.addr }}</p>
+                <p><strong>地区:</strong> {{ house.region }}</p>
+                <p><strong>户型:</strong> {{ house.rooms }}</p>
+                <p><strong>租金:</strong> {{ "%.2f"|format(house.price) }} 元/月</p>
+                <p><strong>押金:</strong> {{ "%.2f"|format(house.deposit) if house.deposit else '无押金' }} 
+                    {% if house.deposit %}元{% endif %}</p>
+                <p><strong>装修情况:</strong> {{ house.situation if house.situation else '暂无信息' }}</p>
+                <p><strong>房源亮点:</strong> {{ house.highlight if house.highlight else '暂无亮点' }}</p>
+                <p><strong>房源状态:</strong> 
+                    {% if status.status == 0 %}
+                        <span class="status-available">可租</span>
+                    {% elif status.status == 1 %}
+                        <span class="status-rented">已出租</span>
+                    {% elif status.status == 2 %}
+                        <span class="status-unlisted">未上架</span>
+                    {% elif status.status == 4 %}
+                        <span class="status-pending">待审核</span>
+                    {% elif status.status == 5 %}
+                        <span class="status-rejected">审核未通过</span>
+                    {% else %}
+                        <span class="status-unknown">未知状态</span>
+                    {% endif %}
+                </p>
+                <p><strong>最后更新:</strong> {{ status.update_time.strftime('%Y-%m-%d %H:%M') if status.update_time else '未知' }}</p>
+            </div>
+        </div>
+        
+        <!-- 操作按钮区域 -->
+        <div class="house-actions">
+            <div class="landlord-info">
+                <h4>房东信息</h4>
+                <p><strong>房东姓名:</strong> {{ status.landlord_name }}</p>
+                <p><strong>联系电话:</strong> <span id="landlord-phone">点击下方按钮查看</span></p>
+                <button class="btn btn-success" onclick="showPhone()">查看电话号码</button>
+            </div>
+            
+            <div class="action-buttons">
+                {% if session.get('username') and session.get('user_type') == 1 %}
+                    <!-- 租客操作按钮 -->
+                    {% if status.status == 0 %}
+                        <a href="{{ url_for('feedback.start_or_get_channel', house_id=house.house_id) }}" class="btn btn-primary">联系房东</a>
+                        <button class="btn btn-secondary" onclick="showAppointmentModal()">预约看房</button>
+                    {% endif %}
+                    
+                    <!-- 维修请求按钮（如果租客已租住该房源） -->
+                    {% if status.status == 1 %}
+                        <button class="btn btn-warning" onclick="showRepairModal()">申请维修</button>
+                    {% endif %}
+                {% elif session.get('username') and session.get('user_type') == 2 and status.landlord_name == session.get('username') %}
+                    <!-- 房东操作按钮 -->
+                    <a href="{{ url_for('house.edit_house', house_id=house.house_id) }}" class="btn btn-primary">编辑房源</a>
+                    {% if status.status != 1 %}
+                        <button class="btn btn-danger" onclick="deleteHouse({{ house.house_id }})">删除房源</button>
+                    {% endif %}
+                {% elif not session.get('username') %}
+                    <!-- 未登录用户 -->
+                    <a href="{{ url_for('account.login') }}" class="btn btn-primary">登录后联系房东</a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <!-- 留言区 -->
     <div class="comments-section">
         <h2>留言区 ({{ pagination.total }}条)</h2>
+        
+        {% if session.get('username') %}
         <div class="at-info" style="display:none;">
             <span id="at-text"></span>
             <span id="cancel-at" style="cursor:pointer;color:#f56c6c;margin-left:8px;">×</span>
         </div>
+        
         <div class="comment-form">
             <textarea name="comment" class="comment-input" placeholder="留下您的评论..." required></textarea>
+            <input type="hidden" id="at-comment-id" value="">
             <button type="button" class="btn btn-primary" id="submit-comment-btn">提交评论</button>
         </div>
+        {% else %}
+        <div class="login-prompt">
+            <p><a href="{{ url_for('account.login') }}">登录</a> 后可以发表评论</p>
+        </div>
+        {% endif %}
+        
         <div class="comments-list">
             {% for comment in comments %}
             <div class="comment" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}" data-desc="{{ comment.desc }}">
@@ -74,7 +129,9 @@
                           data-raw="{{ comment.time.strftime('%Y-%m-%d %H:%M:%S') }}"
                           {% endif %}>
                     </span>
-                    <button class="reply-btn" style="display:none;">回复</button>
+                    {% if session.get('username') %}
+                    <button class="reply-btn" onclick="replyToComment({{ comment.comment_id }}, '{{ comment.username }}')">回复</button>
+                    {% endif %}
                 </div>
                 <div class="comment-body">
                     <p>{{ comment.desc }}</p>
@@ -86,16 +143,15 @@
             {% endfor %}
         </div>
 
-        <!-- 添加分页控件 -->
+        <!-- 分页控件 -->
+        {% if pagination.pages > 1 %}
         <nav aria-label="Page navigation" class="mt-4">
             <ul class="pagination justify-content-center">
-                <!-- 上一页 -->
                 <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
                     <a class="page-link" href="{{ url_for('house.house_detail', house_id=house.house_id, page=pagination.prev_num) if pagination.has_prev else '#' }}" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
-                <!-- 中间页码 -->
                 {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                     {% if p %}
                         {% if p == pagination.page %}
@@ -107,7 +163,6 @@
                         <li class="page-item disabled"><span class="page-link">…</span></li>
                     {% endif %}
                 {% endfor %}
-                <!-- 下一页 -->
                 <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
                     <a class="page-link" href="{{ url_for('house.house_detail', house_id=house.house_id, page=pagination.next_num) if pagination.has_next else '#' }}" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
@@ -115,10 +170,31 @@
                 </li>
             </ul>
         </nav>
-        <!-- 分页控件结束 -->
-
+        {% endif %}
     </div>
-</div> <!-- container 结束 --><!-- 预约表单模态框 -->
+</div>
+
+<!-- 维修请求模态框 -->
+<div id="repairModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeRepairModal()">&times;</span>
+        <h3>申请维修</h3>
+        <form id="repairForm">
+            <div class="form-group">
+                <label for="repairContent">维修内容描述</label>
+                <textarea id="repairContent" name="content" required 
+                          placeholder="请详细描述需要维修的问题，如漏水、电路故障、设备损坏等..."
+                          rows="5"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="closeRepairModal()">取消</button>
+                <button type="submit">提交申请</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 预约看房模态框 -->
 <div id="appointmentModal" class="modal hidden">
     <div class="modal-content">
         <span class="close-button" onclick="closeAppointmentModal()">&times;</span>
@@ -126,17 +202,14 @@
         <form id="appointmentForm">
             <div class="form-group">
                 <label for="houseId">房屋ID</label>
-                <!-- 自动填充房屋ID -->
                 <input type="text" id="houseId" name="house_id" value="{{ house.house_id }}" readonly required>
             </div>
             <div class="form-group">
                 <label for="houseName">房屋名称</label>
-                <!-- 自动填充房屋名称 -->
                 <input type="text" id="houseName" name="house_name" value="{{ house.house_name }}" readonly required>
             </div>
             <div class="form-group">
                 <label for="address">地址</label>
-                <!-- 自动填充用户地址 -->
                 <input type="text" id="address" name="address" value="{{ user.addr if user else '' }}" readonly>
             </div>
             <div class="form-group">
@@ -152,105 +225,365 @@
 </div>
 
 <style>
-    /* 模态框样式 */
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+/* 状态标签样式 */
+.status-available { color: #28a745; font-weight: bold; }
+.status-rented { color: #007bff; font-weight: bold; }
+.status-unlisted { color: #6c757d; font-weight: bold; }
+.status-pending { color: #ffc107; font-weight: bold; }
+.status-rejected { color: #dc3545; font-weight: bold; }
+.status-unknown { color: #6c757d; font-weight: bold; }
+
+/* 图片样式 */
+.house-image {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.house-image-placeholder {
+    width: 100%;
+    max-width: 400px;
+    height: 200px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: #6c757d;
+}
+
+/* 房源详情信息样式 */
+.house-details-info {
+    margin-top: 20px;
+}
+
+.house-details-info p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* 房东信息样式 */
+.landlord-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.landlord-info h4 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* 操作按钮样式 */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close-button:hover {
+    color: #000;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* 登录提示样式 */
+.login-prompt {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.login-prompt a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.login-prompt a:hover {
+    text-decoration: underline;
+}
+
+/* 评论样式优化 */
+.comment {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+
+.comment:last-child {
+    border-bottom: none;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.reply-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.reply-btn:hover {
+    background: #0056b3;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .house-details {
+        flex-direction: column;
+    }
+    
+    .action-buttons {
         justify-content: center;
-        align-items: center;
     }
-
+    
     .modal-content {
-        background-color: #fff;
+        width: 95%;
         padding: 20px;
-        border-radius: 5px;
-        width: 400px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-
-    .hidden {
-        display: none;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 8px;
-        box-sizing: border-box;
-    }
-
-    .form-actions {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .close-button {
-        float: right;
-        font-size: 20px;
-        cursor: pointer;
-    }
+}
 </style>
 
 <script>
-    // 显示模态框
-    function showAppointmentModal() {
-        const modal = document.getElementById('appointmentModal');
-        modal.style.display = 'flex'; // 显示模态框
-    }
-
-    // 隐藏模态框
-    function closeAppointmentModal() {
-        const modal = document.getElementById('appointmentModal');
-        modal.style.display = 'none'; // 隐藏模态框
-    }
-
-    // 提交预约表单
-    document.getElementById('appointmentForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData);
-        data.appointment_time = document.getElementById('appointmentTime').value; // 确保格式为 'YYYY-MM-DDTHH:mm'
-
-        fetch('/house/appointment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(response => response.json()).then(data => {
-            alert(data.msg);
-            if (data.code === 200) {
-                closeAppointmentModal();
-                location.reload();
-            }
-        }).catch(error => {
-            console.error('Error:', error);
-            alert('提交失败，请稍后重试');
-        });
-    });
-</script>
-<script>
+// 全局变量
 window.houseId = {{ house.house_id }};
-
-// --- 添加 landlordPhone 定义 ---
-// 假设 status 对象有一个 phone 属性存储电话号码
-// 如果没有 phone 属性或值为 None，则设为 '获取失败'
 const landlordPhone = "{{ status.phone | default('获取失败', true) }}";
-// --- 添加结束 ---
 
-// 确保 show-date.js 在分页后也能正确执行时间格式化和回复功能
-// 如果 show-date.js 依赖于页面加载时就存在的元素，可能需要调整
-// 但目前的实现应该没问题，因为它是通过 DOMContentLoaded 触发的
+// 显示电话号码
+function showPhone() {
+    document.getElementById('landlord-phone').textContent = landlordPhone;
+}
+
+// 维修申请相关函数
+function showRepairModal() {
+    document.getElementById('repairModal').style.display = 'flex';
+}
+
+function closeRepairModal() {
+    document.getElementById('repairModal').style.display = 'none';
+    document.getElementById('repairForm').reset();
+}
+
+// 提交维修申请
+document.getElementById('repairForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const content = document.getElementById('repairContent').value.trim();
+    
+    if (!content) {
+        alert('请填写维修内容描述');
+        return;
+    }
+    
+    fetch('/house/repair/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            house_id: window.houseId,
+            content: content
+        })
+    }).then(response => response.json()).then(data => {
+        if (data.success) {
+            alert(data.message);
+            closeRepairModal();
+        } else {
+            alert('提交失败：' + data.message);
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('提交失败，请稍后重试');
+    });
+});
+
+// 预约看房相关函数
+function showAppointmentModal() {
+    document.getElementById('appointmentModal').style.display = 'flex';
+    
+    // 设置最小时间为当前时间
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('appointmentTime').min = now.toISOString().slice(0, 16);
+}
+
+function closeAppointmentModal() {
+    document.getElementById('appointmentModal').style.display = 'none';
+    document.getElementById('appointmentForm').reset();
+}
+
+// 提交预约
+document.getElementById('appointmentForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    fetch('/house/appointment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    }).then(response => response.json()).then(data => {
+        alert(data.msg);
+        if (data.code === 200) {
+            closeAppointmentModal();
+            location.reload();
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('提交失败，请稍后重试');
+    });
+});
+
+// 评论回复功能
+function replyToComment(commentId, username) {
+    document.getElementById('at-comment-id').value = commentId;
+    document.getElementById('at-text').textContent = `回复 @${username}：`;
+    document.querySelector('.at-info').style.display = 'block';
+    document.querySelector('.comment-input').focus();
+}
+
+// 取消回复
+document.getElementById('cancel-at').addEventListener('click', function() {
+    document.getElementById('at-comment-id').value = '';
+    document.querySelector('.at-info').style.display = 'none';
+});
+
+// 提交评论
+document.getElementById('submit-comment-btn').addEventListener('click', function() {
+    const content = document.querySelector('.comment-input').value.trim();
+    const atCommentId = document.getElementById('at-comment-id').value;
+    
+    if (!content) {
+        alert('请输入评论内容');
+        return;
+    }
+    
+    // 创建表单数据
+    const formData = new FormData();
+    formData.append('house_id', window.houseId);
+    formData.append('comment', content);
+    if (atCommentId) {
+        formData.append('at', atCommentId);
+    }
+    
+    fetch('/house/add_comment_form', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('评论提交失败，请稍后重试');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('评论提交失败，请稍后重试');
+    });
+});
+
+// 删除房源（房东专用）
+function deleteHouse(houseId) {
+    if (confirm('确定要删除这套房源吗？此操作不可恢复。')) {
+        fetch(`/house/delete/${houseId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                window.location.href = '/account/landlord/home';
+            } else {
+                alert('删除失败：' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('删除失败，请稍后重试');
+        });
+    }
+}
+
+// 页面加载完成后的初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 格式化显示时间（如果有 show-date.js）
+    // 这里可以添加时间格式化的代码
+});
 </script>
 {% endblock %}

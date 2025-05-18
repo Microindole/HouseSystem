@@ -84,6 +84,13 @@ class NewsModel(db.Model):
     house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id', ondelete='RESTRICT', onupdate='RESTRICT'), nullable=False, comment='房屋id，有一个指向house_info的外键')
     title = db.Column(db.String(255), nullable=False, comment='新闻标题（如某某房屋出租了）,一般配对房屋状态变化')
     desc = db.Column(db.String(255), nullable=True, comment='新闻内容')
+    landlord_username = db.Column(db.String(100), db.ForeignKey('login.username'), nullable=True, comment='新闻发布者(房东)')
+    
+    # Add relationship to HouseInfoModel
+    house_info = db.relationship('HouseInfoModel', backref='news_items')
+    
+    def __repr__(self):
+        return f'<NewsModel {self.id} {self.title}>'
 
 
 # class OrderModel(db.Model):
@@ -205,3 +212,24 @@ class RentalContract(db.Model):
 
     def __repr__(self):
         return f'<RentalContract {self.id} - {self.landlord_username} → {self.tenant_username}>'
+    
+class RepairRequestModel(db.Model):
+    __tablename__ = 'repair_request'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id', ondelete='CASCADE'), nullable=False, comment='关联房屋ID')
+    tenant_username = db.Column(db.String(100), db.ForeignKey('login.username', ondelete='CASCADE'), nullable=False, comment='租客用户名')
+    landlord_username = db.Column(db.String(100), db.ForeignKey('login.username', ondelete='CASCADE'), nullable=False, comment='房东用户名')
+    content = db.Column(db.Text, nullable=False, comment='维修内容描述')
+    request_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='请求发起时间')
+    # 状态：请求中 (default), 已同意, 处理中, 已完成, 已拒绝
+    status = db.Column(db.String(50), nullable=False, default='请求中', comment='维修请求状态')
+    handler_notes = db.Column(db.Text, nullable=True, comment='房东处理备注')
+    handled_time = db.Column(db.DateTime, nullable=True, comment='房东处理时间')
+
+    # 关系定义 (backref 名称可以根据您的喜好调整，确保不与现有冲突)
+    house = db.relationship('HouseInfoModel', backref=db.backref('repair_requests_info', lazy='dynamic'))
+    tenant = db.relationship('LoginModel', foreign_keys=[tenant_username], backref=db.backref('sent_repair_requests_info', lazy='dynamic'))
+    landlord = db.relationship('LoginModel', foreign_keys=[landlord_username], backref=db.backref('received_repair_requests_info', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<RepairRequestModel {self.id} by {self.tenant_username} for house {self.house_id}>'

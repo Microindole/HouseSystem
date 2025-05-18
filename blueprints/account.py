@@ -1,6 +1,7 @@
 from datetime import datetime
-
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for, session, flash # 确保导入 flash
+import os
+from werkzeug.utils import secure_filename
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for, session, flash ,current_app,request, jsonify, session
 from sqlalchemy import func, cast, Date
 from sqlalchemy.orm import joinedload
 
@@ -14,7 +15,7 @@ from flask_mail import Message
 from exts import mail, db
 import string
 import random
-from flask import current_app
+import time
 
 ph = PasswordHasher()
 
@@ -321,9 +322,6 @@ def send_email_code():
         return jsonify({'success': False, 'msg': '邮件发送失败，请稍后重试'}), 500
 
 
-from flask import request, jsonify, session
-from flask_mail import Message
-import time
 
 # 发送重置验证码
 @account_bp.route('/send_reset_code', methods=['POST'])
@@ -669,3 +667,9 @@ def submit_listing():
     db.session.add(audit)
     db.session.commit()
     return redirect(url_for('account.landlord_home'))
+
+@account_bp.route('/repair/requests')
+@login_required
+def repair_requests():
+    """重定向到房源管理中的维修请求页面"""
+    return redirect(url_for('house.manage_repair_requests'))
