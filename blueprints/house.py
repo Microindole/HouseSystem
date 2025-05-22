@@ -234,9 +234,20 @@ def add_house():
     if session.get('user_type') != 2:
         flash('只有房东可以发布房源', 'error')
         return redirect(url_for('account.landlord_home'))
-    
+
+    # 无论GET还是POST，都先加载地址数据
+    cities_json_path = os.path.join(current_app.static_folder, 'json', 'cities.json')
+    with open(cities_json_path, 'r', encoding='utf-8') as f:
+        cities_data_for_provinces = json.load(f) # 用于填充省份
+
+    pca_json_path = os.path.join(current_app.static_folder, 'json', 'pca-code.json')
+    with open(pca_json_path, 'r', encoding='utf-8') as f:
+        pca_data = json.load(f) # 用于省市区三级联动
+
     if request.method == 'GET':
-        return render_template('house/add_house.html', cities_data=cities_data)
+        return render_template('house/add_house.html', 
+                               cities_data=cities_data_for_provinces, 
+                               pca_data=pca_data)
     
     # POST 请求处理
     try:
@@ -259,7 +270,9 @@ def add_house():
         # 数据验证
         if not all([house_name, rooms, region, addr, price, phone]):
             flash('请填写必填信息', 'error')
-            return render_template('house/add_house.html', cities_data=cities_data)
+            return render_template('house/add_house.html', 
+                                   cities_data=cities_data_for_provinces, 
+                                   pca_data=pca_data) # POST失败时也要传递pca_data
         
         # 处理图片上传
         image_path = None
@@ -311,7 +324,9 @@ def add_house():
     except Exception as e:
         db.session.rollback()
         flash(f'发布失败：{str(e)}', 'error')
-        return render_template('house/add_house.html', cities_data=cities_data)
+        return render_template('house/add_house.html', 
+                               cities_data=cities_data_for_provinces, 
+                               pca_data=pca_data) # POST异常时也要传递pca_data
 
 
 @house_bp.route('/edit/<int:house_id>', methods=['GET', 'POST'])
@@ -537,6 +552,64 @@ def manage_news():
     return render_template('house/manage_news.html', news_list=news_list)
 
 
+@house_bp.route('/news/delete/<int:news_id>', methods=['POST'])
+@login_required
+def delete_news(news_id):
+    if session.get('user_type') != 2:
+        return jsonify({'success': False, 'message': '只有房东可以删除新闻'}), 403
+    
+    landlord_name = session.get('username')
+    
+    # 查找新闻并验证所有权
+    news = NewsModel.query.filter_by(id=news_id, landlord_username=landlord_name).first()
+    
+    if not news:
+        return jsonify({'success': False, 'message': '新闻不存在或您无权删除'}), 404
+    
+    try:
+        db.session.delete(news)
+        db.session.commit()
+        return jsonify({'success': True, 'message': '新闻删除成功'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'删除失败：{str(e)}'}), 500
+
+# 添加批量删除新闻的路由
+@house_bp.route('/news/batch-delete', methods=['POST'])
+@login_required
+def batch_delete_news():
+    if session.get('user_type') != 2:
+        return jsonify({'success': False, 'message': '只有房东可以批量删除新闻'}), 403
+    
+    try:
+        data = request.get_json()
+        news_ids = data.get('news_ids', [])
+        
+        if not news_ids:
+            return jsonify({'success': False, 'message': '未选择任何新闻'}), 400
+        
+        landlord_name = session.get('username')
+        deleted_count = 0
+        
+        for news_id in news_ids:
+            news = NewsModel.query.filter_by(id=news_id, landlord_username=landlord_name).first()
+            if news:
+                db.session.delete(news)
+                deleted_count += 1
+        
+        db.session.commit()
+        return jsonify({
+            'success': True, 
+            'message': f'成功删除 {deleted_count} 条新闻',
+            'count': deleted_count
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'批量删除失败：{str(e)}'}), 500
+
+
 # 维修请求管理
 @house_bp.route('/repair/request', methods=['POST'])
 @login_required
@@ -654,19 +727,23 @@ def add_comment_form():
     username = session.get('username')
 
     if not house_id or not desc or not username:
-        return redirect(request.referrer or url_for('house.house_detail', house_id=house_id))
+        return jsonify({'success': False, 'message': '缺少必要参数'}), 400
 
-    comment = CommentModel(
-        house_id=house_id,
-        username=username,
-        type=user_type,
-        desc=desc,
-        at=at,
-        time=datetime.now()
-    )
-    db.session.add(comment)
-    db.session.commit()
-    return redirect(url_for('house.house_detail', house_id=house_id))
+    try:
+        comment = CommentModel(
+            house_id=house_id,
+            username=username,
+            type=user_type,
+            desc=desc,
+            at=at,
+            time=datetime.now()
+        )
+        db.session.add(comment)
+        db.session.commit()
+        return jsonify({'success': True, 'message': '评论发表成功'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'评论发表失败: {str(e)}'}), 500
 
 
 @house_bp.route('/appointment', methods=['POST'])

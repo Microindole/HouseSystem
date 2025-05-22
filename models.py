@@ -5,7 +5,7 @@ from sqlalchemy import UniqueConstraint # 新增导入 UniqueConstraint
 class CommentModel(db.Model):
     __tablename__ = 'comment'
     comment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    house_id = db.Column(db.Integer, nullable=False, comment='房屋的id')
+    house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id', ondelete='CASCADE'), nullable=False, comment='房屋的id')
     username = db.Column(db.String(255), nullable=False, comment='留言人名字')
     type = db.Column(db.Integer, nullable=False, comment='留言人类型,1:租客，2:房东')
     desc = db.Column(db.String(255), nullable=False, comment='留言内容')
@@ -60,7 +60,7 @@ class PrivateChannelModel(db.Model):
     channel_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     tenant_username = db.Column(db.String(100), db.ForeignKey('login.username'), nullable=False, comment='租客用户名')
     landlord_username = db.Column(db.String(100), db.ForeignKey('login.username'), nullable=False, comment='房东用户名')
-    house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id'), nullable=False, comment='关联的房屋ID')
+    house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id', ondelete='CASCADE'), nullable=False, comment='关联的房屋ID')
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='频道创建时间')
     # 添加唯一约束，确保同一租客、房东、房屋只有一个频道
     __table_args__ = (UniqueConstraint('tenant_username', 'landlord_username', 'house_id', name='uq_tenant_landlord_house'),)
@@ -81,7 +81,7 @@ class NewsModel(db.Model):
     __tablename__ = 'news'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     time = db.Column(db.DateTime, nullable=False, comment='新闻发布时间，注意新闻只能新增，(尽量)不能修改')
-    house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id', ondelete='RESTRICT', onupdate='RESTRICT'), nullable=False, comment='房屋id，有一个指向house_info的外键')
+    house_id = db.Column(db.Integer, db.ForeignKey('house_info.house_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, comment='房屋id，有一个指向house_info的外键')
     title = db.Column(db.String(255), nullable=False, comment='新闻标题（如某某房屋出租了）,一般配对房屋状态变化')
     desc = db.Column(db.String(255), nullable=True, comment='新闻内容')
     landlord_username = db.Column(db.String(100), db.ForeignKey('login.username'), nullable=True, comment='新闻发布者(房东)')
@@ -91,15 +91,6 @@ class NewsModel(db.Model):
     
     def __repr__(self):
         return f'<NewsModel {self.id} {self.title}>'
-
-
-# class OrderModel(db.Model):
-#     __tablename__ = 'order'
-#     order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     tenant_name = db.Column(db.String(100), nullable=False, comment='写在用户租赁历史中，用户可对租赁状态进行修改，注意：只能归还')
-#     house_id = db.Column(db.Integer, nullable=False)
-#     time = db.Column(db.String(100), nullable=False, comment='租赁时间，按月算，需要前端或者后端计算时间(是否超出日期)')
-#     status = db.Column(db.Integer, nullable=False, comment='与house_status中的status对应,这里0:归还,1:租赁中\r\n注意：这里修改要影响house_status，那里修改不会影响这里')
 
 
 class TenantModel(db.Model):
@@ -133,19 +124,6 @@ class ComplaintModel(db.Model):
     last_updated_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow, comment='最后更新时间')
     update_seen_by_sender = db.Column(db.Boolean, nullable=False, default=False, comment='发送者是否已查看最新状态更新') # 新增字段
 
-    # 可选：与处理记录表建立关系
-    # handling_records = db.relationship('ComplaintHandlingRecordModel', backref='complaint', lazy=True)
-
-# 可选：处理记录模型
-# class ComplaintHandlingRecordModel(db.Model):
-#     __tablename__ = 'complaint_handling_record'
-#     record_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     complaint_id = db.Column(db.Integer, db.ForeignKey('complaint.complaint_id'), nullable=False)
-#     handler_username = db.Column(db.String(100), db.ForeignKey('login.username'), nullable=False)
-#     action_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-#     action_description = db.Column(db.Text, nullable=False, comment='处理动作描述，如：已联系用户，正在调查')
-#     new_status = db.Column(db.String(20), nullable=False, comment='处理后的状态')
-
 
 class DailyRentRateModel(db.Model):
     __tablename__ = 'daily_rent_rate'
@@ -171,11 +149,12 @@ class HouseListingAuditModel(db.Model):
     create_time = db.Column(db.DateTime, server_default=db.func.now(), nullable=False, comment='申请时间')
     update_time = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now(), nullable=False, comment='回复时间')
 
-    # 添加复合外键约束，引用 house_status 的复合主键
+    # 修改复合外键约束，添加 ondelete='CASCADE'
     __table_args__ = (
         db.ForeignKeyConstraint(
             ['house_id', 'landlord_name'], 
-            ['house_status.house_id', 'house_status.landlord_name']
+            ['house_status.house_id', 'house_status.landlord_name'],
+            ondelete='CASCADE'
         ),
     )
 
@@ -194,8 +173,8 @@ class RentalContract(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    # 与聊天频道绑定
-    channel_id = db.Column(db.Integer, nullable=False)
+    # 更新与聊天频道的关系，添加外键约束
+    channel_id = db.Column(db.Integer, db.ForeignKey('private_channel.channel_id', ondelete='CASCADE'), nullable=False, comment='关联的私信频道ID')
 
     landlord_username = db.Column(db.String(100), nullable=False)
     tenant_username = db.Column(db.String(100), nullable=False)
@@ -209,6 +188,9 @@ class RentalContract(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 添加与 PrivateChannelModel 的关系
+    channel = db.relationship('PrivateChannelModel', backref=db.backref('contracts', lazy=True))
 
     def __repr__(self):
         return f'<RentalContract {self.id} - {self.landlord_username} → {self.tenant_username}>'

@@ -519,41 +519,82 @@ function replyToComment(commentId, username) {
 // 取消回复
 document.getElementById('cancel-at').addEventListener('click', function() {
     document.getElementById('at-comment-id').value = '';
+    document.getElementById('at-text').textContent = ''; // 确保清除回复文本
     document.querySelector('.at-info').style.display = 'none';
 });
 
 // 提交评论
-document.getElementById('submit-comment-btn').addEventListener('click', function() {
-    const content = document.querySelector('.comment-input').value.trim();
-    const atCommentId = document.getElementById('at-comment-id').value;
-    
-    if (!content) {
-        alert('请输入评论内容');
-        return;
-    }
-    
-    // 创建表单数据
-    const formData = new FormData();
-    formData.append('house_id', window.houseId);
-    formData.append('comment', content);
-    if (atCommentId) {
-        formData.append('at', atCommentId);
-    }
-    
-    fetch('/house/add_comment_form', {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        if (response.ok) {
-            location.reload();
-        } else {
-            alert('评论提交失败，请稍后重试');
+const submitButtonElement = document.getElementById('submit-comment-btn');
+let isSubmittingComment = false; // 防止重复提交的标志位
+
+if (submitButtonElement) {
+    submitButtonElement.addEventListener('click', function() {
+        if (isSubmittingComment) {
+            // 如果已经在提交过程中，则不执行任何操作
+            console.warn('A comment submission is already in progress.');
+            return; 
         }
-    }).catch(error => {
-        console.error('Error:', error);
-        alert('评论提交失败，请稍后重试');
+
+        const submitBtnInstance = this; // 当前点击的按钮
+        const commentInputElement = document.querySelector('.comment-input');
+        const content = commentInputElement.value.trim();
+        const atCommentIdInputElement = document.getElementById('at-comment-id');
+        const atCommentId = atCommentIdInputElement.value;
+        
+        if (!content) {
+            alert('请输入评论内容');
+            return;
+        }
+        
+        isSubmittingComment = true; // 设置标志位，表示提交开始
+        submitBtnInstance.disabled = true;
+        submitBtnInstance.textContent = '提交中...';
+        
+        const formData = new FormData();
+        formData.append('house_id', window.houseId);
+        formData.append('comment', content);
+        if (atCommentId) {
+            formData.append('at', atCommentId);
+        }
+        
+        let requestAttemptSucceeded = false;
+
+        fetch('/house/add_comment_form', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                requestAttemptSucceeded = true;
+                // 评论成功后，清空输入框和回复状态
+                commentInputElement.value = '';
+                atCommentIdInputElement.value = '';
+                document.getElementById('at-text').textContent = '';
+                document.querySelector('.at-info').style.display = 'none';
+                
+                // 使用带时间戳的URL进行跳转，尝试避免浏览器缓存导致的问题
+                window.location.href = window.location.pathname + '?t=' + new Date().getTime();
+            } else {
+                alert('评论提交失败：' + (data.message || '未知错误'));
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting comment:', error);
+            alert('评论提交失败，网络错误或服务器无响应，请稍后重试');
+        })
+        .finally(() => {
+            // 无论成功或失败，最终都会重置标志位
+            // 但按钮状态的恢复只在请求失败且未发生页面跳转时进行
+            isSubmittingComment = false; 
+            if (!requestAttemptSucceeded) {
+                submitBtnInstance.disabled = false;
+                submitBtnInstance.textContent = '提交评论';
+            }
+            // 如果 requestAttemptSucceeded 为 true, 页面会刷新, 按钮状态自然恢复
+        });
     });
-});
+}
 
 // 删除房源（房东专用）
 function deleteHouse(houseId) {

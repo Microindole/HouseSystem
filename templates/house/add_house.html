@@ -140,8 +140,9 @@
                 <label for="province">省份 <span class="required">*</span></label>
                 <select id="province" name="province" required onchange="updateCities()">
                     <option value="">请选择省份</option>
-                    {% for province in cities_data.keys() %}
-                        <option value="{{ province }}">{{ province }}</option>
+                    {# 使用后端传递的 cities_data (即 pca_data 的顶级键或单独的省份列表) 来填充省份 #}
+                    {% for province_name in cities_data.keys() %} 
+                        <option value="{{ province_name }}">{{ province_name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -215,69 +216,103 @@
     </form>
 </div>
 
+
 <script>
-const citiesData = {{ cities_data | tojson }};
+    // 将后端传递的JSON数据转换为JavaScript对象
+    // const citiesData = {{ cities_data | tojson }}; // 这个可以保留，如果省份列表的来源与pca_data不同
+    const pcaData = {{ pca_data | tojson }};
 
-function updateCities() {
-    const province = document.getElementById('province').value;
-    const citySelect = document.getElementById('city');
-    const districtSelect = document.getElementById('district');
-    
-    // 清空城市和区县选择
-    citySelect.innerHTML = '<option value="">请选择城市</option>';
-    districtSelect.innerHTML = '<option value="">请先选择城市</option>';
-    
-    if (province && citiesData[province]) {
-        citiesData[province].forEach(function(city) {
-            const option = document.createElement('option');
-            option.value = city;
-            option.textContent = city;
-            citySelect.appendChild(option);
-        });
+    function updateCities() {
+        const provinceSelect = document.getElementById('province');
+        const citySelect = document.getElementById('city');
+        const districtSelect = document.getElementById('district');
+        const selectedProvince = provinceSelect.value;
+
+        // 清空城市和区县下拉框
+        citySelect.innerHTML = '<option value="">请选择城市</option>';
+        districtSelect.innerHTML = '<option value="">请先选择城市</option>'; // 当省份改变时，区县也应重置
+
+        if (selectedProvince && pcaData && pcaData[selectedProvince]) {
+            const cities = Object.keys(pcaData[selectedProvince]); // 获取该省份下的所有城市名
+            cities.forEach(function(cityName) {
+                const option = document.createElement('option');
+                option.value = cityName;
+                option.textContent = cityName;
+                citySelect.appendChild(option);
+            });
+        }
     }
-}
 
-function updateDistricts() {
-    // 这里可以根据需要添加区县联动逻辑
-    // 目前简化处理，直接允许输入
-    const districtSelect = document.getElementById('district');
-    districtSelect.innerHTML = '<option value="">请选择区县</option>';
-    
-    // 添加一些常见的区县选项
-    const commonDistricts = ['市辖区', '朝阳区', '海淀区', '西城区', '东城区', '丰台区', '石景山区', '门头沟区', '房山区', '通州区', '顺义区', '昌平区', '大兴区', '怀柔区', '平谷区', '密云区', '延庆区'];
-    
-    commonDistricts.forEach(function(district) {
-        const option = document.createElement('option');
-        option.value = district;
-        option.textContent = district;
-        districtSelect.appendChild(option);
+    function updateDistricts() {
+        const provinceSelect = document.getElementById('province');
+        const citySelect = document.getElementById('city');
+        const districtSelect = document.getElementById('district');
+        const selectedProvince = provinceSelect.value;
+        const selectedCity = citySelect.value;
+
+        // 清空区县下拉框
+        districtSelect.innerHTML = '<option value="">请选择区县</option>';
+
+        if (selectedProvince && selectedCity && 
+            pcaData && 
+            pcaData[selectedProvince] && 
+            pcaData[selectedProvince][selectedCity]) {
+            
+            const districts = pcaData[selectedProvince][selectedCity]; // 获取该城市下的所有区县列表
+            if (Array.isArray(districts)) { // 确保 districts 是一个数组
+                districts.forEach(function(districtName) {
+                    const option = document.createElement('option');
+                    option.value = districtName;
+                    option.textContent = districtName;
+                    districtSelect.appendChild(option);
+                });
+            } else {
+                console.error("未能获取到有效的区县列表: ", districts);
+            }
+        }
+    }
+    // 表单验证
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const phone = document.getElementById('phone').value;
+        const phonePattern = /^[1][3-9]\d{9}$/;
+        
+        if (!phonePattern.test(phone)) {
+            e.preventDefault();
+            alert('请输入正确的手机号码');
+            return false;
+        }
+        
+        const price = parseFloat(document.getElementById('price').value);
+        if (price <= 0) {
+            e.preventDefault();
+            alert('租金必须大于0');
+            return false;
+        }
+        
+        const deposit = document.getElementById('deposit').value;
+        if (deposit && parseFloat(deposit) < 0) {
+            e.preventDefault();
+            alert('押金不能为负数');
+            return false;
+        }
     });
-}
 
-// 表单验证
-document.querySelector('form').addEventListener('submit', function(e) {
-    const phone = document.getElementById('phone').value;
-    const phonePattern = /^[1][3-9]\d{9}$/;
-    
-    if (!phonePattern.test(phone)) {
-        e.preventDefault();
-        alert('请输入正确的手机号码');
-        return false;
-    }
-    
-    const price = parseFloat(document.getElementById('price').value);
-    if (price <= 0) {
-        e.preventDefault();
-        alert('租金必须大于0');
-        return false;
-    }
-    
-    const deposit = document.getElementById('deposit').value;
-    if (deposit && parseFloat(deposit) < 0) {
-        e.preventDefault();
-        alert('押金不能为负数');
-        return false;
-    }
-});
+    // 页面加载时，如果已有选中的省份（例如在编辑页面），则触发一次城市更新
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     if (document.getElementById('province').value) {
+    //         updateCities();
+    //         // 如果城市也已选中，则进一步更新区县
+    //         // 这部分逻辑在“添加”页面可能不需要，但在“编辑”页面会很有用
+    //         // setTimeout(function() { // 使用setTimeout确保citySelect已填充完毕
+    //         //     if (document.getElementById('city').value) {
+    //         //         updateDistricts();
+    //         //     }
+    //         // }, 0);
+    //     }
+    // });
+
+    // 确保表单提交时，如果选择了“请选择...”这类无效选项，给出提示或阻止提交
+    // (这部分表单验证逻辑可以根据您的需求添加)
+
 </script>
 {% endblock %}

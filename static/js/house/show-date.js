@@ -34,13 +34,14 @@ document.addEventListener('DOMContentLoaded', formatCommentTimes);
 
 document.addEventListener('DOMContentLoaded', function() {
     // --- 回复功能 ---
+    // 这部分回复逻辑如果与 house_detail.html 中的 replyToComment 函数功能重叠或冲突，
+    // 也应该考虑统一管理，但主要问题是下面的提交评论功能。
     var textarea = document.querySelector('.comment-input');
-    // console.log("页面加载完成，获取 textarea:", textarea); // 新增日志
+    // console.log("页面加载完成，获取 textarea:", textarea); 
 
-    // 悬停显示回复按钮
     document.querySelectorAll('.comment').forEach(function(commentEl) {
-        var replyBtn = commentEl.querySelector('.reply-btn'); // 把 replyBtn 获取移到这里
-        if (replyBtn) { // 添加判断 replyBtn 是否存在
+        var replyBtn = commentEl.querySelector('.reply-btn'); 
+        if (replyBtn) { 
             commentEl.addEventListener('mouseenter', function() {
                 replyBtn.style.display = 'inline-block';
             });
@@ -52,19 +53,17 @@ document.addEventListener('DOMContentLoaded', function() {
             replyBtn.addEventListener('click', function() {
                 var username = commentEl.getAttribute('data-username');
                 var desc = commentEl.getAttribute('data-desc');
-                var commentId = commentEl.getAttribute('data-comment-id'); // 获取 comment_id
+                var commentId = commentEl.getAttribute('data-comment-id'); 
                 var atInfo = document.querySelector('.at-info');
                 var atText = document.getElementById('at-text');
 
-                console.log("[回复按钮点击] 获取到的 commentId:", commentId); // 新增日志
+                // console.log("[回复按钮点击] 获取到的 commentId:", commentId); 
 
                 atInfo.style.display = 'flex';
                 atText.textContent = '@' + username + ': ' + desc;
                 textarea.focus();
-                // 保存被@信息到 textarea 的 dataset
-                textarea.dataset.at = commentId; // 只保存 comment_id 即可
-                console.log("[回复按钮点击后] 设置 textarea.dataset.at 为:", textarea.dataset.at); // 新增日志
-                // 滚动到输入框
+                textarea.dataset.at = commentId; 
+                // console.log("[回复按钮点击后] 设置 textarea.dataset.at 为:", textarea.dataset.at); 
                 textarea.scrollIntoView({behavior: 'smooth', block: 'center'});
             });
         }
@@ -76,66 +75,44 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelAt.addEventListener('click', function() {
             var atInfo = document.querySelector('.at-info');
             atInfo.style.display = 'none';
-            console.log("[取消@按钮点击前] textarea.dataset.at:", textarea.dataset.at); // 新增日志
-            textarea.removeAttribute('data-at'); // 清除 comment_id
-            console.log("[取消@按钮点击后] textarea.dataset.at:", textarea.dataset.at); // 新增日志
+            // console.log("[取消@按钮点击前] textarea.dataset.at:", textarea.dataset.at); 
+            textarea.removeAttribute('data-at'); 
+            // console.log("[取消@按钮点击后] textarea.dataset.at:", textarea.dataset.at); 
         });
-    }
-
-    // --- 提交评论功能 (合并后的唯一监听器) ---
-    var btn = document.getElementById('submit-comment-btn');
-    if (btn && textarea) {
-        btn.addEventListener('click', function() {
-            var comment = textarea.value.trim();
-            if (!comment) {
-                alert('请输入评论内容');
-                textarea.focus();
-                return;
-            }
-
-            console.log("[提交按钮点击] 开始处理，检查 textarea.dataset.at:", textarea.dataset.at); // 新增日志
-
-            // 创建隐藏表单
-            var form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '/house/add_comment_form'; // 确认后端路由是这个
-            form.style.display = 'none';
-
-            // 添加评论内容
-            var inputComment = document.createElement('input');
-            inputComment.name = 'comment';
-            inputComment.value = comment;
-            form.appendChild(inputComment);
-
-            // 添加房屋ID
-            var inputHouseId = document.createElement('input');
-            inputHouseId.name = 'house_id';
-            inputHouseId.value = window.houseId;
-            form.appendChild(inputHouseId);
-
-            // 如果有@信息 (即 textarea.dataset.at 存在)，添加 at 字段
-            if (textarea.dataset.at) {
-                console.log("[提交按钮点击] 检测到 textarea.dataset.at 存在，值为:", textarea.dataset.at, "。准备添加 at input。"); // 新增日志
-                var inputAt = document.createElement('input');
-                inputAt.name = 'at'; // 后端接收的字段名是 at
-                inputAt.value = textarea.dataset.at; // 值为 comment_id
-                form.appendChild(inputAt);
-            } else {
-                console.log("[提交按钮点击] 未检测到 textarea.dataset.at。"); // 新增日志
-            }
-
-            // 提交表单
-            console.log("[提交按钮点击] 准备提交表单。"); // 新增日志
-            document.body.appendChild(form);
-            form.submit();
-
-            // 清除 @ 状态 (可选，如果希望提交后清除)
-            if (cancelAt) {
-                 // cancelAt.click(); // 暂时注释掉，避免干扰调试
-            }
-            // textarea.value = ''; // 暂时注释掉
-        });
-    } else {
-        console.error("未找到提交按钮或文本区域！"); // 新增错误日志
     }
 });
+
+// ... 其他 show-date.js 中的代码，如 formatCommentTimes ...
+function formatCommentTimes() {
+    document.querySelectorAll('.comment-time').forEach(function(el) {
+        const rawTime = el.getAttribute('data-raw');
+        if (rawTime) {
+            const date = new Date(rawTime);
+            // 强制转换为北京时间 (不依赖浏览器时区)
+            const beijingTimestamp = new Date(date.getTime() + (8 - date.getTimezoneOffset() / 60) * 3600000);
+
+            const now = new Date();
+            const diffSeconds = Math.floor((now - beijingTimestamp) / 1000);
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            if (diffSeconds < 60) {
+                el.textContent = '刚刚';
+            } else if (diffMinutes < 60) {
+                el.textContent = `${diffMinutes}分钟前`;
+            } else if (diffHours < 24) {
+                el.textContent = `${diffHours}小时前`;
+            } else if (diffDays === 1) {
+                el.textContent = '昨天';
+            } else if (diffDays < 7) {
+                el.textContent = `${diffDays}天前`;
+            } else {
+                el.textContent = beijingTimestamp.toLocaleDateString();
+            }
+        } else {
+            el.textContent = '未知时间';
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', formatCommentTimes);
