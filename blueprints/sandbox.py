@@ -1,7 +1,8 @@
 from flask import render_template, request, jsonify, Blueprint, redirect, url_for, session, flash
 from blueprints.pay import alipay_obj, ALIPAY_SETTING
 from decorators import login_required # 导入 login_required 装饰器
-import time 
+from models import RentalContract, PrivateChannelModel, HouseInfoModel # 新增导入
+import time
 import random
 
 pay_bp = Blueprint('pay', __name__)
@@ -17,7 +18,7 @@ def good_list_view():
         return render_template('paytest.html')
     # 如果是post，我们认为是购买
     alipay = alipay_obj()
-    
+
     # 生成唯一的订单号
     # 方法1: 时间戳（到秒）+ 4位随机数
     # current_time_str = time.strftime("%Y%m%d%H%M%S", time.localtime())
@@ -117,7 +118,7 @@ def start_contract_payment():
         flash("无效的合同 ID", "error")
         return redirect(url_for('contract.view_contracts'))
 
-    from models import RentalContract
+
     contract = RentalContract.query.get(contract_id)
     if not contract:
         flash("合同不存在", "error")
@@ -133,12 +134,22 @@ def start_contract_payment():
         flash("该合同已支付或已撤销", "error")
         return redirect(url_for('contract.view_contracts'))
 
+    # 获取房屋信息
+    channel = PrivateChannelModel.query.get(contract.channel_id)
+    if not channel:
+        flash("找不到关联合同的频道信息", "error")
+        return redirect(url_for('contract.view_contracts'))
+
+    house = HouseInfoModel.query.get(channel.house_id)
+    if not house:
+        flash("找不到关联的房屋信息", "error")
+        return redirect(url_for('contract.view_contracts'))
+
     alipay = alipay_obj()
 
     # 金额（转为字符串），可以根据你的合同字段
     total_amount = str(contract.total_amount)
-    # subject = f"租房合同支付 - 合同ID {contract_id}"
-    subject = f"租房合同支付 - {contract.house_name}（{contract.addr}）"
+    subject = f"租房合同支付 - {house.house_name}（{house.addr}）" # 修改此处
 
     out_trade_no = str(int(time.time() * 1000)) + str(random.randint(1000, 9999))
 

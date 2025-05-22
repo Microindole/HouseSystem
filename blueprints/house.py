@@ -909,7 +909,7 @@ def batch_house_action():
 # 房源搜索API
 @house_bp.route('/api/search', methods=['GET'])
 def api_house_search():
-    """房源搜索API（支持前端AJAX调用）"""
+    """房源搜索API"""
     try:
         keyword = request.args.get('keyword', '').strip()
         region = request.args.get('region', '').strip()

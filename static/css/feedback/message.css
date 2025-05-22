@@ -49,17 +49,19 @@
     padding: 10px 15px;
     border-bottom: 1px solid var(--border-color);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
     text-decoration: none;
     color: inherit;
+    border-left: 3px solid transparent;
 }
 
 .chat-list-item:hover {
-    background-color: #f0f0f0;
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .chat-list-item.active {
-    background-color: #e0e0e0;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-left: 3px solid #409eff;
 }
 
 /* --- 移除 .chat-avatar --- */
@@ -133,12 +135,19 @@
     background-color: var(--body-bg);
     display: flex; /* 使用 flex 布局 */
     flex-direction: column; /* 消息垂直排列 */
+    transition: opacity 0.3s ease;
+}
+
+.message-area.loading {
+    opacity: 0.6;
 }
 
 .message-item {
     display: flex; /* 保持 flex 用于对齐 */
     margin-bottom: 15px;
     max-width: 70%;
+    animation: fadeIn 0.3s ease;
+    transform-origin: top;
 }
 
 /* --- 移除 .message-avatar --- */
@@ -220,6 +229,15 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    transition: all 0.3s ease;
+    max-height: 200px;
+    overflow: hidden;
+}
+
+.input-area.hidden {
+    max-height: 0;
+    padding: 0;
+    margin: 0;
 }
 
 .message-input {
@@ -250,13 +268,17 @@
     border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.3s ease, transform 0.1s ease;
     height: 100%;
     box-sizing: border-box;
 }
 
 .send-button:hover {
-    background-color: #357abd;
+    background-color: #66b1ff;
+}
+
+.send-button:active {
+    transform: scale(0.95);
 }
 
 /* 滚动条样式 (可选) */
@@ -303,4 +325,74 @@
     text-align: center;
     color: #888;
     margin-top: 40px; /* 增加一点上边距 */
+}
+
+/* 消息加载动画 */
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    width: 100%;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #409eff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 消息项动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 合同弹窗动画 */
+.contract-modal {
+    transition: opacity 0.3s ease;
+}
+
+.contract-modal-content {
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 关闭按钮悬停效果 */
+.close-btn {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    color: #f56c6c;
+    transform: scale(1.1);
+}
+
+/* 平滑滚动设置 */
+html {
+    scroll-behavior: smooth;
 }

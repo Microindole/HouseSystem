@@ -1,14 +1,14 @@
 import json
 
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, abort, flash # 导入 flash
-from sqlalchemy import or_, and_ 
+from sqlalchemy import or_, and_
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
 
 # 导入所需模型
 from models import HouseInfoModel, HouseStatusModel, LandlordModel, db, PrivateChannelModel, LoginModel, MessageModel, \
     ComplaintModel, TenantModel, RentalContract  # 加入ComplaintModel, TenantModel
-from decorators import login_required, admin_required 
+from decorators import login_required, admin_required
 
 
 feedback_bp = Blueprint('feedback', __name__, url_prefix='/feedback')
@@ -44,7 +44,7 @@ def start_or_get_channel(house_id):
         # 确保房东用户存在
         landlord_user = LoginModel.query.get(landlord_username)
         if not landlord_user:
-             abort(400, description="房东用户不存在。")
+            abort(400, description="房东用户不存在。")
 
         # 创建新频道
         channel = PrivateChannelModel(
@@ -117,13 +117,13 @@ def chat(channel_id):
     username = session['username']
 
     channels = PrivateChannelModel.query.filter(
-        (PrivateChannelModel.tenant_username == username) | 
+        (PrivateChannelModel.tenant_username == username) |
         (PrivateChannelModel.landlord_username == username)
     ).all()
 
     channel_list = []
     for ch in channels:
-        last_msg = MessageModel.query.filter_by(channel_id=ch.channel_id)\
+        last_msg = MessageModel.query.filter_by(channel_id=ch.channel_id) \
             .order_by(MessageModel.timestamp.desc()).first()
         # 统计未读消息数（接收者是当前用户且未读）
         unread_count = MessageModel.query.filter_by(
@@ -159,14 +159,14 @@ def messages():
     username = session['username']
     # 查询所有与当前用户相关的频道
     channels = PrivateChannelModel.query.filter(
-        (PrivateChannelModel.tenant_username == username) | 
+        (PrivateChannelModel.tenant_username == username) |
         (PrivateChannelModel.landlord_username == username)
     ).all()
 
     # 构建频道列表及其最后一条消息
     channel_list = []
     for ch in channels:
-        last_msg = MessageModel.query.filter_by(channel_id=ch.channel_id)\
+        last_msg = MessageModel.query.filter_by(channel_id=ch.channel_id) \
             .order_by(MessageModel.timestamp.desc()).first()
         # 统计未读消息数（接收者是当前用户且未读）
         unread_count = MessageModel.query.filter_by(
@@ -288,9 +288,9 @@ def manage_complaints():
 
     if user_type != 0: # 非管理员
         query = query.filter(ComplaintModel.receiver == username)
-    
+
     complaints_raw = query.all()
-    
+
     complaints_list_for_template = []
     for complaint_obj in complaints_raw:
         complaint_dict = {
@@ -306,7 +306,7 @@ def manage_complaints():
             'update_seen_by_sender': complaint_obj.update_seen_by_sender
         }
         complaints_list_for_template.append(complaint_dict)
-    
+
     csrf_form = CSRFOnlyForm() # Create an instance of the CSRF form
 
     return render_template(
@@ -348,14 +348,14 @@ def update_complaint_status(complaint_id):
             flash(f'更新投诉状态失败: {e}', 'danger')
     else:
         flash(f'投诉 #{complaint_id} 状态未发生变化。', 'info')
-        
+
     return redirect(url_for('feedback.manage_complaints'))
 
 @feedback_bp.route('/my_complaints')
 @login_required
 def my_complaints():
     current_username = session['username']
-    my_complaints_list = ComplaintModel.query.filter_by(sender=current_username)\
+    my_complaints_list = ComplaintModel.query.filter_by(sender=current_username) \
         .order_by(ComplaintModel.last_updated_time.desc()).all() # 按最后更新时间排序更好
 
     # 将当前用户发送的、状态已更新且用户尚未查看的投诉标记为已查看
@@ -365,7 +365,7 @@ def my_complaints():
         ComplaintModel.update_seen_by_sender == False,
         ComplaintModel.status != '待处理' # 确保是状态被处理过的
     ).update({'update_seen_by_sender': True})
-    
+
     try:
         db.session.commit()
     except Exception as e:
@@ -393,7 +393,7 @@ def send_contract():
 
 
     house_id = channel.house_id
-    existing_active_contract = RentalContract.query.join(PrivateChannelModel, RentalContract.channel_id == PrivateChannelModel.channel_id)\
+    existing_active_contract = RentalContract.query.join(PrivateChannelModel, RentalContract.channel_id == PrivateChannelModel.channel_id) \
         .filter(PrivateChannelModel.house_id == house_id, RentalContract.status == 0).first()
 
     if existing_active_contract:
@@ -430,3 +430,63 @@ def send_contract():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'msg': '发送失败: ' + str(e)})
+
+# 添加新的 API 端点用于获取聊天数据
+@feedback_bp.route('/get_chat_data/<int:channel_id>')
+@login_required
+def get_chat_data(channel_id):
+    username = session['username']
+    channel = PrivateChannelModel.query.get_or_404(channel_id)
+
+    # 验证用户是否有权访问此频道
+    if username not in [channel.tenant_username, channel.landlord_username]:
+        return jsonify({'success': False, 'error': '无权访问此聊天'}), 403
+
+    # 获取房源信息
+    house = HouseInfoModel.query.get(channel.house_id)
+    house_status = HouseStatusModel.query.filter_by(house_id=channel.house_id).first()
+
+    # 获取消息列表
+    messages = MessageModel.query.filter_by(channel_id=channel_id).order_by(MessageModel.timestamp.asc()).all()
+
+    # 设置房源状态
+    if house_status:
+        channel.house_status = house_status.status
+
+    # 构造消息数据
+    messages_data = []
+    for msg in messages:
+        messages_data.append({
+            'message_id': msg.message_id,
+            'sender_username': msg.sender_username,
+            'receiver_username': msg.receiver_username,
+            'content': msg.content,
+            'timestamp': msg.timestamp.isoformat() + 'Z',  # ISO格式时间
+            'is_read': msg.is_read
+        })
+
+    # 构造房源数据
+    house_data = None
+    if house:
+        house_data = {
+            'house_id': house.house_id,
+            'house_name': house.house_name,
+            'price': float(house.price) if house.price is not None else 0,
+            'deposit': float(house.deposit) if house.deposit is not None else 0
+        }
+
+    # 构造频道数据
+    channel_data = {
+        'channel_id': channel.channel_id,
+        'tenant_username': channel.tenant_username,
+        'landlord_username': channel.landlord_username,
+        'house_id': channel.house_id,
+        'house_status': getattr(channel, 'house_status', None)
+    }
+
+    return jsonify({
+        'success': True,
+        'channel': channel_data,
+        'messages': messages_data,
+        'house': house_data
+    })
