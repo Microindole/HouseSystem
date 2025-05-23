@@ -1,3 +1,5 @@
+import os
+
 from flask import render_template, request, jsonify, session, redirect, url_for, flash
 from datetime import datetime
 from models import HouseStatusModel, RepairRequestModel, AppointmentModel, HouseInfoModel, HouseListingAuditModel, db
