@@ -232,7 +232,7 @@
         {% if house_info.image %}
         <div class="current-image">
             <label>当前图片：</label>
-            <img src="{{ url_for('static', filename=house_info.image.split('static/')[1]) }}" alt="当前房源图片">
+            <img src="{{ house_info.image }}" alt="当前房源图片">
         </div>
         {% endif %}
         

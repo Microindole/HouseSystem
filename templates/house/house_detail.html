@@ -19,11 +19,7 @@
         <div class="house-info">
             <!-- 房源图片显示 -->
             {% if house.image %}
-                {% if house.image.startswith('static/') %}
-                    <img src="{{ url_for('static', filename=house.image.split('static/')[1]) }}" class="house-image" alt="{{ house.house_name }}">
-                {% else %}
-                    <img src="{{ house.image }}" class="house-image" alt="{{ house.house_name }}">
-                {% endif %}
+                <img src="{{ house.image }}" class="house-image" alt="{{ house.house_name }}">
             {% else %}
                 <div class="house-image-placeholder">
                     <span>暂无图片</span>

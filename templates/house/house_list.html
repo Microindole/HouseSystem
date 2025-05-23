@@ -96,7 +96,11 @@
             {% if houses %}
                 {% for house in houses %}
                 <div class="house-card-horizontal">
-                    <img src="{{ url_for('static', filename=house.image.split('static/')[1]) }}" class="house-image-horizontal" alt="房屋图片">
+                    {% if house.image %}
+                        <img src="{{ house.image }}" class="house-image-horizontal" alt="房屋图片">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default_house_thumbnail.png') }}" class="house-image-horizontal" alt="暂无图片">
+                    {% endif %}
                     <div class="house-info-horizontal">
                         <div class="house-title-row">
                             <span class="house-title-horizontal">{{ house.house_name }}</span>
