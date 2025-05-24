@@ -153,6 +153,7 @@
             {% if session.get('user_type') == 0 %}
             <li><a href="{{ url_for('feedback.manage_complaints') }}">管理投诉</a></li>
             {% endif %}
+            <li><a href="{{ url_for('ai_chat.chat_page') }}">AI 聊天助手</a></li>
 
             <li><a href="{{ url_for('account.logout') }}">退出登录</a></li>
         </ul>

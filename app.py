@@ -8,7 +8,8 @@ from flask_migrate import Migrate
 from blueprints.account import account_bp
 from blueprints.house import house_bp
 from blueprints.feedback import feedback_bp
-from blueprints.sandbox import pay_bp 
+from blueprints.sandbox import pay_bp
+from blueprints.ai_chat_bp import ai_chat_bp
 from models import MessageModel, ComplaintModel, DailyRentRateModel, HouseStatusModel
 
 
@@ -26,6 +27,7 @@ app.register_blueprint(house_bp, url_prefix='/house')
 app.register_blueprint(feedback_bp, url_prefix='/feedback')
 app.register_blueprint(contract_bp, url_prefix='/contract')
 app.register_blueprint(pay_bp, url_prefix='/') # 注册 pay_bp
+app.register_blueprint(ai_chat_bp)
 
 with open('static/json/cities.json', 'r', encoding='utf-8') as f:
     cities_data = json.load(f)
