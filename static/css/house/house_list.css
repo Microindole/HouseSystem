@@ -1,0 +1,667 @@
+/* 全局样式 */
+body {
+    background-color: #f4f4f9;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* 容器样式 */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+/* 标题样式 */
+.text-center {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* 搜索栏样式 */
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar .form-control {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.search-bar .btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.search-bar .btn:hover {
+    background-color: #0056b3;
+}
+
+/* 房源卡片样式 */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.col {
+    flex: 1 1 calc(33.333% - 20px);
+    box-sizing: border-box;
+}
+
+.card {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.card .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.card .btn:hover {
+    background-color: #0056b3;
+}
+
+.no-houses-message {
+    font-size: 1.2rem;
+    color: #6c757d;
+    margin-top: 20px;
+}
+
+/* 新闻区域样式 */
+.news-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.news-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.news-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.news-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.nav-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.news-container {
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.news-carousel {
+    display: flex;
+    transition: transform 0.5s ease;
+    gap: 0;
+}
+
+.news-item {
+    min-width: calc(33.333% - 0px);
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-right: 1px solid #dee2e6;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.news-item:last-child {
+    border-right: none;
+}
+
+.news-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-desc {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+    margin: 0 0 15px 0;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.news-date {
+    font-size: 12px;
+    color: #999;
+    font-weight: 500;
+}
+
+.news-house {
+    font-size: 12px;
+    color: #007bff;
+    background: rgba(0, 123, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.news-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    background: #007bff;
+    transform: scale(1.2);
+}
+
+.indicator:hover {
+    background: #007bff;
+    opacity: 0.7;
+}
+
+.news-footer-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.news-stats {
+    font-size: 14px;
+    color: #666;
+}
+
+.no-news {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.no-news-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.no-news p {
+    margin: 0;
+    font-size: 16px;
+    color: #999;
+}
+
+
+/* 房源列表样式 */
+.house-list-section {
+    margin-top: 20px;
+}
+
+.house-list-section h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #24292f;
+}
+
+/************************  新增的  *************************************/
+
+.house-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 24px;
+    align-items: center;
+}
+
+.house-card-horizontal {
+    display: flex;
+    flex-direction: row;
+    width: 750px;
+    min-height: 180px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    border: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.house-card-horizontal:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    transform: translateY(-4px) scale(1.01);
+}
+
+.house-image-horizontal {
+    width: 240px;
+    height: 180px;
+    object-fit: cover;
+    background: #f6f6f6;
+    flex-shrink: 0;
+}
+
+.house-info-horizontal {
+    flex: 1;
+    padding: 18px 24px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.house-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.house-title-horizontal {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+}
+
+.house-price-horizontal {
+    font-size: 22px;
+    color: #ff5722;
+    font-weight: bold;
+}
+
+.house-detail-row {
+    display: flex;
+    gap: 32px;
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.house-highlight {
+    font-size: 14px;
+    color: #ff9800;
+    margin-bottom: 4px;
+}
+
+.house-situation {
+    font-size: 14px;
+    color: #2196f3;
+    margin-bottom: 4px;
+}
+
+.btn-detail-horizontal {
+    align-self: flex-end;
+    background-color: #ff5722;
+    color: #fff;
+    border: none;
+    padding: 8px 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s;
+    margin-top: 10px;
+    text-decoration: none;
+}
+.btn-detail-horizontal:hover {
+    background: #e64a19;
+}
+
+/***************************** 新增的 ******************************************/
+.house-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.house-card {
+    width: 300px; /* 固定宽度 */
+    background-color: #ffffff;
+    border: 1px solid #d1d5da;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease-in-out; /* 添加悬停效果 */
+}
+
+.house-card:hover {
+    transform: scale(1.03); /* 悬停时放大 */
+}
+
+.house-image {
+    width: 100%; /* 确保图片宽度适应卡片 */
+    height: 200px; /* 固定高度 */
+    object-fit: cover; /* 确保图片按比例裁剪，填充整个区域 */
+    border-bottom: 1px solid #d1d5da;
+}
+
+.house-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.house-title {
+    font-size: 18px;
+    color: #0366d6; /* GitHub 蓝色 */
+    margin: 0;
+}
+
+.house-details {
+    font-size: 14px;
+    color: #24292f;
+    line-height: 1.5;
+}
+
+.btn-primary {
+    align-self: flex-start;
+    background-color: #0366d6; /* GitHub 蓝色 */
+    color: #ffffff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background-color: #005cc5;
+}
+
+.no-houses-message {
+    font-size: 16px;
+    color: #6a737d; /* GitHub 灰色 */
+    text-align: center;
+    margin-top: 20px;
+}
+
+.filter-form {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f3f6f9;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.filter-form label {
+  font-weight: bold;
+}
+.filter-form input, .filter-form select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.filter-form button {
+  padding: 6px 12px;
+  background-color: #0366d6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+.filter-form button:hover {
+  background-color:#005cc5 ;
+
+}
+
+.pagination {
+    text-align: center;
+    margin: 20px 0;
+}
+.pagination-list {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+.pagination-list li {
+    display: inline;
+    margin: 0 5px;
+}
+.pagination-list li a, .pagination-list li span {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #333;
+    text-decoration: none;
+}
+.pagination-list li.active span {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+
+
+
+
+.house-cards-horizontal {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+}
+
+.house-card-horizontal {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    min-height: 180px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    border: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.house-card-horizontal:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    transform: translateY(-4px) scale(1.01);
+}
+
+.house-image-horizontal {
+    width: 240px;
+    height: 180px;
+    object-fit: cover;
+    background: #f6f6f6;
+    flex-shrink: 0;
+}
+
+.house-info-horizontal {
+    flex: 1;
+    padding: 18px 24px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.house-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.house-title-horizontal {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+}
+
+.house-price-horizontal {
+    font-size: 22px;
+    color: #ff5722;
+    font-weight: bold;
+}
+
+.house-detail-row {
+    display: flex;
+    gap: 32px;
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.house-highlight {
+    font-size: 14px;
+    color: #ff9800;
+    margin-bottom: 4px;
+}
+
+.house-situation {
+    font-size: 14px;
+    color: #2196f3;
+    margin-bottom: 4px;
+}
+
+.btn-detail-horizontal {
+    align-self: flex-end;
+    background-color: #ff5722;
+    color: #fff;
+    border: none;
+    padding: 8px 22px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.2s;
+    margin-top: 10px;
+    text-decoration: none;
+}
+.btn-detail-horizontal:hover {
+    background: #e64a19;
+}

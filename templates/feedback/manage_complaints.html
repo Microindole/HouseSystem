@@ -1,0 +1,105 @@
+<!-- filepath: c:\Users\15139\Desktop\house-system\templates\feedback\manage_complaints.html -->
+{% extends "base.html" %}
+{% block title %}管理投诉与反馈{% endblock %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feedback/manage_complaints.css') }}">
+{% endblock %}
+{% block body %}
+<div class="manage-complaints-container">
+    <h2>管理投诉与反馈</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if complaints_list %}
+    <table class="complaints-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>类型</th>
+                <th>发送人</th>
+                <th>接收人</th>
+                <th>内容摘要</th>
+                <th>提交时间</th>
+                <th>当前状态</th>
+                <th>最后更新</th>
+                <th>处理人</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for complaint in complaints_list %}
+            <tr>
+                <td>{{ complaint.complaint_id }}</td>
+                <td>{{ complaint.type }}</td>
+                <td>{{ complaint.sender }}</td>
+                <td>{{ complaint.receiver if complaint.receiver else '管理员' }}</td>
+                <td>{{ complaint.content[:50] }}{% if complaint.content|length > 50 %}...{% endif %}</td>
+                <td>{{ complaint.time if complaint.time else 'N/A' }}</td>
+                <td>
+                    <span class="status-badge status-{{ complaint.status.replace(' ', '-') }}">{{ complaint.status }}</span>
+                </td>
+                <td>{{ complaint.last_updated_time if complaint.last_updated_time else 'N/A' }}</td>
+                <td>{{ complaint.handler_username if complaint.handler_username else 'N/A' }}</td>
+                <td>
+                    {# Call showDetailsModal with only the complaint ID #}
+                    <button onclick="showDetailsModal({{ complaint.complaint_id }})">详情/处理</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>当前没有需要您处理的投诉或反馈。</p>
+    {% endif %}
+</div>
+
+<!-- 详情与处理模态框 -->
+<div id="complaint-details-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeDetailsModal()">&times;</span>
+        <h3>投诉/反馈详情 (ID: <span id="modal-complaint-id"></span>)</h3>
+        <p><strong>类型:</strong> <span id="modal-type"></span></p>
+        <p><strong>发送人:</strong> <span id="modal-sender"></span></p>
+        <p><strong>接收人:</strong> <span id="modal-receiver"></span></p>
+        <p><strong>提交时间:</strong> <span id="modal-time"></span></p>
+        <p><strong>当前状态:</strong> <span id="modal-current-status"></span></p>
+        <p><strong>处理人:</strong> <span id="modal-handler"></span></p>
+        <p><strong>最后更新:</strong> <span id="modal-last-updated"></span></p>
+        <div class="content-box">
+            <strong>内容:</strong>
+            <pre id="modal-content"></pre>
+        </div>
+        <hr>
+        <h4>更新状态</h4>
+        <form id="update-status-form" method="POST">
+            {# Add CSRF token if form is passed from backend #}
+            {% if form and form.csrf_token %}
+                {{ form.csrf_token }}
+            {% endif %}
+            <div class="form-group">
+                <label for="modal-status-select">新状态:</label>
+                <select id="modal-status-select" name="status">
+                    <option value="待处理">待处理</option>
+                    <option value="处理中">处理中</option>
+                    <option value="已解决">已解决</option>
+                    <option value="已关闭">已关闭</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">更新状态</button>
+        </form>
+    </div>
+</div>
+
+{# Pass complaints_list data to a global JavaScript variable #}
+<script>
+    const allComplaintsData = {{ complaints_list|tojson|safe }};
+</script>
+{# Link the external JavaScript file, 'defer' ensures it runs after DOM is ready and allComplaintsData is set #}
+<script src="{{ url_for('static', filename='js/feedback/manage_complaints.js') }}" defer></script>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}交易历史{% endblock %}
+
+{% block body %}
+<h2 style="margin-bottom: 20px;">交易历史</h2>
+
+<div class="contract-list">
+    {% for c in contracts %}
+    <div class="contract-card" data-end-time="{{ c.end_time.strftime('%Y-%m-%d %H:%M:%S') if c.end_time else '' }}">
+        <div class="contract-header">
+            <strong>房屋：{{ c.house_name }}</strong>
+            <span class="status-badge
+                {% if c.status == 0 %}status-pending
+                {% elif c.status == 1 %}status-success
+                {% elif c.status == 2 %}status-cancelled
+                {% elif c.status == 3 %}status-revoked
+                {% endif %}">
+                {% if c.status == 0 %}进行中
+                {% elif c.status == 1 %}支付成功
+                {% elif c.status == 2 %}已取消
+                {% elif c.status == 3 %}已撤销
+                {% endif %}
+            </span>
+        </div>
+        <div class="contract-body">
+            <p><strong>地址：</strong>{{ c.addr }}</p>
+            <p><strong>房东：</strong>{{ c.landlord }}</p>
+            <p><strong>租客：</strong>{{ c.tenant }}</p>
+            <p><strong>金额：</strong>{{ c.amount }} 元</p>
+            <p><strong>创建时间：</strong>{{ c.created_at }}</p>
+            <p><strong>到期时间：</strong>{{ c.end_time.strftime('%Y-%m-%d') if c.end_time else '未知' }}</p>
+            <!-- 这里插入到期提示 -->
+            <span class="expire-tip" data-house-status="{{ c.house_status }}" style="color:red;display:none;">
+                该合同已到期！
+            </span>
+            <span class="returned-tip" data-house-status="{{ c.house_status }}" style="color:green;display:none;">
+                该合同已归还
+            </span>
+        </div>
+        <div class="contract-actions">
+            {% if current_user == c.landlord and c.status == 0 %}
+            <form method="POST" action="{{ url_for('contract.cancel_contract', contract_id=c.contract_id) }}">
+                <button class="btn btn-danger" type="submit" onclick="return confirm('确认撤销此合同？')">撤销</button>
+            </form>
+            {% endif %}
+
+            {% if current_user == c.tenant and c.status == 0 %}
+            <form method="POST" action="{{ url_for('pay.start_contract_payment') }}">
+                <input type="hidden" name="contract_id" value="{{ c.contract_id }}">
+                <button class="btn btn-primary" type="submit" onclick="return confirm('确认支付该合同？')">支付</button>
+            </form>
+            {% endif %}
+
+            <!-- 合同到期且为租客时，显示归还和联系续租 -->
+            {% if current_user == c.tenant and c.status == 1 and c.house_status == 1 %}
+            <form method="POST" action="{{ url_for('contract.return_house', contract_id=c.contract_id) }}" style="display:inline;">
+                <button class="btn btn-danger return-btn" type="submit" style="display:none;">归还</button>
+            </form>
+            <a class="btn btn-primary renew-btn" href="{{ url_for('feedback.start_or_get_channel', house_id=c.house_id) }}" style="display:none;">联系续租</a>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <p>暂无合同记录。</p>
+    {% endfor %}
+</div>
+
+<!-- 分页导航 -->
+<div class="pagination">
+    {% if page > 1 %}
+    <a href="{{ url_for('contract.contract_list', page=page-1) }}">&laquo; 上一页</a>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+        {% if p == page %}
+            <span class="current-page">{{ p }}</span>
+        {% else %}
+            <a href="{{ url_for('contract.contract_list', page=p) }}">{{ p }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page < total_pages %}
+   <a href="{{ url_for('contract.view_contracts', page=page+1) }}">下一页 &raquo;</a>
+    {% endif %}
+</div>
+
+<style>
+.contract-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.contract-card {
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #fafafa;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+.contract-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.contract-body p {
+    margin: 4px 0;
+}
+.contract-actions {
+    margin-top: 15px;
+}
+.status-badge {
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+}
+.status-pending { background-color: orange; }
+.status-success { background-color: green; }
+.status-cancelled { background-color: gray; }
+.status-revoked { background-color: red; }
+.btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+}
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* 分页样式 */
+.pagination {
+    margin-top: 30px;
+    text-align: center;
+}
+.pagination a, .pagination span {
+    display: inline-block;
+    margin: 0 6px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+}
+.pagination a:hover {
+    background-color: #007bff;
+    color: white;
+}
+.current-page {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.contract-card').forEach(function(card) {
+        var endTimeStr = card.getAttribute('data-end-time');
+        var houseStatus = card.querySelector('.expire-tip')?.getAttribute('data-house-status');
+        if (endTimeStr) {
+            var endDate = new Date(endTimeStr.split(' ')[0]);
+            endDate.setDate(endDate.getDate() + 1);
+            var now = new Date();
+            if (now >= endDate) {
+                if (houseStatus == "1") {
+                    // 还未归还，显示到期
+                    var tip = card.querySelector('.expire-tip');
+                    if (tip) tip.style.display = 'inline';
+
+                    var returnBtn = card.querySelector('.return-btn');
+                    var renewBtn = card.querySelector('.renew-btn');
+                    if (returnBtn) returnBtn.style.display = 'inline-block';
+                    if (renewBtn) renewBtn.style.display = 'inline-block';
+                } else {
+                    // 已归还，显示已归还
+                    var returned = card.querySelector('.returned-tip');
+                    if (returned) returned.style.display = 'inline';
+                }
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

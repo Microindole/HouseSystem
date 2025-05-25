@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% block title %}房源统计{% endblock %}
+{% block head %}
+<style>
+.statistics-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.stats-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent-color);
+}
+
+.stat-card.total::before { --accent-color: #007bff; }
+.stat-card.available::before { --accent-color: #28a745; }
+.stat-card.rented::before { --accent-color: #17a2b8; }
+.stat-card.unlisted::before { --accent-color: #ffc107; }
+.stat-card.pending::before { --accent-color: #fd7e14; }
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    background: var(--accent-color);
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: bold;
+    color: #333;
+    margin: 10px 0;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.stat-change {
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.stat-change.positive {
+    color: #28a745;
+}
+
+.stat-change.negative {
+    color: #dc3545;
+}
+
+.charts-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.quick-stats {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.quick-stats h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.quick-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.quick-stat-item:last-child {
+    border-bottom: none;
+}
+
+.quick-stat-label {
+    font-weight: 500;
+    color: #555;
+}
+
+.quick-stat-value {
+    font-weight: bold;
+    color: #333;
+}
+
+.action-buttons {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn {
+    background: #007bff;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0 10px;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.btn:hover {
+    background: #0056b3;
+}
+
+.btn-success {
+    background: #28a745;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-secondary {
+    background: #6c757d;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+</style>
+{% endblock %}
+{% block body %}
+<div class="statistics-container">
+    <div class="stats-header">
+        <h1>房源统计概览</h1>
+        <p>全面了解您的房源经营情况</p>
+    </div>
+    
+    <!-- 主要统计卡片 -->
+    <div class="stats-grid">
+        <div class="stat-card total">
+            <div class="stat-icon" style="--accent-color: #007bff;">🏠</div>
+            <div class="stat-number">{{ stats.total_houses }}</div>
+            <div class="stat-label">总房源数</div>
+        </div>
+        
+        <div class="stat-card available">
+            <div class="stat-icon" style="--accent-color: #28a745;">✅</div>
+            <div class="stat-number">{{ stats.available_houses }}</div>
+            <div class="stat-label">已上架</div>
+        </div>
+        
+        <div class="stat-card rented">
+            <div class="stat-icon" style="--accent-color: #17a2b8;">🔑</div>
+            <div class="stat-number">{{ stats.rented_houses }}</div>
+            <div class="stat-label">出租中</div>
+        </div>
+        
+        <div class="stat-card unlisted">
+            <div class="stat-icon" style="--accent-color: #ffc107;">📝</div>
+            <div class="stat-number">{{ stats.unlisted_houses }}</div>
+            <div class="stat-label">未上架</div>
+        </div>
+        
+        <div class="stat-card pending">
+            <div class="stat-icon" style="--accent-color: #fd7e14;">⏳</div>
+            <div class="stat-number">{{ stats.pending_houses }}</div>
+            <div class="stat-label">待审核</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="--accent-color: #6f42c1;">📈</div>
+            <div class="stat-number">{{ stats.occupancy_rate }}%</div>
+            <div class="stat-label">出租率</div>
+        </div>
+    </div>
+    
+    <!-- 图表区域 -->
+    <div class="charts-section">
+        <h3>房源状态分布</h3>
+        <div class="charts-grid">
+            <div class="chart-container">
+                <canvas id="statusPieChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 快速统计 -->
+    <div class="quick-stats">
+        <h3>待处理事项</h3>
+        <div class="quick-stat-item">
+            <span class="quick-stat-label">待处理维修请求</span>
+            <span class="quick-stat-value">{{ stats.recent_repairs }}</span>
+        </div>
+        <div class="quick-stat-item">
+            <span class="quick-stat-label">待处理预约</span>
+            <span class="quick-stat-value">{{ stats.recent_appointments }}</span>
+        </div>
+        <div class="quick-stat-item">
+            <span class="quick-stat-label">待审核房源</span>
+            <span class="quick-stat-value">{{ stats.pending_houses }}</span>
+        </div>
+    </div>
+    
+    <!-- 操作按钮 -->
+    <div class="action-buttons">
+        <a href="{{ url_for('house.add_house') }}" class="btn btn-success">发布新房源</a>
+        <a href="{{ url_for('house.export_houses') }}" class="btn">导出数据</a>
+        <a href="{{ url_for('account.landlord_home') }}" class="btn btn-secondary">返回首页</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// 房源状态饼图
+const statusCtx = document.getElementById('statusPieChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['已上架', '出租中', '未上架', '待审核'],
+        datasets: [{
+            data: [
+                {{ stats.available_houses }},
+                {{ stats.rented_houses }},
+                {{ stats.unlisted_houses }},
+                {{ stats.pending_houses }}
+            ],
+            backgroundColor: [
+                '#28a745',
+                '#17a2b8',
+                '#ffc107',
+                '#fd7e14'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            },
+            title: {
+                display: true,
+                text: '房源状态分布'
+            }
+        }
+    }
+});
+
+// 趋势图（示例数据）
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+new Chart(trendCtx, {
+    type: 'line',
+    data: {
+        labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+        datasets: [{
+            label: '出租数量',
+            data: [
+                Math.max(0, {{ stats.rented_houses }} - 5),
+                Math.max(0, {{ stats.rented_houses }} - 3),
+                Math.max(0, {{ stats.rented_houses }} - 2),
+                Math.max(0, {{ stats.rented_houses }} - 1),
+                {{ stats.rented_houses }},
+                {{ stats.rented_houses }}
+            ],
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            title: {
+                display: true,
+                text: '出租趋势'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

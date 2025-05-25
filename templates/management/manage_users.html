@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}管理用户{% endblock %}
+{% block body %}
+    <script src="{{ url_for('static', filename='js/admin/admin-search.js') }}"></script>
+<div class="container mt-4">
+    <h2>用户管理</h2>
+    <div class="user-tables-container">
+  <!-- 租客列表 -->
+  <div class="user-section">
+  <!-- 租客部分 -->
+  <div class="user-box">
+    <h3 class="section-title">租客列表</h3>
+    <div class="search-section">
+  <input type="text" id="tenantSearch" placeholder="搜索租客用户名..." class="search-input">
+  <button onclick="searchTenants()" class="search-btn">搜索</button>
+  <button onclick="resetTenants()" class="reset-btn">返回全部</button>
+  </div>
+    <div class="table-container">
+      <table class="fixed-header-table">
+        <thead>
+          <tr>
+            <th>用户名</th>
+            <th>类型</th>
+            <th>电话</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in tenants %}
+          <tr>
+            <td>{{ user.tenant_name }}</td>
+            <td>租客</td>
+            <td>{{ user.phone }}</td>
+            <td>
+              <div class="gh-btn-group">
+                <form method="POST" action="{{ url_for('account.reset_userpassword') }}">
+                  <input type="hidden" name="username" value="{{ user.tenant_name }}">
+                  <button type="submit" class="gh-btn gh-btn-warning">重置密码</button>
+
+                </form>
+               
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 房东部分 -->
+  <div class="user-box">
+    <h3 class="section-title">房东列表</h3>
+     <div class="search-section">
+    <input type="text" id="landlordSearch" placeholder="搜索房东用户名..." class="search-input">
+    <button onclick="searchLandlords()" class="search-btn">搜索</button>
+    <button onclick="resetLandlords()" class="reset-btn">返回全部</button>
+     </div>
+    <div class="table-container">
+      <table class="fixed-header-table">
+        <thead>
+          <tr>
+            <th>用户名</th>
+            <th>类型</th>
+            <th>电话</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in landlords %}
+          <tr>
+            <td>{{ user.landlord_name }}</td>
+            <td>房东</td>
+            <td>{{ user.phone }}</td>
+            <td>
+              <div class="gh-btn-group">
+                <form method="POST" action="{{ url_for('account.reset_userpassword') }}">
+                  <input type="hidden" name="username" value="{{ user.landlord_name }}">
+                  <button type="submit" class="gh-btn gh-btn-warning">重置密码</button>
+
+
+                </form>
+                    <button class="btn-view" onclick="showHouses('{{ user.landlord_name }}')">查看房源</button>
+
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+    <div id="houseModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h3 id="modal-title">房源列表</h3>
+    <table class="fixed-header-table">
+      <thead>
+        <tr>
+          <th>房源ID</th>
+          <th>状态</th>
+          <th>房屋名称</th>
+          <th>地区</th>
+          <th>地址</th>
+          <th>电话</th>
+          <th>更新时间</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="house-table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,380 @@
+body {
+    margin: 0;
+    padding: 0;
+
+}
+
+/* 页面背景和布局 */
+.profile-page {
+    padding: 20px; /* 这个内边距可以保留，用于profile-container的外部空间 */
+    /* background-color: #f9f9f9; */ /* 将此行注释掉或删除 */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-container {
+    max-width: 500px;
+    width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #d1d5da;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
+    padding: 36px 32px 28px 32px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.8s cubic-bezier(.68,-0.55,.27,1.55);
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+/* 标题样式 */
+.profile-container h1 {
+    font-size: 24px;
+    color: #333333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 2rem;
+    color: #28a745;
+    margin-bottom: 28px;
+    text-align: center;
+    letter-spacing: 2px;
+    font-weight: bold;
+    text-shadow: 0 2px 8px #e0e0e0;
+    animation: popIn 0.7s;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0;}
+    100% { transform: scale(1); opacity: 1;}
+}
+
+/* 表单组 */
+.profile-container .form-group {
+    margin-bottom: 15px;
+    margin-bottom: 22px;
+    position: relative;
+}
+
+.profile-container .form-group label {
+    display: block;
+    font-size: 14px;
+    color: #555555;
+    margin-bottom: 5px;
+    font-size: 15px;
+    color: #5b5b5b;
+    margin-bottom: 7px;
+    display: block;
+    font-weight: 500;
+    letter-spacing: 1px;
+    transition: color 0.3s;
+}
+
+.profile-container .form-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #f3f3fa;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    background: #e9e6fa;
+    box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
+    animation: inputGlow 0.5s;
+}
+
+@keyframes inputGlow {
+    0% { box-shadow: 0 0 0 0 #764ba2;}
+    100% { box-shadow: 0 0 8px 2px #764ba2;}
+}
+
+/* 用户名只读样式 */
+.profile-container .form-group input[readonly],
+.profile-container .form-group input.readonly-field { /* 新增 .readonly-field 类 */
+    background: #f0f0f0;
+    color: #777777; /* 调整颜色使其更清晰一些 */
+    cursor: not-allowed;
+    border: 1px solid #e0e0e0; /* 添加一个细边框 */
+    font-weight: normal; /* 可以设为 normal，如果不需要加粗 */
+    letter-spacing: 1px;
+    box-shadow: none;
+    opacity: 1;
+    outline: none;
+    transition: background 0.3s, color 0.3s;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* 地址输入框样式统一 */
+.profile-container .form-group input[type="text"].address,
+.profile-container .form-group textarea.address {
+    background: #f3f3fa;
+    border-radius: 6px;
+    border: none;
+    padding: 12px 14px;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+    resize: vertical;
+    min-height: 40px;
+}
+
+.profile-container .form-group input[type="text"].address:focus,
+.profile-container .form-group textarea.address:focus {
+    background: #e9e6fa;
+    box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
+    animation: inputGlow 0.5s;
+}
+
+/* 地址下拉框风格统一 */
+.profile-container .form-group select.address {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #f3f3fa;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+}
+
+/* 地址多级下拉框横向排列美化（不改html结构） */
+.profile-container .form-group label + select.address,
+.profile-container .form-group label + select.address + select.address,
+.profile-container .form-group label + select.address + select.address + select.address {
+    margin-right: 10px;
+}
+
+.profile-container .form-group select.address {
+    display: inline-block;
+    width: 32%;
+    min-width: 90px;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #f3f3fa;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.profile-container .form-group select.address:last-child {
+    margin-right: 0;
+}
+
+.profile-container .form-group select.address:focus {
+    background: #e9e6fa;
+    box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
+    animation: inputGlow 0.5s;
+}
+
+/* 按钮样式 */
+.profile-container .btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #28a745; /* 简约绿色 */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    padding: 13px 0;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2); /* 绿色阴影 */
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; /* 更新过渡属性 */
+    margin-top: 10px;
+    animation: btnPop 0.7s;
+}
+
+@keyframes btnPop {
+    0% { transform: scale(0.9);}
+    100% { transform: scale(1);}
+}
+
+.profile-container .btn:hover {
+    background-color: #218838; /* 深一点的绿色 */
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 18px rgba(40, 167, 69, 0.3); /* 绿色悬停阴影 */
+}
+
+/* 返回首页按钮特定样式 */
+.profile-container .btn-return-home {
+    display: inline-block; /* 或者 block，根据你想要的布局 */
+    padding: 8px 15px;
+    margin-top: 20px; /* 与上方表单的间距 */
+    font-size: 14px;
+    color: #495057; /* 深灰色文字 */
+    background-color: #f8f9fa; /* 浅灰色背景 */
+    border: 1px solid #ced4da; /* 边框颜色 */
+    border-radius: 4px;
+    text-decoration: none; /* 去除下划线 */
+    text-align: center;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.profile-container .btn-return-home:hover {
+    background-color: #e9ecef; /* 悬停时背景变深一点 */
+    color: #343a40; /* 悬停时文字颜色变深 */
+    border-color: #adb5bd;
+}
+
+/* 提示信息 */
+.profile-container .alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 12px;
+    margin-bottom: 18px;
+    border-radius: 6px;
+    font-size: 15px;
+    animation: fadeIn 0.7s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0;}
+    to { opacity: 1;}
+}
+
+.profile-container .alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    background: linear-gradient(90deg, #d4edda 0%, #b7e4c7 100%);
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.profile-container .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    background: linear-gradient(90deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* 下拉选择框动画 */
+.form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+}
+
+/* 地址选择区域横向排列美化 */
+#region-select {
+    display: flex;
+    gap: 12px;
+    margin-top: 2px;
+}
+
+#region-select select {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #f3f3fa;
+    box-shadow: 0 2px 8px rgba(120, 120, 180, 0.06);
+    transition: box-shadow 0.3s, background 0.3s;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='gray' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    cursor: pointer;
+}
+
+#region-select select:focus {
+    background: #e9e6fa;
+    box-shadow: 0 4px 16px rgba(120, 120, 180, 0.13);
+    animation: inputGlow 0.5s;
+}
+
+.code-row {
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+    gap: 10px; /* 输入框和按钮之间的间距 */
+}
+
+.code-row input[type="text"] {
+    flex: 1; /* 输入框占据剩余空间 */
+    height: 36px; /* 高度与按钮一致 */
+    padding: 0 10px;
+    font-size: 14px;
+    border: 1px solid #d1d5da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.code-row .btn {
+    width: auto;
+    min-width: 0;
+    height: 36px; /* 高度与输入框一致 */
+    padding: 0 16px;
+    font-size: 14px;
+    border-radius: 4px;
+    background: #2ea44f;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 6px rgba(27, 31, 35, 0.04);
+}
+
+.code-row .btn:hover {
+    background: #24913b;
+}
+
+

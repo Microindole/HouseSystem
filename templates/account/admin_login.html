@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}管理员登录{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/account/login.css') }}"> <!-- 可以复用登录页面的CSS -->
+{% endblock %}
+
+{% block body %}
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <h1>管理员登录</h1>
+            <p>智能房屋租赁系统</p>
+        </div>
+<!-- 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %} -->
+
+        <form method="POST" action="{{ url_for('account.admin_login') }}" class="login-form">
+            {{ form.csrf_token if form and form.csrf_token }} {# 如果你的表单使用了CSRF保护 #}
+            <div class="form-group">
+                <label for="username">管理员账户</label>
+                <input type="text" id="username" name="username" placeholder="请输入管理员用户名" required
+                       value="{{ form.username.data if form and form.username.data is not none else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" placeholder="请输入密码" required>
+            </div>
+            <button type="submit" class="btn">登录</button>
+        </form>
+        <p class="register-link" style="text-align: center; margin-top: 20px;">
+            <a href="{{ url_for('account.login') }}">返回普通用户登录</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
