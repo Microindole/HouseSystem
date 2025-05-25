@@ -385,6 +385,8 @@ def delete_house_logic(house_id):
     if house_status.status == 1:
         return jsonify({'success': False, 'message': '出租中的房源不允许删除'}), 400
     try:
+        # 先删除新闻
+        NewsModel.query.filter_by(house_id=house_id).delete()
         house_info = HouseInfoModel.query.get(house_id)
         if house_info and house_info.image and os.path.exists(house_info.image):
             try:
@@ -399,6 +401,7 @@ def delete_house_logic(house_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': f'删除失败：{str(e)}'}), 500
+    
 
 def update_house_status_logic(house_id):
     """更新房源状态（房东操作）"""
