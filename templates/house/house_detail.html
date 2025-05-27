@@ -2,7 +2,10 @@
 
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/house/house_detail.css') }}">
-    <script src="{{ url_for('static', filename='js/house/show-date.js') }}" defer></script>
+    <!-- 引入消息提示模块 -->
+    <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
+    <!-- 引入房源详情页面JS -->
+    <script src="{{ url_for('static', filename='js/house/house_detail.js') }}"></script>
 {% endblock %}
 
 {% block title %}{{ house.house_name }} - 房源详情{% endblock %}
@@ -65,7 +68,7 @@
                     <button class="btn btn-success" onclick="showPhone()">查看电话号码</button>
                 </div>
 
-                <!-- 新位置：添加房屋地图作为独立卡片 -->
+                <!-- 房屋地图 -->
                 <div class="house-location-card">
                     <h4>房源位置</h4>
                     <div id="map-container" style="width:100%; height:350px;"></div>
@@ -104,7 +107,7 @@
             {% if session.get('username') %}
                 <div class="at-info" style="display:none;">
                     <span id="at-text"></span>
-                    <span id="cancel-at" style="cursor:pointer;color:#f56c6c;margin-left:8px;">×</span>
+                    <span id="cancel-at">×</span>
                 </div>
 
                 <div class="comment-form">
@@ -122,15 +125,15 @@
                 {% for comment in comments %}
                     <div class="comment" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}" data-desc="{{ comment.desc }}">
                         <div class="comment-header">
-                    <span>
-                        <strong class="comment-username">{{ comment.username }}</strong>
-                        <span class="comment-type">({{ '房东' if comment.type == 2 else '租客' }})</span>
-                    </span>
+                            <span>
+                                <strong class="comment-username">{{ comment.username }}</strong>
+                                <span class="comment-type">({{ '房东' if comment.type == 2 else '租客' }})</span>
+                            </span>
                             <span class="comment-time"
                                     {% if comment.time %}
                                   data-raw="{{ comment.time.strftime('%Y-%m-%d %H:%M:%S') }}"
                                     {% endif %}>
-                    </span>
+                            </span>
                             {% if session.get('username') %}
                                 <button class="reply-btn" onclick="replyToComment({{ comment.comment_id }}, '{{ comment.username }}')">回复</button>
                             {% endif %}
@@ -177,7 +180,7 @@
     </div>
 
     <!-- 维修请求模态框 -->
-    <div id="repairModal" class="modal hidden">
+    <div id="repairModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeRepairModal()">&times;</span>
             <h3>申请维修</h3>
@@ -197,7 +200,7 @@
     </div>
 
     <!-- 预约看房模态框 -->
-    <div id="appointmentModal" class="modal hidden">
+    <div id="appointmentModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeAppointmentModal()">&times;</span>
             <h3>预约看房</h3>
@@ -226,533 +229,31 @@
         </div>
     </div>
 
-    <style>
-        /* 状态标签样式 */
-        .status-available { color: #28a745; font-weight: bold; }
-        .status-rented { color: #007bff; font-weight: bold; }
-        .status-unlisted { color: #6c757d; font-weight: bold; }
-        .status-pending { color: #ffc107; font-weight: bold; }
-        .status-rejected { color: #dc3545; font-weight: bold; }
-        .status-unknown { color: #6c757d; font-weight: bold; }
-
-        /* 图片样式 */
-        .house-image {
-            width: 100%;
-            max-width: 400px;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .house-image-placeholder {
-            width: 100%;
-            max-width: 400px;
-            height: 200px;
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            color: #6c757d;
-        }
-
-        /* 房源详情信息样式 */
-        .house-details-info {
-            margin-top: 20px;
-        }
-
-        .house-details-info p {
-            margin-bottom: 10px;
-            line-height: 1.6;
-        }
-
-        /* 房东信息样式 */
-        .landlord-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .landlord-info h4 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        /* 地图卡片样式 */
-        .house-location-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .house-location-card h4 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        /* 操作按钮样式 */
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        /* 模态框样式 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            position: relative;
-        }
-
-        .close-button {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #aaa;
-        }
-
-        .close-button:hover {
-            color: #000;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        /* 登录提示样式 */
-        .login-prompt {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .login-prompt a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .login-prompt a:hover {
-            text-decoration: underline;
-        }
-
-        /* 评论样式优化 */
-        .comment {
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
-        }
-
-        .comment:last-child {
-            border-bottom: none;
-        }
-
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .reply-btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .reply-btn:hover {
-            background: #0056b3;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .house-details {
-                flex-direction: column;
-            }
-
-            .action-buttons {
-                justify-content: center;
-            }
-
-            .modal-content {
-                width: 95%;
-                padding: 20px;
-            }
-        }
-    </style>
-
-    <script>
-        // 全局变量
-        window.houseId = {{ house.house_id }};
-        const landlordPhone = "{{ status.phone | default('获取失败', true) }}";
-
-        // 显示电话号码
-        function showPhone() {
-            document.getElementById('landlord-phone').textContent = landlordPhone;
-        }
-
-        // 维修申请相关函数
-        function showRepairModal() {
-            document.getElementById('repairModal').style.display = 'flex';
-        }
-
-        function closeRepairModal() {
-            document.getElementById('repairModal').style.display = 'none';
-            document.getElementById('repairForm').reset();
-        }
-
-        // 提交维修申请
-        document.getElementById('repairForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const content = document.getElementById('repairContent').value.trim();
-
-            if (!content) {
-                alert('请填写维修内容描述');
-                return;
-            }
-
-            fetch('/house/repair/request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    house_id: window.houseId,
-                    content: content
-                })
-            }).then(response => response.json()).then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    closeRepairModal();
-                } else {
-                    alert('提交失败：' + data.message);
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-                alert('提交失败，请稍后重试');
-            });
-        });
-
-        // 预约看房相关函数
-        function showAppointmentModal() {
-            document.getElementById('appointmentModal').style.display = 'flex';
-
-            // 设置最小时间为当前时间
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('appointmentTime').min = now.toISOString().slice(0, 16);
-        }
-
-        function closeAppointmentModal() {
-            document.getElementById('appointmentModal').style.display = 'none';
-            document.getElementById('appointmentForm').reset();
-        }
-
-        // 提交预约
-        document.getElementById('appointmentForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-
-            fetch('/house/appointment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(response => response.json()).then(data => {
-                alert(data.msg);
-                if (data.code === 200) {
-                    closeAppointmentModal();
-                    location.reload();
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-                alert('提交失败，请稍后重试');
-            });
-        });
-
-        // 评论回复功能
-        function replyToComment(commentId, username) {
-            document.getElementById('at-comment-id').value = commentId;
-            document.getElementById('at-text').textContent = `回复 @${username}：`;
-            document.querySelector('.at-info').style.display = 'block';
-            document.querySelector('.comment-input').focus();
-        }
-
-        // 取消回复
-        document.getElementById('cancel-at').addEventListener('click', function() {
-            document.getElementById('at-comment-id').value = '';
-            document.getElementById('at-text').textContent = ''; // 确保清除回复文本
-            document.querySelector('.at-info').style.display = 'none';
-        });
-
-        // 提交评论
-        const submitButtonElement = document.getElementById('submit-comment-btn');
-        let isSubmittingComment = false; // 防止重复提交的标志位
-
-        if (submitButtonElement) {
-            submitButtonElement.addEventListener('click', function() {
-                if (isSubmittingComment) {
-                    // 如果已经在提交过程中，则不执行任何操作
-                    console.warn('A comment submission is already in progress.');
-                    return;
-                }
-
-                const submitBtnInstance = this; // 当前点击的按钮
-                const commentInputElement = document.querySelector('.comment-input');
-                const content = commentInputElement.value.trim();
-                const atCommentIdInputElement = document.getElementById('at-comment-id');
-                const atCommentId = atCommentIdInputElement.value;
-
-                if (!content) {
-                    alert('请输入评论内容');
-                    return;
-                }
-
-                isSubmittingComment = true; // 设置标志位，表示提交开始
-                submitBtnInstance.disabled = true;
-                submitBtnInstance.textContent = '提交中...';
-
-                const formData = new FormData();
-                formData.append('house_id', window.houseId);
-                formData.append('comment', content);
-                if (atCommentId) {
-                    formData.append('at', atCommentId);
-                }
-
-                let requestAttemptSucceeded = false;
-
-                fetch('/house/add_comment_form', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            requestAttemptSucceeded = true;
-                            // 评论成功后，清空输入框和回复状态
-                            commentInputElement.value = '';
-                            atCommentIdInputElement.value = '';
-                            document.getElementById('at-text').textContent = '';
-                            document.querySelector('.at-info').style.display = 'none';
-
-                            // 使用带时间戳的URL进行跳转，尝试避免浏览器缓存导致的问题
-                            window.location.href = window.location.pathname + '?t=' + new Date().getTime();
-                        } else {
-                            alert('评论提交失败：' + (data.message || '未知错误'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error submitting comment:', error);
-                        alert('评论提交失败，网络错误或服务器无响应，请稍后重试');
-                    })
-                    .finally(() => {
-                        // 无论成功或失败，最终都会重置标志位
-                        // 但按钮状态的恢复只在请求失败且未发生页面跳转时进行
-                        isSubmittingComment = false;
-                        if (!requestAttemptSucceeded) {
-                            submitBtnInstance.disabled = false;
-                            submitBtnInstance.textContent = '提交评论';
-                        }
-                        // 如果 requestAttemptSucceeded 为 true, 页面会刷新, 按钮状态自然恢复
-                    });
-            });
-        }
-
-        // 删除房源（房东专用）
-        function deleteHouse(houseId) {
-            if (confirm('确定要删除这套房源吗？此操作不可恢复。')) {
-                fetch(`/house/delete/${houseId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            window.location.href = '/account/landlord/home';
-                        } else {
-                            alert('删除失败：' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('删除失败，请稍后重试');
-                    });
-            }
-        }
-
-        // 页面加载完成后的初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 格式化显示时间（如果有 show-date.js）
-            // 这里可以添加时间格式化的代码
-        });
-    </script>
-
-
-    <!-- 替换地图脚本部分 -->
+    <!-- 百度地图API -->
     <script type="text/javascript" src="https://api.map.baidu.com/api?type=webgl&v=1.0&ak=tG45XJla84SWiND3VIKh7UlHFdb0scGH"></script>
+    
+    <!-- 页面初始化脚本 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化地图
-            var map = new BMapGL.Map('map-container', {
-                enableMapClick: true,  // 启用地图点击
-                displayOptions: {
-                    building: true,     // 显示建筑物
-                    poi: true,          // 显示兴趣点
-                    indoor: false       // 不显示室内图
+            // 初始化页面配置
+            const config = {
+                houseId: {{ house.house_id }},
+                landlordPhone: "{{ status.phone | default('获取失败', true) }}",
+                currentUser: {
+                    username: "{{ session.get('username') or '' }}",
+                    isLoggedIn: {{ 'true' if session.get('username') else 'false' }}
+                },
+                houseData: {
+                    house_name: "{{ house.house_name }}",
+                    region: "{{ house.region }}",
+                    addr: "{{ house.addr }}",
+                    price: "{{ '%.2f'|format(house.price) }}",
+                    image: "{{ house.image or '' }}"
                 }
-            });
+            };
             
-            // 设置地图样式
-            map.setMapStyleV2({
-                styleId: '01e6259d6df0835e035b80a7ee838682'  // 标准地图样式
-            });
-            
-            // 添加控件
-            map.addControl(new BMapGL.ScaleControl());        // 添加比例尺控件
-            map.addControl(new BMapGL.ZoomControl());         // 添加缩放控件
-            map.enableScrollWheelZoom(true);                 // 允许滚轮缩放
-
-            // 组合完整地址
-            var fullAddress = "{{ house.region }} {{ house.addr }}";
-            
-            // 创建地址解析器实例
-            var myGeo = new BMapGL.Geocoder();
-            
-            // 将地址解析结果显示在地图上
-            myGeo.getPoint(fullAddress, function(point) {
-                if (point) {
-                    // 设置地图中心点和缩放级别
-                    map.centerAndZoom(point, 17);
-                    
-                    // 添加标记
-                    var marker = new BMapGL.Marker(point);
-                    map.addOverlay(marker);
-                    
-                    // 添加房源名称标签
-                    var label = new BMapGL.Label("{{ house.house_name }}", {
-                        position: point,
-                        offset: new BMapGL.Size(20, -10)
-                    });
-                    label.setStyle({
-                        color: "#333",
-                        fontSize: "13px",
-                        height: "22px",
-                        lineHeight: "22px",
-                        padding: "3px 10px",
-                        borderRadius: "4px",
-                        background: "#fff",
-                        border: "1px solid #1296db",
-                        whiteSpace: "nowrap",
-                        fontFamily: "微软雅黑",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
-                    });
-                    marker.setLabel(label);
-                    
-                    // 添加信息窗口
-                    var content =
-                        '<div style="padding:12px;max-width:300px;">' +
-                        '<h4 style="margin:0 0 8px 0;color:#1296db;font-size:16px;">{{ house.house_name }}</h4>' +
-                        '{% if house.image %}<img src="{{ house.image }}" style="width:100%;max-height:120px;object-fit:cover;border-radius:4px;margin-bottom:8px;">{% endif %}' +
-                        '<p style="margin:0;font-size:14px;line-height:1.5;"><strong>地址：</strong>{{ house.addr }}</p>' +
-                        '<p style="margin:5px 0 0;color:#666;font-size:13px;line-height:1.5;"><strong>所在区域：</strong>{{ house.region }}</p>' +
-                        '<p style="margin:5px 0 0;color:#666;font-size:13px;line-height:1.5;"><strong>价格：</strong>{{ "%.2f"|format(house.price) }}元/月</p>' +
-                        '<div style="margin-top:10px;text-align:right;">' +
-                        '<a href="https://map.baidu.com/search/{{ house.region }} {{ house.addr }}/?querytype=s&wd={{ house.region }} {{ house.addr }}" ' +
-                        'target="_blank" style="color:#1296db;text-decoration:none;font-size:13px;">在百度地图查看 &raquo;</a>' +
-                        '</div>' +
-                        '</div>';
-                        
-                    var infoWindow = new BMapGL.InfoWindow(content, {
-                        title: "房源信息",
-                        enableMessage: false
-                    });
-                    
-                    // 默认打开信息窗口
-                    marker.openInfoWindow(infoWindow);
-                    
-                    // 点击标记时打开信息窗口
-                    marker.addEventListener('click', function() {
-                        this.openInfoWindow(infoWindow);
-                    });
-                    
-                } else {
-                    console.error('无法解析地址：' + fullAddress);
-                    // 尝试只用地区定位
-                    myGeo.getPoint("{{ house.region }}", function(regionPoint) {
-                        if (regionPoint) {
-                            map.centerAndZoom(regionPoint, 14);
-                            
-                            // 添加一个区域标记
-                            var regionMarker = new BMapGL.Marker(regionPoint);
-                            map.addOverlay(regionMarker);
-                            
-                            // 添加提示
-                            document.getElementById('map-container').insertAdjacentHTML(
-                                'beforeend',
-                                '<div style="position:absolute;bottom:10px;left:10px;right:10px;background:rgba(255,255,255,0.9);padding:10px;border-radius:4px;text-align:center;color:#f56c6c;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,0.2);">无法精确定位房源地址，已显示所在地区</div>'
-                            );
-                        } else {
-                            document.getElementById('map-container').innerHTML = '<div style="text-align:center;padding:30px;background:#f8f9fa;border-radius:8px;"><p style="color:#f56c6c;font-weight:bold;">无法显示地图，请检查房源地址信息</p></div>';
-                        }
-                    }, "全国");
-                }
-            }, "全国");
+            // 初始化房源详情页面
+            initHouseDetail(config);
         });
     </script>
 {% endblock %}

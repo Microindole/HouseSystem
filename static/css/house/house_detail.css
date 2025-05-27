@@ -1,4 +1,6 @@
-/* 房源详情页样式 */
+/* 房源详情页样式 - 优化版本 */
+
+/* 基础布局 */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -42,7 +44,6 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-/* 房源信息列表样式 */
 .house-details-info p {
     padding: 8px 0;
     border-bottom: 1px solid #f0f0f0;
@@ -59,7 +60,7 @@
     color: #555;
 }
 
-/* 房源图片样式 */
+/* 房源图片 */
 .house-image {
     width: 100%;
     max-height: 300px;
@@ -92,15 +93,17 @@
     height: fit-content;
 }
 
-/* 房东信息样式 */
-.landlord-info {
+/* 房东信息和地图卡片 */
+.landlord-info,
+.house-location-card {
     background: #f8f9fa;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
 }
 
-.landlord-info h4 {
+.landlord-info h4,
+.house-location-card h4 {
     margin: 0 0 15px 0;
     color: #333;
     font-size: 18px;
@@ -111,7 +114,7 @@
     color: #555;
 }
 
-/* 操作按钮样式 */
+/* 操作按钮 */
 .action-buttons {
     display: flex;
     flex-direction: column;
@@ -128,103 +131,41 @@
     font-size: 14px;
     font-weight: 500;
     transition: all 0.3s ease;
+    display: inline-block;
 }
 
-.btn-primary {
-    background: #007bff;
-    color: white;
-}
+/* 按钮颜色样式 */
+.btn-primary { background: #007bff; color: white; }
+.btn-primary:hover { background: #0056b3; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-secondary:hover { background: #545b62; }
+.btn-success { background: #28a745; color: white; }
+.btn-success:hover { background: #218838; }
+.btn-warning { background: #ffc107; color: #212529; }
+.btn-warning:hover { background: #e0a800; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-danger:hover { background: #c82333; }
 
-.btn-primary:hover {
-    background: #0056b3;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #545b62;
-}
-
-.btn-success {
-    background: #28a745;
-    color: white;
-}
-
-.btn-success:hover {
-    background: #218838;
-}
-
-.btn-warning {
-    background: #ffc107;
-    color: #212529;
-}
-
-.btn-warning:hover {
-    background: #e0a800;
-}
-
-.btn-danger {
-    background: #dc3545;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #c82333;
-}
-
-/* 状态标签样式 */
-.status-available {
-    color: #28a745;
-    font-weight: bold;
-    background: #d4edda;
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
-.status-rented {
-    color: #004085;
-    font-weight: bold;
-    background: #cce7ff;
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
-.status-unlisted {
-    color: #721c24;
-    font-weight: bold;
-    background: #f8d7da;
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
-.status-pending {
-    color: #856404;
-    font-weight: bold;
-    background: #fff3cd;
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
-.status-rejected {
-    color: #721c24;
-    font-weight: bold;
-    background: #f8d7da;
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
+/* 状态标签 */
+.status-available,
+.status-rented,
+.status-unlisted,
+.status-pending,
+.status-rejected,
 .status-unknown {
-    color: #6c757d;
     font-weight: bold;
-    background: #e9ecef;
     padding: 2px 8px;
     border-radius: 4px;
 }
 
-/* 留言区样式 */
+.status-available { color: #28a745; background: #d4edda; }
+.status-rented { color: #004085; background: #cce7ff; }
+.status-unlisted { color: #721c24; background: #f8d7da; }
+.status-pending { color: #856404; background: #fff3cd; }
+.status-rejected { color: #721c24; background: #f8d7da; }
+.status-unknown { color: #6c757d; background: #e9ecef; }
+
+/* 留言区 */
 .comments-section {
     background: white;
     padding: 30px;
@@ -238,7 +179,7 @@
     font-size: 24px;
 }
 
-/* 登录提示样式 */
+/* 登录提示 */
 .login-prompt {
     text-align: center;
     padding: 20px;
@@ -268,7 +209,14 @@
     color: #0066cc;
 }
 
-/* 评论表单样式 */
+#cancel-at {
+    cursor: pointer;
+    color: #f56c6c;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+/* 评论表单 */
 .comment-form {
     margin-bottom: 30px;
 }
@@ -295,7 +243,7 @@
     margin-top: 10px;
 }
 
-/* 评论列表样式 */
+/* 评论列表 */
 .comments-list {
     border-top: 1px solid #eee;
     padding-top: 20px;
@@ -304,10 +252,26 @@
 .comment {
     padding: 15px 0;
     border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
 }
 
 .comment:last-child {
     border-bottom: none;
+}
+
+.comment:first-child {
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .comment-header {
@@ -341,6 +305,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
+    display: none;
 }
 
 .reply-btn:hover {
@@ -361,7 +326,7 @@
     color: #666;
 }
 
-/* 分页样式 */
+/* 分页 */
 .pagination {
     list-style: none;
     display: flex;
@@ -404,7 +369,7 @@
     cursor: not-allowed;
 }
 
-/* 模态框样式 */
+/* 模态框 */
 .modal {
     display: none;
     position: fixed;
@@ -502,32 +467,16 @@
         gap: 20px;
     }
     
-    .house-header h1 {
-        font-size: 24px;
-    }
-    
-    .house-header h3 {
-        font-size: 18px;
-    }
-    
-    .container {
-        padding: 15px;
-    }
+    .house-header h1 { font-size: 24px; }
+    .house-header h3 { font-size: 18px; }
+    .container { padding: 15px; }
     
     .house-info,
     .house-actions,
-    .comments-section {
-        padding: 20px;
-    }
+    .comments-section { padding: 20px; }
     
-    .action-buttons {
-        gap: 8px;
-    }
-    
-    .btn {
-        padding: 10px 16px;
-        font-size: 13px;
-    }
+    .action-buttons { gap: 8px; }
+    .btn { padding: 10px 16px; font-size: 13px; }
     
     .comment-header {
         flex-direction: column;
@@ -535,40 +484,15 @@
         gap: 5px;
     }
     
-    .modal-content {
-        width: 95%;
-        padding: 20px;
-    }
-    
-    .pagination {
-        gap: 2px;
-    }
-    
-    .page-link {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
+    .modal-content { width: 95%; padding: 20px; }
+    .pagination { gap: 2px; }
+    .page-link { padding: 6px 10px; font-size: 13px; }
 }
 
 @media (max-width: 480px) {
-    .house-header {
-        padding: 15px;
-    }
-    
-    .house-header h1 {
-        font-size: 20px;
-    }
-    
-    .house-header h3 {
-        font-size: 16px;
-    }
-    
-    .house-details-info strong {
-        width: 80px;
-        font-size: 13px;
-    }
-    
-    .comments-section h2 {
-        font-size: 20px;
-    }
+    .house-header { padding: 15px; }
+    .house-header h1 { font-size: 20px; }
+    .house-header h3 { font-size: 16px; }
+    .house-details-info strong { width: 80px; font-size: 13px; }
+    .comments-section h2 { font-size: 20px; }
 }

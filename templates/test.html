@@ -1,0 +1,14 @@
+<!-- 在任何需要消息提示的页面中 -->
+<script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
+
+<script>
+    // 使用方式
+    messageToast.success('操作成功！');
+    messageToast.error('操作失败！');
+    messageToast.warning('请注意！');
+    messageToast.info('提示信息');
+
+    // 或者使用兼容的旧版本函数
+    showMessage('操作成功！', 'success');
+    showMessage('操作失败！', 'error');
+</script>

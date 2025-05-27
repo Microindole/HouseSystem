@@ -6,11 +6,15 @@ from models import HouseStatusModel
 
 import os
 import json
+import uuid
 from flask import render_template, request, jsonify, session, redirect, url_for, abort, flash, current_app, Response
 from werkzeug.utils import secure_filename
 from sqlalchemy import or_
 from models import (HouseInfoModel, HouseStatusModel, CommentModel, NewsModel,
                    TenantModel, LandlordModel, AppointmentModel, RepairRequestModel, db, HouseListingAuditModel)
+# 新增导入 OSS 服务
+from service.oss_service import get_oss_client, delete_oss_object
+import alibabacloud_oss_v2 as oss_sdk
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
@@ -216,6 +220,42 @@ def export_houses_csv(landlord_name):
         headers={'Content-Disposition': f'attachment; filename={filename}'}
     )
 
+def upload_image_to_oss(file, house_id=None):
+    """上传图片到OSS并返回URL"""
+    try:
+        client = get_oss_client()
+        bucket_name = current_app.config['OSS_BUCKET_NAME']
+        
+        # 生成安全且唯一的文件名
+        filename = secure_filename(file.filename)
+        file_ext = os.path.splitext(filename)[1]
+        object_name = f"house_images/{house_id or 'temp'}/{uuid.uuid4().hex}{file_ext}"
+        
+        # 上传文件
+        result = client.put_object(oss_sdk.PutObjectRequest(
+            bucket=bucket_name,
+            key=object_name,
+            body=file.stream,
+            headers={"x-oss-object-acl": "public-read"}
+        ))
+        
+        if result.status_code == 200:
+            # 构建图片URL
+            oss_cname_url = current_app.config.get('OSS_CNAME_URL')
+            if oss_cname_url:
+                image_url = f"{oss_cname_url.rstrip('/')}/{object_name.lstrip('/')}"
+            else:
+                endpoint = current_app.config['OSS_ENDPOINT'].replace('https://', '').replace('http://', '')
+                image_url = f"https://{bucket_name}.{endpoint}/{object_name}"
+            
+            return image_url
+        else:
+            raise Exception(f"OSS上传失败，状态码: {result.status_code}")
+            
+    except Exception as e:
+        current_app.logger.error(f"OSS上传失败: {str(e)}")
+        raise e
+
 def add_house_logic():
     if session.get('user_type') != 2:
         flash('只有房东可以发布房源', 'error')
@@ -248,18 +288,13 @@ def add_house_logic():
             return render_template('house/add_house.html',
                                    cities_data=cities_data_for_provinces,
                                    pca_data=pca_data)
-        image_path = None
+        image_url = None
         if 'image' in request.files:
             file = request.files['image']
             if file.filename != '' and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-                filename = f"{timestamp}_{filename}"
-                upload_folder = os.path.join(current_app.static_folder, 'images')
-                os.makedirs(upload_folder, exist_ok=True)
-                file_path = os.path.join(upload_folder, filename)
-                file.save(file_path)
-                image_path = f"static/images/{filename}"
+                # 使用OSS上传替代本地存储
+                image_url = upload_image_to_oss(file)
+        
         house_info = HouseInfoModel(
             house_name=house_name,
             rooms=rooms,
@@ -269,7 +304,7 @@ def add_house_logic():
             deposit=float(deposit) if deposit else None,
             situation=situation,
             highlight=highlight,
-            image=image_path
+            image=image_url  # 保存OSS URL
         )
         db.session.add(house_info)
         db.session.flush()
@@ -338,19 +373,12 @@ def edit_house_logic(house_id):
         if 'image' in request.files:
             file = request.files['image']
             if file.filename != '' and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-                filename = f"{timestamp}_{filename}"
-                upload_folder = os.path.join(current_app.static_folder, 'images')
-                os.makedirs(upload_folder, exist_ok=True)
-                file_path = os.path.join(upload_folder, filename)
-                file.save(file_path)
-                if house_info.image and os.path.exists(house_info.image):
-                    try:
-                        os.remove(house_info.image)
-                    except:
-                        pass
-                house_info.image = f"static/images/{filename}"
+                # 删除旧图片（如果是OSS URL）
+                if house_info.image:
+                    delete_oss_object(house_info.image)
+                
+                # 上传新图片到OSS
+                house_info.image = upload_image_to_oss(file, house_id)
         house_info.house_name = house_name
         house_info.rooms = rooms
         house_info.region = region
@@ -385,12 +413,14 @@ def delete_house_logic(house_id):
     if house_status.status == 1:
         return jsonify({'success': False, 'message': '出租中的房源不允许删除'}), 400
     try:
+        # 先删除新闻
+        NewsModel.query.filter_by(house_id=house_id).delete()
         house_info = HouseInfoModel.query.get(house_id)
-        if house_info and house_info.image and os.path.exists(house_info.image):
-            try:
-                os.remove(house_info.image)
-            except:
-                pass
+        
+        # 删除OSS图片
+        if house_info and house_info.image:
+            delete_oss_object(house_info.image)
+        
         db.session.delete(house_status)
         if house_info:
             db.session.delete(house_info)
@@ -399,7 +429,7 @@ def delete_house_logic(house_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': f'删除失败：{str(e)}'}), 500
-
+    
 def update_house_status_logic(house_id):
     """更新房源状态（房东操作）"""
     if session.get('user_type') != 2:
