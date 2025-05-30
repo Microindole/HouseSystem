@@ -22,7 +22,7 @@
                         <div class="chat-info">
                             <div class="chat-info-header">
                         <span class="chat-name">
-                            {{ item.channel.tenant_username if session.username == item.channel.landlord_username else item.channel.landlord_username }}
+                            {{ item.channel.tenant_username if g.username == item.channel.landlord_username else item.channel.landlord_username }}
                         </span>
                                 {% if item.last_message %}
                                     <span class="chat-time">{{ item.last_message.timestamp.strftime('%H:%M') }}</span>
@@ -101,7 +101,7 @@
 
     <script>
         // 全局变量 - 初始状态
-        window.currentUsername = "{{ session.username | e }}";
+        window.currentUsername = "{{ g.username | e }}";
         window.activeChannelId = null;
         window.activeTenantUsername = null;
         window.activeLandlordUsername = null;

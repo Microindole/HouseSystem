@@ -1,9 +1,9 @@
 # blueprints/ai_chat_bp.py
 
-from flask import Blueprint, request, jsonify, session, current_app, render_template, Response
+from flask import Blueprint, request, jsonify, session, current_app, render_template, Response, g
 from openai import OpenAI
 import json
-from decorators import login_required # 确保你的项目中存在这个装饰器
+from decorators import login_required, verify_token
 
 ai_chat_bp = Blueprint('ai_chat', __name__, url_prefix='/ai_chat')
 
@@ -21,7 +21,26 @@ def get_chat_history():
         ]
     return session['chat_history']
 
+# --- 新增token身份校验 ---
+from flask import request
+from functools import wraps
+
+def token_required_for_ai(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get('access_token')
+        if not token:
+            return jsonify({'error': '未登录或登录已过期'}), 401
+        payload = verify_token(token)
+        if not payload:
+            return jsonify({'error': 'Token无效或已过期'}), 401
+        g.username = payload.get('username')
+        g.user_type = payload.get('user_type')
+        return f(*args, **kwargs)
+    return decorated_function
+
 @ai_chat_bp.route('/')
+@token_required_for_ai
 @login_required
 def chat_page():
     """提供聊天页面的路由，并传递当前用户的聊天记录"""
@@ -29,6 +48,7 @@ def chat_page():
     return render_template('ai_chat_page.html', chat_history=chat_history)
 
 @ai_chat_bp.route('/send_message', methods=['POST'])
+@token_required_for_ai
 @login_required
 def send_message():
     user_input = request.json.get('message')
@@ -91,6 +111,7 @@ def send_message():
         return jsonify({"error": f"AI 服务暂时不可用: {str(e)}"}), 500
 
 @ai_chat_bp.route('/clear_history', methods=['POST'])
+@token_required_for_ai
 @login_required
 def clear_history():
     """清除当前用户的聊天记录"""

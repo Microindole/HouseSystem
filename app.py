@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, render_template, g, session
+from flask import Flask, render_template, g, session, request
 import config
 from blueprints.contract import contract_bp
 from exts import db, mail
@@ -11,6 +11,7 @@ from blueprints.feedback import feedback_bp
 from blueprints.sandbox import pay_bp
 from blueprints.ai_chat_bp import ai_chat_bp
 from models import MessageModel, ComplaintModel, DailyRentRateModel, HouseStatusModel
+from decorators import login_required, verify_token
 
 
 app = Flask(__name__)
@@ -47,8 +48,8 @@ def inject_default_filters():
 def inject_unread_counts():
     unread_total = 0
     unread_complaint_updates = 0
-    if 'username' in session:
-        username = session['username']
+    if hasattr(g, 'username'):
+        username = g.username
         unread_channels = db.session.query(MessageModel.channel_id)\
             .filter(MessageModel.receiver_username == username, MessageModel.is_read == False)\
             .distinct().count()
@@ -63,6 +64,11 @@ def inject_unread_counts():
     return dict(unread_total=unread_total, unread_complaint_updates=unread_complaint_updates)
 
 
+@app.context_processor
+def inject_user_info():
+    return dict(g=g)
+
+
 @app.before_request
 def set_default_filters():
     g.filters = {
@@ -71,6 +77,16 @@ def set_default_filters():
         'min_price': None,
         'max_price': None
     }
+
+
+@app.before_request
+def inject_user_from_token():
+    token = request.cookies.get('access_token')
+    if token:
+        payload = verify_token(token)
+        if payload:
+            g.username = payload.get('username')
+            g.user_type = payload.get('user_type')
 
 
 @app.route('/')

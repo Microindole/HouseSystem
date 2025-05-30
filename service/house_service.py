@@ -1,13 +1,13 @@
 import csv
 from io import StringIO
 from datetime import datetime
-from flask import Response
+from flask import Response, g
 from models import HouseStatusModel
 
 import os
 import json
 import uuid
-from flask import render_template, request, jsonify, session, redirect, url_for, abort, flash, current_app, Response
+from flask import render_template, request, jsonify, redirect, url_for, abort, flash, current_app, Response, g
 from werkzeug.utils import secure_filename
 from sqlalchemy import or_
 from models import (HouseInfoModel, HouseStatusModel, CommentModel, NewsModel,
@@ -138,8 +138,8 @@ def get_house_detail(house_id):
     if not status:
         flash('房源状态信息不存在', 'error')
         abort(404)
-    user_type = session.get('user_type')
-    username = session.get('username')
+    user_type = getattr(g, 'user_type', None)
+    username = getattr(g, 'username', None)
     if user_type != 2 or (user_type == 2 and status.landlord_name != username):
         if status.status != 0:
             flash('该房源暂不可查看', 'error')
@@ -257,7 +257,7 @@ def upload_image_to_oss(file, house_id=None):
         raise e
 
 def add_house_logic():
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         flash('只有房东可以发布房源', 'error')
         return redirect(url_for('account.landlord_home'))
     cities_json_path = os.path.join(current_app.static_folder, 'json', 'cities.json')
@@ -310,7 +310,7 @@ def add_house_logic():
         db.session.flush()
         house_status = HouseStatusModel(
             house_id=house_info.house_id,
-            landlord_name=session.get('username'),
+            landlord_name=g.username,
             status=2,
             phone=phone,
             update_time=datetime.now()
@@ -327,10 +327,10 @@ def add_house_logic():
                                pca_data=pca_data)
 
 def edit_house_logic(house_id):
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         flash('只有房东可以编辑房源', 'error')
         return redirect(url_for('account.landlord_home'))
-    landlord_name = session.get('username')
+    landlord_name = getattr(g, 'username', None)
     house_status = HouseStatusModel.query.filter_by(
         house_id=house_id,
         landlord_name=landlord_name
@@ -401,9 +401,9 @@ def edit_house_logic(house_id):
                              cities_data=cities_data)
 
 def delete_house_logic(house_id):
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         return jsonify({'success': False, 'message': '只有房东可以删除房源'}), 403
-    landlord_name = session.get('username')
+    landlord_name = getattr(g, 'username', None)
     house_status = HouseStatusModel.query.filter_by(
         house_id=house_id,
         landlord_name=landlord_name
@@ -432,9 +432,9 @@ def delete_house_logic(house_id):
     
 def update_house_status_logic(house_id):
     """更新房源状态（房东操作）"""
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         return jsonify({'success': False, 'message': '只有房东可以更新房源状态'}), 403
-    landlord_name = session.get('username')
+    landlord_name = getattr(g, 'username', None)
     house_status = HouseStatusModel.query.filter_by(
         house_id=house_id,
         landlord_name=landlord_name

@@ -56,12 +56,12 @@
 </div>
 
 <div class="auth-buttons">
-    {% if session.get('username') %}
-        <button id="user-menu-button" class="username-button">{{ session['username'] }}</button>
-    {% else %}
-        <a href="{{ url_for('account.login') }}" class="login-button">登录</a>
-    {% endif %}
-</div>
+        {% if g.username %}
+            <button id="user-menu-button" class="username-button">{{ g.username }}</button>
+        {% else %}
+            <a href="{{ url_for('account.login') }}" class="login-button">登录</a>
+        {% endif %}
+    </div>
 
 <script>
     // 省份选择变化时，动态更新城市选择框
@@ -109,12 +109,12 @@
     <!-- 用户侧边栏 -->
     <div id="user-sidebar" class="user-sidebar hidden">
         <div class="user-sidebar-header">
-            <h2>{{ session['username'] }}</h2>
+            <h2>{{ g.username }}</h2>
             <button id="close-sidebar" class="close-button">&times;</button>
         </div>
         <ul class="user-sidebar-menu">
             <li>
-                <a href="{% if session.get('user_type') == 1 %}{{ url_for('account.tenant_home') }}{% elif session.get('user_type') == 2 %}{{ url_for('account.landlord_home') }}{% else %}{{ url_for('account.admin_dashboard') }}{% endif %}">
+                <a href="{% if g.user_type == 1 %}{{ url_for('account.tenant_home') }}{% elif g.user_type == 2 %}{{ url_for('account.landlord_home') }}{% else %}{{ url_for('account.admin_dashboard') }}{% endif %}">
                     我的主页
                 </a>
             </li>
@@ -132,9 +132,9 @@
             <li><a href="{{ url_for('contract.view_contracts') }}">查看交易历史</a></li>
             <li><a href="{{ url_for('house.view_appointments') }}">查看预约</a></li> <!-- 新增按钮 -->
             
-            {% if session.get('user_type') == 1 %}
+            {% if g.user_type == 1 %}
             <li><a href="{{ url_for('house.manage_repair_requests') }}">我的维修请求</a></li>
-            {% elif session.get('user_type') == 2 %}
+            {% elif g.user_type == 2 %}
             <li><a href="{{ url_for('house.manage_repair_requests') }}">维修请求管理</a></li>
             {% endif %}
             
@@ -150,7 +150,7 @@
                 </a>
             </li>
             
-            {% if session.get('user_type') == 0 %}
+            {% if g.user_type == 0 %}
             <li><a href="{{ url_for('feedback.manage_complaints') }}">管理投诉</a></li>
             {% endif %}
             <li><a href="{{ url_for('ai_chat.chat_page') }}">AI 聊天助手</a></li>

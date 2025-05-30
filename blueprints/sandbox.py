@@ -1,6 +1,6 @@
-from flask import render_template, request, jsonify, Blueprint, redirect, url_for, session, flash
+from flask import render_template, request, jsonify, Blueprint, redirect, url_for, session, flash, g
 from blueprints.pay import alipay_obj, ALIPAY_SETTING
-from decorators import login_required # 导入 login_required 装饰器
+from decorators import login_required
 from models import RentalContract, PrivateChannelModel, HouseInfoModel # 新增导入
 import time
 import random
@@ -12,7 +12,7 @@ def index():
     return render_template('index.html')
 
 @pay_bp.route('/pay', methods=['GET', 'POST'])
-@login_required # 添加登录保护
+@login_required
 def good_list_view():
     if request.method == 'GET':
         return render_template('paytest.html')
@@ -51,27 +51,15 @@ def good_list_view():
     return jsonify({'url': url, 'status': 1})
 
 @pay_bp.route('/alipay/success_result/', methods=['POST', 'GET'])
-@login_required # 添加登录保护
+@login_required
 def alipay_success_result():
-    # 支付宝同步回调，GET请求通常包含参数，POST通常是异步通知（但这里配置为同步）
-    # 实际项目中，这里应该有验签逻辑来确认回调的合法性
-    # data = request.args.to_dict() # GET请求的参数
-    # signature = data.pop("sign")
-    # success = alipay_obj().verify(data, signature)
-    # if success and data["trade_status"] in ("TRADE_SUCCESS", "TRADE_FINISHED"):
-    #     print("支付成功，验签通过")
-    # else:
-    #     print("验签失败或支付未成功")
-    #     flash("支付验证失败，请联系客服。", "error")
-    #     return redirect(url_for('account.login')) # 或其他错误页面
-
     flash("支付成功！", "success")
-    user_type = session.get('user_type')
+    user_type = g.user_type
 
     # 新增：租客支付成功后，修改合同和房屋状态
     if user_type == 1: # 租客
         from models import db, RentalContract, PrivateChannelModel, HouseStatusModel
-        username = session.get('username')
+        username = g.username
         # 获取租客最新的待支付合同
         contract = RentalContract.query.filter_by(tenant_username=username, status=0).order_by(RentalContract.created_at.desc()).first()
         if contract:
@@ -99,11 +87,11 @@ def alipay_success_result():
 
 
 @pay_bp.route('/alipay/fail_result/', methods=['POST', 'GET'])
-@login_required # 支付失败页面也建议登录保护
+@login_required
 def alipay_fail_result():
     flash("支付失败或已取消。", "error")
     # 可以选择渲染一个通用的支付失败页面，或者也根据用户类型跳转
-    user_type = session.get('user_type')
+    user_type = g.user_type
     if user_type == 1:
         return redirect(url_for('account.tenant_home')) # 例如，让租客返回其首页
     # 对于其他类型或通用情况，可以渲染一个特定的失败页面
@@ -125,7 +113,7 @@ def start_contract_payment():
         return redirect(url_for('contract.view_contracts'))
 
     # 只能由租客发起自己的支付
-    if contract.tenant_username != session.get('username'):
+    if contract.tenant_username != g.username:
         flash("无权限操作该合同支付", "error")
         return redirect(url_for('contract.view_contracts'))
 

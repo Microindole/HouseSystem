@@ -75,7 +75,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    {% if session.get('username') and session.get('user_type') == 1 %}
+                    {% if g.username and g.user_type == 1 %}
                         <!-- 租客操作按钮 -->
                         {% if status.status == 0 %}
                             <a href="{{ url_for('feedback.start_or_get_channel', house_id=house.house_id) }}" class="btn btn-primary">联系房东</a>
@@ -86,13 +86,13 @@
                         {% if status.status == 1 %}
                             <button class="btn btn-warning" onclick="showRepairModal()">申请维修</button>
                         {% endif %}
-                    {% elif session.get('username') and session.get('user_type') == 2 and status.landlord_name == session.get('username') %}
+                    {% elif g.username and g.user_type == 2 and status.landlord_name == g.username %}
                         <!-- 房东操作按钮 -->
                         <a href="{{ url_for('house.edit_house', house_id=house.house_id) }}" class="btn btn-primary">编辑房源</a>
                         {% if status.status != 1 %}
                             <button class="btn btn-danger" onclick="deleteHouse({{ house.house_id }})">删除房源</button>
                         {% endif %}
-                    {% elif not session.get('username') %}
+                    {% elif not g.username %}
                         <!-- 未登录用户 -->
                         <a href="{{ url_for('account.login') }}" class="btn btn-primary">登录后联系房东</a>
                     {% endif %}
@@ -104,7 +104,7 @@
         <div class="comments-section">
             <h2>留言区 ({{ pagination.total }}条)</h2>
 
-            {% if session.get('username') %}
+            {% if g.username %}
                 <div class="at-info" style="display:none;">
                     <span id="at-text"></span>
                     <span id="cancel-at">×</span>
@@ -134,7 +134,7 @@
                                   data-raw="{{ comment.time.strftime('%Y-%m-%d %H:%M:%S') }}"
                                     {% endif %}>
                             </span>
-                            {% if session.get('username') %}
+                            {% if g.username %}
                                 <button class="reply-btn" onclick="replyToComment({{ comment.comment_id }}, '{{ comment.username }}')">回复</button>
                             {% endif %}
                         </div>
@@ -240,8 +240,8 @@
                 houseId: {{ house.house_id }},
                 landlordPhone: "{{ status.phone | default('获取失败', true) }}",
                 currentUser: {
-                    username: "{{ session.get('username') or '' }}",
-                    isLoggedIn: {{ 'true' if session.get('username') else 'false' }}
+                    username: "{{ g.username or '' }}",
+                    isLoggedIn: {{ 'true' if g.username else 'false' }}
                 },
                 houseData: {
                     house_name: "{{ house.house_name }}",

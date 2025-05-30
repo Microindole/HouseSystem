@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, abort, flash # 导入 flash
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, abort, flash, g # 导入 flash
 from sqlalchemy import or_, and_
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
@@ -20,11 +20,11 @@ class CSRFOnlyForm(FlaskForm):
 @login_required
 def start_or_get_channel(house_id):
     # 1. 检查用户是否为租客
-    if session.get('user_type') != 1:
+    if g.user_type != 1:
         flash('只有租客才能发起与房东的对话。', 'warning')
         return redirect(url_for('house.house_detail', house_id=house_id))
 
-    tenant_username = session.get('username')
+    tenant_username = g.username
 
     # 2. 查找房源状态以获取房东用户名
     house_status = HouseStatusModel.query.filter_by(house_id=house_id).first()
@@ -70,7 +70,7 @@ def start_or_get_channel(house_id):
 @login_required
 def send_message(channel_id):
     channel = PrivateChannelModel.query.get_or_404(channel_id)
-    sender_username = session.get('username')
+    sender_username = g.username
     content = request.form.get('content')
 
     # 权限检查：确保发送者是频道的一方
@@ -114,7 +114,7 @@ def send_message(channel_id):
 @feedback_bp.route('/chat/<int:channel_id>')
 @login_required
 def chat(channel_id):
-    username = session['username']
+    username = g.username
 
     channels = PrivateChannelModel.query.filter(
         (PrivateChannelModel.tenant_username == username) |
@@ -156,7 +156,7 @@ def chat(channel_id):
 @feedback_bp.route('/messages')
 @login_required
 def messages():
-    username = session['username']
+    username = g.username
     # 查询所有与当前用户相关的频道
     channels = PrivateChannelModel.query.filter(
         (PrivateChannelModel.tenant_username == username) |
@@ -191,7 +191,7 @@ def messages():
 @feedback_bp.route('/set_read/<int:channel_id>', methods=['POST'])
 @login_required
 def set_read(channel_id):
-    username = session['username']
+    username = g.username
     # 只将自己为接收者的消息设为已读
     MessageModel.query.filter_by(
         channel_id=channel_id,
@@ -206,7 +206,7 @@ def set_read(channel_id):
 def complaint():
 
     if request.method == 'POST':
-        sender = session['username']
+        sender = g.username
         receiver = request.form.get('receiver', '').strip()
         content = request.form.get('content', '').strip()
         complaint_type = request.form.get('type', '投诉') # 获取信息类型
@@ -246,8 +246,8 @@ def complaint():
         user_list.append({'username': t.tenant_name, 'type': '租客'})
 
     my_houses = [] # 如果当前用户是房东，其名下的房源
-    user_type = session.get('user_type')
-    current_username = session.get('username')
+    user_type = g.user_type
+    current_username = g.username
 
     if user_type == 2:
         my_houses_query = HouseInfoModel.query.join(
@@ -281,8 +281,8 @@ def get_houses_by_landlord():
 @feedback_bp.route('/manage_complaints')
 @login_required # 或者 @admin_required 如果只有管理员能处理
 def manage_complaints():
-    username = session.get('username')
-    user_type = session.get('user_type')
+    username = g.username
+    user_type = g.user_type
 
     query = ComplaintModel.query.order_by(ComplaintModel.last_updated_time.desc())
 
@@ -319,8 +319,8 @@ def manage_complaints():
 @login_required # 或者 @admin_required
 def update_complaint_status(complaint_id):
     complaint = ComplaintModel.query.get_or_404(complaint_id)
-    username = session.get('username')
-    user_type = session.get('user_type')
+    username = g.username
+    user_type = g.user_type
 
     if user_type != 0 and complaint.receiver != username:
         flash('您没有权限修改此投诉的状态。', 'danger')
@@ -354,7 +354,7 @@ def update_complaint_status(complaint_id):
 @feedback_bp.route('/my_complaints')
 @login_required
 def my_complaints():
-    current_username = session['username']
+    current_username = g.username
     my_complaints_list = ComplaintModel.query.filter_by(sender=current_username) \
         .order_by(ComplaintModel.last_updated_time.desc()).all() # 按最后更新时间排序更好
 
@@ -384,7 +384,7 @@ def send_contract():
     amount = data.get('amount')
     receiver = data.get('receiver_username')
 
-    sender = session.get('username')
+    sender = g.username
     channel = PrivateChannelModel.query.get(channel_id)
 
     # 身份校验：必须是房东，且频道存在
@@ -435,7 +435,7 @@ def send_contract():
 @feedback_bp.route('/get_chat_data/<int:channel_id>')
 @login_required
 def get_chat_data(channel_id):
-    username = session['username']
+    username = g.username
     channel = PrivateChannelModel.query.get_or_404(channel_id)
 
     # 验证用户是否有权访问此频道

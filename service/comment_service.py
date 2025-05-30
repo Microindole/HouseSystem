@@ -1,4 +1,4 @@
-from flask import request, jsonify, session
+from flask import request, jsonify, g
 from datetime import datetime
 from models import CommentModel, db
 
@@ -6,8 +6,8 @@ def add_comment_form_logic():
     house_id = request.form.get('house_id')
     desc = request.form.get('comment')
     at = request.form.get('at')
-    user_type = session.get('user_type', 1)
-    username = session.get('username')
+    user_type = getattr(g, 'user_type', 1)
+    username = getattr(g, 'username', None)
     
     if not house_id or not desc or not username:
         return jsonify({'success': False, 'message': '缺少必要参数'}), 400

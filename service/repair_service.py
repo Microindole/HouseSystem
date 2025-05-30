@@ -1,9 +1,9 @@
-from flask import render_template, request, jsonify, session, flash, redirect, url_for, current_app
+from flask import render_template, request, jsonify, session, flash, redirect, url_for, current_app, g
 from datetime import datetime
 from models import RepairRequestModel, HouseStatusModel, db
 
 def create_repair_request_logic():
-    if session.get('user_type') != 1:
+    if getattr(g, 'user_type', None) != 1:
         return jsonify({'success': False, 'message': '只有租客可以发起维修请求'}), 403
     try:
         house_id = request.json.get('house_id')
@@ -15,7 +15,7 @@ def create_repair_request_logic():
             return jsonify({'success': False, 'message': '房源不存在'}), 404
         repair_request = RepairRequestModel(
             house_id=house_id,
-            tenant_username=session.get('username'),
+            tenant_username=getattr(g, 'username', None),
             landlord_username=house_status.landlord_name,
             content=content
         )
@@ -27,8 +27,8 @@ def create_repair_request_logic():
         return jsonify({'success': False, 'message': f'提交失败：{str(e)}'}), 500
 
 def manage_repair_requests_logic():
-    user_type = session.get('user_type')
-    username = session.get('username')
+    user_type = getattr(g, 'user_type', None)
+    username = getattr(g, 'username', None)
     if user_type == 1:
         requests = RepairRequestModel.query.filter_by(
             tenant_username=username
@@ -44,11 +44,11 @@ def manage_repair_requests_logic():
         return redirect(url_for('index'))
 
 def handle_repair_request_logic(request_id):
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         return jsonify({'success': False, 'message': '只有房东可以处理维修请求'}), 403
     try:
         repair_request = RepairRequestModel.query.get(request_id)
-        if not repair_request or repair_request.landlord_username != session.get('username'):
+        if not repair_request or repair_request.landlord_username != getattr(g, 'username', None):
             return jsonify({'success': False, 'message': '维修请求不存在或您无权处理'}), 404
         status = request.json.get('status')
         notes = request.json.get('notes', '')

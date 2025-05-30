@@ -1,18 +1,27 @@
 # contract.py
-from flask import Blueprint, request, session, jsonify, render_template, redirect, url_for, flash
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, g
 from models import db, RentalContract, HouseInfoModel, PrivateChannelModel, HouseStatusModel
 from datetime import datetime, timedelta
 from functools import wraps
+from decorators import verify_token
 
 contract_bp = Blueprint('contract', __name__)
 
-# 登录保护装饰器
+# token登录保护装饰器
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:
+        token = request.cookies.get('access_token')
+        if not token:
             flash("请先登录", "error")
             return redirect(url_for('account.login'))
+        payload = verify_token(token)
+        if not payload:
+            flash("登录已过期，请重新登录", "error")
+            return redirect(url_for('account.login'))
+        g.username = payload.get('username')
+        g.user_type = payload.get('user_type')
         return f(*args, **kwargs)
     return decorated_function
 
@@ -23,7 +32,7 @@ def login_required(f):
 @contract_bp.route('/history')
 @login_required
 def view_contracts():
-    username = session.get('username')
+    username = g.username
     page = request.args.get('page', 1, type=int)
     per_page = 9  # 每页显示9条
 
@@ -71,7 +80,7 @@ def view_contracts():
 @contract_bp.route('/cancel/<int:contract_id>', methods=['POST'])
 @login_required
 def cancel_contract(contract_id):
-    username = session['username']
+    username = g.username
     contract = RentalContract.query.get(contract_id)
 
     if not contract:
@@ -96,7 +105,7 @@ def cancel_contract(contract_id):
 @login_required
 def return_house(contract_id):
     contract = RentalContract.query.get_or_404(contract_id)
-    username = session.get('username')
+    username = g.username
     # 只有租客本人能归还
     if contract.tenant_username != username:
         flash("无权限归还该房屋", "error")

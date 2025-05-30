@@ -1,4 +1,4 @@
-from flask import request, jsonify, session, render_template
+from flask import request, jsonify, render_template, g
 from datetime import datetime
 from models import AppointmentModel, HouseInfoModel, HouseStatusModel, db
 
@@ -8,7 +8,7 @@ def create_appointment_logic():
         house_id = data.get('house_id')
         house_name = data.get('house_name')
         appointment_time = data.get('appointment_time')
-        tenant_name = session.get('username')
+        tenant_name = g.username
         house = HouseInfoModel.query.filter_by(house_id=house_id).first()
         if not house:
             return jsonify({'code': 404, 'msg': '房屋不存在'}), 404
@@ -36,8 +36,8 @@ def create_appointment_logic():
         return jsonify({'code': 500, 'msg': '服务器内部错误'}), 500
 
 def view_appointments_logic():
-    user_type = session.get('user_type')
-    username = session.get('username')
+    user_type = g.user_type
+    username = g.username
     if user_type == 1:
         appointments = AppointmentModel.query.filter_by(tenant_name=username).order_by(AppointmentModel.appointment_time.desc()).all()
     elif user_type == 2:

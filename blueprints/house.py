@@ -2,7 +2,7 @@ import json
 import os
 import uuid
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, abort, flash, current_app
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, abort, flash, current_app, g
 from sqlalchemy import or_
 from datetime import datetime
 from models import (HouseInfoModel, HouseStatusModel, CommentModel, NewsModel,
@@ -110,10 +110,6 @@ def manage_repair_requests():
 def handle_repair_request(request_id):
     return handle_repair_request_logic(request_id)
 
-@house_bp.route('/load_more_news', methods=['GET'])
-def load_more_news():
-    return load_more_news_logic()
-
 @house_bp.route('/add_comment_form', methods=['POST'])
 @login_required
 def add_comment_form():
@@ -151,6 +147,6 @@ def api_house_search():
 @house_bp.route('/export')
 @login_required
 def export_houses():
-    landlord_name = session.get('username')
+    landlord_name = g.username
     return export_houses_csv(landlord_name)
 

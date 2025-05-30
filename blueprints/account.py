@@ -1,9 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, jsonify, request, redirect, url_for, session, flash ,current_app,request, jsonify, session
+from flask import Blueprint, render_template, jsonify, request, redirect, url_for, session, flash ,current_app,request, jsonify, session, g
 from sqlalchemy import func, cast, Date
 from sqlalchemy.orm import joinedload
+import jwt
+from functools import wraps
+from flask import make_response
 
 from models import LoginModel, db, TenantModel, LandlordModel, HouseStatusModel, DailyRentRateModel, \
     HouseListingAuditModel, HouseInfoModel
@@ -17,12 +20,32 @@ import string
 import random
 import time
 
+SECRET_KEY = 'your_secret_key'  # 请替换为安全的密钥
+
 ph = PasswordHasher()
 
 
 def generate_code(length=6):
     """生成随机数字验证码"""
     return ''.join(random.choices(string.digits, k=length))
+
+
+def generate_token(username, user_type):
+    payload = {
+        'username': username,
+        'user_type': user_type,
+        'exp': datetime.utcnow() + timedelta(days=1)
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+
+
+def verify_token(token):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        return payload
+    except Exception:
+        return None
+
 
 # 后面模版引擎的重定向account.login的account就是来自这里
 account_bp = Blueprint("account", __name__, url_prefix="/account") # 建议为蓝图添加 url_prefix
@@ -80,9 +103,10 @@ def login():
                 flash("角色与用户名不匹配，请重新输入。", "error")
                 return render_template("account/login.html", form=form)
 
-            session['username'] = username
-            session['user_type'] = user_login.type # 使用从数据库查询到的类型
-            return redirect(redirect_url)
+            token = generate_token(username, user_login.type)
+            resp = make_response(redirect(redirect_url))
+            resp.set_cookie('access_token', token, httponly=True, max_age=86400)
+            return resp
         else:
             # 将表单验证错误传递给模板
             for field, errors in form.errors.items():
@@ -112,9 +136,10 @@ def admin_login():
                 flash('管理员用户名或密码错误，或非管理员账户。', 'error')
                 return render_template('account/admin_login.html', form=form)
 
-            session['username'] = admin_user.username
-            session['user_type'] = admin_user.type
-            return redirect(url_for('account.admin_dashboard'))
+            token = generate_token(admin_user.username, admin_user.type)
+            resp = make_response(redirect(url_for('account.admin_dashboard')))
+            resp.set_cookie('access_token', token, httponly=True, max_age=86400)
+            return resp
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -204,16 +229,11 @@ def register():
 @account_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    """个人信息修改页面"""
-    if 'username' not in session:
-        return redirect(url_for('account.login'))
-    username = session['username']
-    user_type = session.get('user_type')
+    username = g.username
+    user_type = g.user_type
     user_email_obj = EmailUsernameMapModel.query.filter_by(username=username).first()
     user_email = user_email_obj.email if user_email_obj else "未绑定邮箱"
-
     if request.method == 'GET':
-        # 加载用户信息
         user = None
         if user_type == 1:
             user = TenantModel.query.filter_by(tenant_name=username).first()
@@ -400,21 +420,21 @@ def reset_password():
 
 
 @account_bp.route('/logout', methods=['GET', 'POST'])
-@login_required # 登出也应该是在登录状态下操作
+@login_required
 def logout():
-    """登出功能"""
-    session.clear()
+    resp = make_response(redirect(url_for('account.login')))
+    resp.delete_cookie('access_token')
     flash("您已成功登出。", "info")
-    return redirect(url_for('account.login'))
+    return resp
 
 
 @account_bp.route('/tenant/home')
 @login_required
 def tenant_home():
     """租客首页"""
-    if session.get('user_type') != 1:
+    if g.user_type != 1:
         flash("无权访问。", "warning")
-        return redirect(url_for('index')) # 或者合适的错误页面/首页
+        return redirect(url_for('index'))
     return render_template('tenant_home.html')
 
 
@@ -422,16 +442,15 @@ def tenant_home():
 @login_required
 def landlord_home():
     """房东首页"""
-    if session.get('user_type') != 2:
+    if g.user_type != 2:
         flash("无权访问。", "warning")
-        return redirect(url_for('index')) # 或者合适的错误页面/首页
-
-    landlord_name = session.get('username')
+        return redirect(url_for('index'))
+    landlord_name = g.username
     houses = HouseStatusModel.query.filter_by(landlord_name=landlord_name).all()
     for house in houses:
         house.latest_audit = HouseListingAuditModel.query.filter_by(house_id=house.house_id).order_by(
             HouseListingAuditModel.id.desc()).first()
-    return render_template('landlord_home.html',houses=houses)
+    return render_template('landlord_home.html', houses=houses)
 
 
 
@@ -439,11 +458,11 @@ def landlord_home():
 
 
 @account_bp.route('/admin/dashboard')
-@login_required # 并且应该有 admin_required 装饰器
+@login_required  # 并且应该有 admin_required 装饰器
 # @admin_required # 假设您已经定义了这个装饰器
 def admin_dashboard():
     """管理员后台"""
-    if session.get('user_type') != 0: # 再次确认是管理员
+    if g.user_type != 0: # 再次确认是管理员
         flash("无权访问管理员后台。", "danger")
         return redirect(url_for('account.login')) # 或者首页
     return render_template('admin_dashboard.html')
@@ -451,44 +470,40 @@ def admin_dashboard():
 
 
 @account_bp.route('/admin/users', methods=['GET', 'POST'])
+@login_required
 def manage_users():
-    if session.get('user_type') != 0:
+    if g.user_type != 0:
         return redirect(url_for('account.login'))
-
-    # 获取所有用户（根据你的模型调整）
     tenants = TenantModel.query.all()
     landlords = LandlordModel.query.all()
     admins = LoginModel.query.filter_by(type=3).all()
-
     return render_template('management/manage_users.html', tenants=tenants, landlords=landlords, admins=admins)
 
-
 @account_bp.route('/admin/reset_userpassword', methods=['POST'])
+@login_required
 def reset_userpassword():
-    if session.get('user_type') != 0:
+    if g.user_type != 0:
         return redirect(url_for('account.login'))
-
     username = request.form.get('username')
     login_user = LoginModel.query.filter_by(username=username).first()
     if login_user:
         password = '123456'
         hashed_password = ph.hash(password)
-        login_user.password=hashed_password
+        login_user.password = hashed_password
         db.session.commit()
     return redirect(url_for('account.manage_users'))
 
 @account_bp.route('/admin/landlord_houses/<landlord_name>')
+@login_required
 def get_landlord_houses(landlord_name):
-    if session.get('user_type') != 0:
+    if g.user_type != 0:
         return redirect(url_for('account.login'))
-
     houses = HouseStatusModel.query.options(
         joinedload(HouseStatusModel.house_info)
     ).filter_by(landlord_name=landlord_name).all()
-
     house_list = []
     for h in houses:
-        house_info = h.house_info  # 通过关系获取 HouseInfoModel 实例
+        house_info = h.house_info
         house_list.append({
             'house_id': h.house_id,
             'status': h.status,
@@ -498,16 +513,15 @@ def get_landlord_houses(landlord_name):
             'region': house_info.region if house_info else '',
             'addr': house_info.addr if house_info else ''
         })
-
     return jsonify(house_list)
-@account_bp.route('/admin/down_house', methods=['POST'])
-def down_house():
-    if session.get('user_type') != 0:
-        return jsonify({'success': False, 'message': '权限不足'}), 403
 
+@account_bp.route('/admin/down_house', methods=['POST'])
+@login_required
+def down_house():
+    if g.user_type != 0:
+        return jsonify({'success': False, 'message': '权限不足'}), 403
     house_id = request.json.get('house_id')
     landlord_name = request.json.get('landlord_name')
-
     house = HouseStatusModel.query.filter_by(house_id=house_id, landlord_name=landlord_name).first()
     if house and house.status == 0:
         house.status = 2
@@ -516,37 +530,10 @@ def down_house():
         return jsonify({'success': True})
     return jsonify({'success': False, 'message': '房源不存在或无法下架'}), 400
 
-
-@account_bp.route('/api/rent_rate_history', methods=['GET'])
-def rent_rate_history():
-    # 获取请求中的日期参数
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-
-    if not start_date or not end_date:
-        return jsonify({'error': '缺少开始日期或结束日期'}), 400
-
-    # 将字符串转换为日期对象
-    start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-    end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-
-    # 查询指定日期范围内的出租率数据
-    records = db.session.query(DailyRentRateModel).filter(
-        DailyRentRateModel.date.between(start_date, end_date)
-    ).all()
-
-    # 格式化返回的数据
-    dates = [record.date.strftime('%Y-%m-%d') for record in records]
-    rates = [round(record.rent_rate, 2) for record in records]
-
-    return jsonify({
-        'dates': dates,
-        'rates': rates
-    })
-#跳转系统设置页面
 @account_bp.route('/admin/system_setting')
+@login_required
 def system_setting():
-    if session.get('user_type') != 0:
+    if g.user_type != 0:
         return redirect(url_for('account.login'))
     return render_template('management/manage_statistic.html')
 
@@ -636,34 +623,26 @@ def reject_audit_ajax():
 
 
 @account_bp.route('/landlord/submit_listing', methods=['POST'])
+@login_required
 def submit_listing():
     house_id = request.form.get('house_id')
-    landlord_name = session.get('username')
-
-    # 确保拿到的是联合主键的数据
+    landlord_name = g.username
     house_status = HouseStatusModel.query.filter_by(
         house_id=house_id,
         landlord_name=landlord_name
     ).first()
-
     if not house_status:
         return '房源不存在或无权限操作', 404
-
     if house_status.status != 2 and house_status.status != 5:
         return '当前状态不能提交申请', 400
-
-    # 更新状态为 4：待审核
     house_status.status = 4
-
-    # 同时新增审核记录
     audit = HouseListingAuditModel(
         house_id=house_status.house_id,
         house_name=house_status.house_info.house_name,
         landlord_name=house_status.landlord_name,
-        audit_status=0,  # 0 表示审核中
+        audit_status=0,
         reason=None,
     )
-
     db.session.add(audit)
     db.session.commit()
     return redirect(url_for('account.landlord_home'))
