@@ -360,25 +360,6 @@ function initMap(houseData) {
             const marker = new BMapGL.Marker(point);
             map.addOverlay(marker);
             
-            const label = new BMapGL.Label(houseData.house_name, {
-                position: point,
-                offset: new BMapGL.Size(20, -10)
-            });
-            label.setStyle({
-                color: "#333",
-                fontSize: "13px",
-                height: "22px",
-                lineHeight: "22px",
-                padding: "3px 10px",
-                borderRadius: "4px",
-                background: "#fff",
-                border: "1px solid #1296db",
-                whiteSpace: "nowrap",
-                fontFamily: "微软雅黑",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
-            });
-            marker.setLabel(label);
-            
             const content = `
                 <div style="padding:12px;max-width:300px;">
                     <h4 style="margin:0 0 8px 0;color:#1296db;font-size:16px;">${houseData.house_name}</h4>

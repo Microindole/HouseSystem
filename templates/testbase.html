@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能房屋租赁系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #334155;
+            line-height: 1.6;m
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            gap: 24px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo::before {
+            content: "🏠";
+            font-size: 24px;
+        }
+
+        /* 地区选择器 */
+        .region-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .region-selector select {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #475569;
+            cursor: pointer;
+            outline: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .region-selector select:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 搜索框 */
+        .search-container {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-box {
+            display: flex;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+        }
+
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .search-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #2563eb;
+        }
+
+        /* 用户按钮 */
+        .user-btn {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-btn:hover {
+            background: #334155;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 主要内容区域 */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* 地区显示 */
+        .current-location {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .location-text {
+            font-size: 16px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .location-text::before {
+            content: "📍";
+        }
+
+        /* 最新资讯卡片 */
+        .news-section {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .news-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .news-title::before {
+            content: "📰";
+        }
+
+        .news-nav {
+            background: #f1f5f9;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: #64748b;
+        }
+
+        .news-nav:hover {
+            background: #e2e8f0;
+            transform: translateX(2px);
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .news-card {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .news-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .news-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .news-card-desc {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .news-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .news-date {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .news-tag {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .more-news-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .more-news-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 20px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .filter-input, .filter-select {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            background: #f9fafb;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-btn {
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            height: fit-content;
+        }
+
+        .filter-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* 房源列表 */
+        .listings-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before {
+            content: "🏘️";
+        }
+
+        .listing-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s;
+            margin-bottom: 24px;
+        }
+
+        .listing-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .listing-content {
+            display: grid;
+            grid-template-columns: 280px 1fr auto;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .listing-image {
+            width: 280px;
+            height: 200px;
+            border-radius: 16px;
+            object-fit: cover;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .listing-info {
+            flex: 1;
+        }
+
+        .listing-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .listing-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .detail-item {
+            font-size: 14px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-item strong {
+            color: #374151;
+        }
+
+        .listing-features {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .feature-tag {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .deposit-info {
+            background: #f0f9ff;
+            color: #0369a1;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .listing-price {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 16px;
+        }
+
+        .price-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #dc2626;
+            line-height: 1;
+        }
+
+        .price-unit {
+            font-size: 16px;
+            color: #64748b;
+        }
+
+        .view-btn {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(255, 107, 53, 0.3);
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 107, 53, 0.4);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 16px;
+                padding: 0 16px;
+            }
+
+            .main-container {
+                padding: 24px 16px;
+            }
+
+            .listing-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .listing-image {
+                width: 100%;
+                max-width: 320px;
+                margin: 0 auto;
+            }
+
+            .listing-price {
+                text-align: center;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .listing-card, .news-card, .filter-section, .news-section {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* 分页指示器 */
+        .pagination-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dot.active {
+            background: #3b82f6;
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">智能租房</a>
+            
+            <div class="region-selector">
+                <span>切换地区：</span>
+                <select id="provinceSelect">
+                    <option value="">选择省份</option>
+                    <option value="上海市" selected>上海市</option>
+                    <option value="北京市">北京市</option>
+                    <option value="广东省">广东省</option>
+                </select>
+                <span>城市：</span>
+                <select id="citySelect">
+                    <option value="上海市" selected>上海市</option>
+                </select>
+            </div>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="搜索房源、地点或关键词">
+                    <button class="search-btn">搜索</button>
+                </div>
+            </div>
+
+            <button class="user-btn" id="userBtn">登录</button>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="main-container">
+        <!-- 当前位置 -->
+        <div class="current-location">
+            <div class="location-text">当前选择地区：上海市</div>
+        </div>
+
+        <!-- 最新资讯 -->
+        <section class="news-section">
+            <div class="news-header">
+                <h2 class="news-title">最新资讯</h2>
+                <button class="news-nav">→</button>
+            </div>
+            
+            <div class="news-grid">
+                <div class="news-card">
+                    <h3 class="news-card-title">上海市好房子特价</h3>
+                    <p class="news-card-desc">无敌优势，性价比超高的精选房源推荐</p>
+                    <div class="news-card-footer">
+                        <span class="news-date">05月18日</span>
+                        <span class="news-tag">测试版精修郊区别墅</span>
+                    </div>
+                </div>
+                
+                <div class="news-card">
+                    <h3 class="news-card-title">东城区新房源出租</h3>
+                    <p class="news-card-desc">豪华装修，交通便利，欢迎预约看房</p>
+                    <div class="news-card-footer">
+                        <span class="news-date">04月17日</span>
+                        <span class="news-tag">新房源！</span>
+                    </div>
+                </div>
+                
+                <div class="news-card">
+                    <h3 class="news-card-title">东城区单间出租</h3>
+                    <p class="news-card-desc">东城区单间出租，适合单身人士，交通便利</p>
+                    <div class="news-card-footer">
+                        <span class="news-date">04月10日</span>
+                        <span class="news-tag">热门</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pagination-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+            </div>
+            
+            <button class="more-news-btn">
+                查看更多新闻
+                <span>→</span>
+            </button>
+            <span style="float: right; color: #94a3b8; font-size: 14px; margin-top: 16px;">共 4 条资讯</span>
+        </section>
+
+        <!-- 筛选区域 -->
+        <section class="filter-section">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label class="filter-label">地址关键词：</label>
+                    <input type="text" class="filter-input" placeholder="例如：朝阳、五道口">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">户型：</label>
+                    <select class="filter-select">
+                        <option>不限</option>
+                        <option>1室1厅</option>
+                        <option>2室1厅</option>
+                        <option>3室2厅</option>
+                        <option>4室2厅</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">价格范围：</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="number" class="filter-input" placeholder="最低价" style="flex: 1;">
+                        <span style="align-self: center; color: #64748b;">-</span>
+                        <input type="number" class="filter-input" placeholder="最高价" style="flex: 1;">
+                    </div>
+                </div>
+                
+                <button class="filter-btn">筛选</button>
+            </div>
+        </section>
+
+        <!-- 房源列表 -->
+        <section class="listings-section">
+            <h2 class="section-title">房源列表</h2>
+            
+            <div class="listing-card">
+                <div class="listing-content">
+                    <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400&h=300&fit=crop" alt="房源图片" class="listing-image">
+                    
+                    <div class="listing-info">
+                        <h3 class="listing-title">测试版精修郊区别墅</h3>
+                        
+                        <div class="listing-details">
+                            <div class="detail-item">
+                                <strong>户型：</strong> 4室2厅
+                            </div>
+                            <div class="detail-item">
+                                <strong>地区：</strong> 上海市上海市朝阳区
+                            </div>
+                            <div class="detail-item">
+                                <strong>地址：</strong> 浦东112
+                            </div>
+                        </div>
+                        
+                        <div class="listing-features">
+                            <span class="feature-tag">🌟 非常好</span>
+                            <span class="feature-tag">📞 详情电话咨询</span>
+                        </div>
+                        
+                        <div>
+                            <span style="color: #64748b; font-size: 14px; margin-right: 16px;"><strong>装修：</strong> 精装</span>
+                            <span class="deposit-info">💰 押金：500000.00 元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="listing-price">
+                        <div>
+                            <span class="price-amount">50000.00</span>
+                            <span class="price-unit">元/月</span>
+                        </div>
+                        <button class="view-btn">查看详情</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // 简单的交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 搜索功能
+            const searchBtn = document.querySelector('.search-btn');
+            const searchInput = document.querySelector('.search-input');
+            
+            searchBtn.addEventListener('click', function() {
+                const keyword = searchInput.value.trim();
+                if (keyword) {
+                    console.log('搜索关键词:', keyword);
+                    // 这里可以添加实际的搜索逻辑
+                }
+            });
+
+            // 筛选功能
+            const filterBtn = document.querySelector('.filter-btn');
+            filterBtn.addEventListener('click', function() {
+                console.log('执行筛选');
+                // 这里可以添加实际的筛选逻辑
+            });
+
+            // 查看详情按钮
+            const viewBtns = document.querySelectorAll('.view-btn');
+            viewBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    console.log('查看房源详情');
+                    // 这里可以添加跳转到详情页的逻辑
+                });
+            });
+
+            // 分页点击
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function() {
+                    dots.forEach(d => d.classList.remove('active'));
+                    this.classList.add('active');
+                    console.log('切换到第', index + 1, '页');
+                });
+            });
+
+            // 省市联动
+            const provinceSelect = document.getElementById('provinceSelect');
+            const citySelect = document.getElementById('citySelect');
+            
+            const citiesData = {
+                '上海市': ['上海市'],
+                '北京市': ['北京市'],
+                '广东省': ['广州市', '深圳市', '珠海市', '东莞市']
+            };
+
+            provinceSelect.addEventListener('change', function() {
+                const province = this.value;
+                citySelect.innerHTML = '<option value="">选择城市</option>';
+                
+                if (province && citiesData[province]) {
+                    citiesData[province].forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city;
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                }
+            });
+
+            // 用户按钮点击
+            const userBtn = document.getElementById('userBtn');
+            userBtn.addEventListener('click', function() {
+                console.log('用户登录/菜单');
+                // 这里可以添加登录或用户菜单逻辑
+            });
+        });
+    </script>
+</body>
+</html>

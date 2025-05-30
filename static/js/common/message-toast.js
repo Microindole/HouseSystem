@@ -5,7 +5,23 @@
 class MessageToast {
     constructor() {
         this.toastContainer = null;
-        this.initContainer();
+        this.initialized = false;
+    }
+
+    /**
+     * 初始化模块（延迟初始化）
+     */
+    init() {
+        if (this.initialized) return;
+        
+        // 确保 DOM 已加载
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initContainer());
+        } else {
+            this.initContainer();
+        }
+        
+        this.initialized = true;
     }
 
     /**
@@ -15,6 +31,12 @@ class MessageToast {
         // 如果已存在容器则直接返回
         if (document.querySelector('.toast-container')) {
             this.toastContainer = document.querySelector('.toast-container');
+            return;
+        }
+
+        // 确保 body 存在
+        if (!document.body) {
+            setTimeout(() => this.initContainer(), 10);
             return;
         }
 
@@ -33,12 +55,26 @@ class MessageToast {
     }
 
     /**
+     * 确保已初始化
+     */
+    ensureInitialized() {
+        if (!this.initialized) {
+            this.init();
+        }
+        if (!this.toastContainer) {
+            this.initContainer();
+        }
+    }
+
+    /**
      * 显示消息提示
      * @param {string} message 消息内容
      * @param {string} type 消息类型: success, error, warning, info
      * @param {number} duration 显示时长(毫秒)，默认3000ms
      */
     show(message, type = 'success', duration = 3000) {
+        this.ensureInitialized();
+        
         // 创建消息元素
         const messageDiv = document.createElement('div');
         messageDiv.className = `message-toast message-${type}`;
@@ -90,6 +126,252 @@ class MessageToast {
         });
 
         return messageDiv;
+    }
+
+    /**
+     * 显示确认对话框
+     * @param {string} message 确认消息
+     * @param {Object} options 选项配置
+     * @returns {Promise<boolean>} 用户选择结果
+     */
+    confirm(message, options = {}) {
+        this.ensureInitialized();
+        
+        return new Promise((resolve) => {
+            const {
+                title = '确认操作',
+                confirmText = '确定',
+                cancelText = '取消',
+                type = 'warning'
+            } = options;
+
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 15000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+
+            // 创建对话框
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                max-width: 400px;
+                width: 90%;
+                padding: 0;
+                transform: scale(0.8);
+                transition: transform 0.3s ease;
+                overflow: hidden;
+            `;
+
+            // 创建标题栏
+            const header = document.createElement('div');
+            header.style.cssText = `
+                padding: 20px 20px 15px;
+                border-bottom: 1px solid #eee;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+
+            // 添加图标
+            const icon = document.createElement('span');
+            icon.style.cssText = `
+                font-size: 20px;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            const iconStyles = {
+                warning: { text: '⚠️', color: '#ffc107' },
+                error: { text: '❌', color: '#dc3545' },
+                info: { text: 'ℹ️', color: '#17a2b8' },
+                success: { text: '✅', color: '#28a745' }
+            };
+            
+            const iconConfig = iconStyles[type] || iconStyles.warning;
+            icon.textContent = iconConfig.text;
+            icon.style.color = iconConfig.color;
+
+            const titleElement = document.createElement('h3');
+            titleElement.textContent = title;
+            titleElement.style.cssText = `
+                margin: 0;
+                font-size: 18px;
+                color: #333;
+                font-weight: 600;
+            `;
+
+            header.appendChild(icon);
+            header.appendChild(titleElement);
+
+            // 创建内容区
+            const content = document.createElement('div');
+            content.style.cssText = `
+                padding: 20px;
+                color: #666;
+                line-height: 1.6;
+                font-size: 14px;
+            `;
+            content.textContent = message;
+
+            // 创建按钮区
+            const buttonArea = document.createElement('div');
+            buttonArea.style.cssText = `
+                padding: 15px 20px 20px;
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+                border-top: 1px solid #f0f0f0;
+            `;
+
+            // 取消按钮（如果需要）
+            if (cancelText) {
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = cancelText;
+                cancelButton.style.cssText = `
+                    padding: 8px 20px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    background: white;
+                    color: #666;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: all 0.2s ease;
+                `;
+                cancelButton.addEventListener('mouseenter', () => {
+                    cancelButton.style.background = '#f8f9fa';
+                    cancelButton.style.borderColor = '#adb5bd';
+                });
+                cancelButton.addEventListener('mouseleave', () => {
+                    cancelButton.style.background = 'white';
+                    cancelButton.style.borderColor = '#ddd';
+                });
+                cancelButton.addEventListener('click', () => handleClose(false));
+                buttonArea.appendChild(cancelButton);
+            }
+
+            // 确认按钮
+            const confirmButton = document.createElement('button');
+            confirmButton.textContent = confirmText;
+            
+            const buttonStyles = {
+                warning: '#ffc107',
+                error: '#dc3545',
+                info: '#17a2b8',
+                success: '#28a745'
+            };
+            
+            const buttonColor = buttonStyles[type] || buttonStyles.warning;
+            confirmButton.style.cssText = `
+                padding: 8px 20px;
+                border: none;
+                border-radius: 4px;
+                background: ${buttonColor};
+                color: white;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+            `;
+            confirmButton.addEventListener('mouseenter', () => {
+                confirmButton.style.transform = 'translateY(-1px)';
+                confirmButton.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            });
+            confirmButton.addEventListener('mouseleave', () => {
+                confirmButton.style.transform = 'translateY(0)';
+                confirmButton.style.boxShadow = 'none';
+            });
+
+            // 组装对话框
+            dialog.appendChild(header);
+            dialog.appendChild(content);
+            buttonArea.appendChild(confirmButton);
+            dialog.appendChild(buttonArea);
+            overlay.appendChild(dialog);
+
+            // 事件处理
+            const handleClose = (result) => {
+                overlay.style.opacity = '0';
+                dialog.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    if (document.body.contains(overlay)) {
+                        document.body.removeChild(overlay);
+                    }
+                    resolve(result);
+                }, 300);
+            };
+
+            confirmButton.addEventListener('click', () => handleClose(true));
+            
+            // 点击遮罩层关闭
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    handleClose(false);
+                }
+            });
+
+            // ESC 键关闭
+            const handleKeydown = (e) => {
+                if (e.key === 'Escape') {
+                    document.removeEventListener('keydown', handleKeydown);
+                    handleClose(false);
+                }
+            };
+            document.addEventListener('keydown', handleKeydown);
+
+            // 显示对话框
+            document.body.appendChild(overlay);
+            
+            // 动画显示
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                dialog.style.transform = 'scale(1)';
+            }, 10);
+
+            // 聚焦到确认按钮
+            setTimeout(() => {
+                confirmButton.focus();
+            }, 100);
+        });
+    }
+
+    /**
+     * 显示警告提示（替代 alert）
+     * @param {string} message 警告消息
+     * @param {Object} options 选项配置
+     * @returns {Promise<void>}
+     */
+    alert(message, options = {}) {
+        return new Promise((resolve) => {
+            const {
+                title = '提示',
+                buttonText = '确定',
+                type = 'info'
+            } = options;
+
+            this.confirm(message, {
+                title,
+                confirmText: buttonText,
+                cancelText: null, // 不显示取消按钮
+                type
+            }).then(() => resolve());
+        });
     }
 
     /**
@@ -155,8 +437,10 @@ class MessageToast {
      * 清除所有消息
      */
     clear() {
-        const messages = this.toastContainer.querySelectorAll('.message-toast');
-        messages.forEach(msg => this.hide(msg));
+        if (this.toastContainer) {
+            const messages = this.toastContainer.querySelectorAll('.message-toast');
+            messages.forEach(msg => this.hide(msg));
+        }
     }
 
     // 便捷方法
@@ -177,15 +461,56 @@ class MessageToast {
     }
 }
 
-// 创建全局实例
-window.messageToast = new MessageToast();
+// 模块化初始化函数
+function initMessageToast() {
+    // 创建全局实例（如果不存在）
+    if (typeof window.messageToast === 'undefined') {
+        window.messageToast = new MessageToast();
+        window.messageToast.init();
+    }
 
-// 兼容旧版本的 showMessage 函数
-window.showMessage = function(message, type = 'success', duration = 3000) {
-    return window.messageToast.show(message, type, duration);
-};
+    // 兼容旧版本的 showMessage 函数
+    if (typeof window.showMessage === 'undefined') {
+        window.showMessage = function(message, type = 'success', duration = 3000) {
+            return window.messageToast.show(message, type, duration);
+        };
+    }
 
-// 导出（如果支持模块化）
+    // 替代原生 alert 和 confirm 函数
+    if (typeof window.showAlert === 'undefined') {
+        window.showAlert = function(message, options = {}) {
+            return window.messageToast.alert(message, options);
+        };
+    }
+
+    if (typeof window.showConfirm === 'undefined') {
+        window.showConfirm = function(message, options = {}) {
+            return window.messageToast.confirm(message, options);
+        };
+    }
+
+    return window.messageToast;
+}
+
+// 自动初始化（当脚本加载时）
+if (typeof window !== 'undefined') {
+    // 浏览器环境
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMessageToast);
+    } else {
+        initMessageToast();
+    }
+}
+
+// 导出（支持多种模块系统）
 if (typeof module !== 'undefined' && module.exports) {
+    // CommonJS (Node.js)
     module.exports = MessageToast;
+} else if (typeof define === 'function' && define.amd) {
+    // AMD (RequireJS)
+    define([], function() { return MessageToast; });
+} else if (typeof window !== 'undefined') {
+    // 浏览器全局变量
+    window.MessageToast = MessageToast;
+    window.initMessageToast = initMessageToast;
 }

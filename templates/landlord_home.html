@@ -2,6 +2,8 @@
 {% block title %}房东首页{% endblock %}
 
 {% block head %}
+<!-- 引入消息提示模块 -->
+<script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 <style>
 .dashboard-container {
     max-width: 1200px;
@@ -373,30 +375,67 @@
         {% endif %}
     </div>
 </div>
+<!-- 引入消息提示模块 -->
+<script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 
 <script>
 function deleteHouse(houseId) {
-    if (confirm('确定要删除这套房源吗？此操作不可恢复。')) {
-        fetch(`/house/delete/${houseId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+    // 确保模块已初始化
+    if (typeof messageToast === 'undefined') {
+        // 如果模块未加载，使用备用方案
+        if (confirm('确定要删除这套房源吗？此操作不可恢复。')) {
+            performDelete(houseId);
+        }
+        return;
+    }
+
+    // 使用模块化的确认对话框
+    messageToast.confirm('确定要删除这套房源吗？此操作不可恢复。', {
+        title: '删除房源',
+        type: 'error',
+        confirmText: '删除',
+        cancelText: '取消'
+    }).then(confirmed => {
+        if (confirmed) {
+            performDelete(houseId);
+        }
+    });
+}
+
+function performDelete(houseId) {
+    fetch(`/house/delete/${houseId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof messageToast !== 'undefined') {
+                messageToast.success(data.message);
+            } else {
+                alert('删除成功: ' + data.message);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
+            setTimeout(() => {
                 location.reload();
+            }, 1500);
+        } else {
+            if (typeof messageToast !== 'undefined') {
+                messageToast.error('删除失败：' + data.message);
             } else {
                 alert('删除失败：' + data.message);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (typeof messageToast !== 'undefined') {
+            messageToast.error('删除失败，请稍后重试');
+        } else {
             alert('删除失败，请稍后重试');
-        });
-    }
+        }
+    });
 }
 </script>
 {% endblock %}
