@@ -150,3 +150,7 @@ def export_houses():
     landlord_name = g.username
     return export_houses_csv(landlord_name)
 
+
+@house_bp.route('/load_more_news', methods=['GET'])
+def load_more_news():
+    return load_more_news_logic()

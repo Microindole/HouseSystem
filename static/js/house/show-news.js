@@ -117,6 +117,7 @@ function initLoadMoreFunction() {
                     });
                     currentOffset += data.news.length;
                     if (loadMoreBtn) loadMoreBtn.dataset.offset = currentOffset; // Update offset
+
                     // 重新初始化轮播，但要考虑现有项
                     // initNewsCarousel(); // This might reset the view, better to update dynamically if possible or ensure it handles additions
                     if (!data.has_more) {
@@ -148,6 +149,7 @@ function initLoadMoreFunction() {
             });
     });
 }
+
 // 创建新闻元素
 function createNewsElement(newsData, index) { // Renamed 'news' to 'newsData'
     const newsItem = document.createElement('div');
