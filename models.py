@@ -1,6 +1,30 @@
 from exts import db
 from datetime import datetime
-from sqlalchemy import UniqueConstraint # 新增导入 UniqueConstraint
+from sqlalchemy import UniqueConstraint
+
+"""
+本模块定义了应用程序中使用的所有数据库模型 (SQLAlchemy Models)。
+每个类代表数据库中的一张表，其实例代表表中的一条记录。
+
+主要模型及其用途如下：
+
+- CommentModel: 存储用户对房屋的评论或留言信息，包括评论人、内容、时间以及可能回复的某条其他评论。
+- HouseInfoModel: 存储房屋的基本静态信息，如房屋名称、户型、所在地区、详细地址、价格、押金、装修情况、房屋亮点和相关图片。
+- HouseStatusModel: 存储房屋的动态状态信息，如关联的房东、当前状态（例如空置、出租中、装修中）、对外联系电话以及状态的最后更新时间。
+- LandlordModel: 存储房东用户的基本信息，包括房东用户名（主键）、联系电话和住址。
+- LoginModel: 存储用户的登录认证信息，包括用户名（主键）、加密后的密码以及用户类型（如管理员、租客、房东）。
+- PrivateChannelModel: 定义租客和房东之间针对特定房屋建立的私人沟通渠道，记录了参与方和关联房屋。
+- MessageModel: 存储在上述私信频道中发送的具体消息内容，包括发送者、接收者、消息文本、时间戳及已读状态。
+- NewsModel: 存储与房屋相关的动态或新闻资讯，通常关联到具体的房屋及其房东，记录了新闻的标题、描述和发布时间。
+- TenantModel: 存储租客用户的基本信息，包括租客用户名（主键）、联系电话和住址。
+- AppointmentModel: 记录租客就特定房源向房东发起的看房预约详情，包含预约时间、涉及的房源、租客、房东以及预约状态。
+- ComplaintModel: 存储用户（租客、房东或管理员）提交的投诉或反馈信息，包括发送人、接收人（可选）、内容、类型、处理状态、处理人及时间戳。
+- DailyRentRateModel: 用于按天记录和统计平台上房源的出租情况，包括总上架数、已出租数及计算得出的出租率。
+- HouseListingAuditModel: 记录房东提交的房源上架申请的审核流程信息，包括关联房源、房东、审核状态、原因及时间戳。
+- EmailUsernameMapModel: 建立用户邮箱地址与其系统用户名的映射关系，方便通过邮箱进行关联操作。
+- RentalContract: 存储租赁合同的详细信息，关联到特定的私信频道，记录合同双方、起止日期、总金额、支付状态及创建更新时间。
+- RepairRequestModel: 记录租客针对特定房屋提交的维修请求，包含请求描述、关联房源、租客、房东、请求时间、处理状态及房东备注等。
+"""
 
 class CommentModel(db.Model):
     __tablename__ = 'comment'
@@ -85,10 +109,10 @@ class NewsModel(db.Model):
     title = db.Column(db.String(255), nullable=False, comment='新闻标题（如某某房屋出租了）,一般配对房屋状态变化')
     desc = db.Column(db.String(255), nullable=True, comment='新闻内容')
     landlord_username = db.Column(db.String(100), db.ForeignKey('login.username'), nullable=True, comment='新闻发布者(房东)')
-    
+
     # Add relationship to HouseInfoModel
     house_info = db.relationship('HouseInfoModel', backref='news_items')
-    
+
     def __repr__(self):
         return f'<NewsModel {self.id} {self.title}>'
 
@@ -99,7 +123,7 @@ class TenantModel(db.Model):
     phone = db.Column(db.String(100), nullable=False, comment='联系方式')
     addr = db.Column(db.String(255), nullable=False, comment='用户住址')
 
-    
+
 class AppointmentModel(db.Model):
     __tablename__ = 'appointment'
     appointment_id = db.Column(db.Integer, primary_key=True, autoincrement=True, comment='预约ID')
@@ -152,7 +176,7 @@ class HouseListingAuditModel(db.Model):
     # 修改复合外键约束，添加 ondelete='CASCADE'
     __table_args__ = (
         db.ForeignKeyConstraint(
-            ['house_id', 'landlord_name'], 
+            ['house_id', 'landlord_name'],
             ['house_status.house_id', 'house_status.landlord_name'],
             ondelete='CASCADE'
         ),
@@ -194,7 +218,7 @@ class RentalContract(db.Model):
 
     def __repr__(self):
         return f'<RentalContract {self.id} - {self.landlord_username} → {self.tenant_username}>'
-    
+
 class RepairRequestModel(db.Model):
     __tablename__ = 'repair_request'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
