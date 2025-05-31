@@ -1,6 +1,4 @@
-好的，这篇 Markdown 文档将说明如何使用您提供的 `message-toast.js` 模块来显示不同类型的消息提示。
 
-```markdown
 # message-toast.js 模块使用指南
 
 `message-toast.js` 是一个用于在网页中显示美观、非阻塞式消息提示（Toasts）、警告框（Alerts）和确认框（Confirms）的 JavaScript 模块。它会自动在页面加载时初始化，并提供全局函数方便调用。
@@ -12,7 +10,6 @@
 ```html
     <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 ```
-*(请将 `path/to/your/` 替换为实际的文件路径)*
 
 模块初始化后，会在 `window` 对象上挂载以下几个便捷函数：
 * `window.showMessage(message, type, duration)`
@@ -214,4 +211,3 @@ if (window.messageToast) {
 ---
 
 通过以上方法，您可以方便地在您的项目中使用 `message-toast.js` 模块来增强用户界面的消息提示体验。
-```
