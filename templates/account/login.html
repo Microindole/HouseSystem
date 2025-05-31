@@ -31,17 +31,13 @@
                 {% endif %}
             {% endwith %}
 
-            {# These conditional blocks for 'error' and 'errors' might display other types of errors #}
-            {# not sent via flash, or could be part of an older error display mechanism. #}
-            {# If all errors from account.py's login flow are now flashed, these might be redundant #}
-            {# or could be integrated into the toast system if desired, but that's a separate step. #}
             {% if error %}
                 <p class="error-message">{{ error }}</p>
             {% endif %}
-            {% if errors %} {# This is typically for WTForms form.errors passed directly to template #}
+            {% if errors %}
                 <ul class="error-list">
-                    {% for field, field_errors in errors.items() %} {# Renamed 'messages' to 'field_errors' for clarity #}
-                        {% for e_msg in field_errors %} {# Renamed 'message' to 'e_msg' #}
+                    {% for field, field_errors in errors.items() %}
+                        {% for e_msg in field_errors %}
                             <li class="error-message">{{ field }}: {{ e_msg }}</li>
                         {% endfor %}
                     {% endfor %}

@@ -459,7 +459,7 @@
         </ul>
     </div>
 </div>
-
+<script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 <script>
 // 页面自动刷新（当有待处理请求时）
 document.addEventListener('DOMContentLoaded', function() {
@@ -497,9 +497,12 @@ document.querySelectorAll('.status-badge').forEach(badge => {
                 message = '很抱歉，房东拒绝了您的维修申请，请查看回复说明';
                 break;
         }
-        
         if (message) {
-            alert(message);
+            if (window.showMessage) {
+                window.showMessage(message, "info");
+            } else {
+                alert(message);
+            }
         }
     });
 });

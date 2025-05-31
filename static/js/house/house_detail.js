@@ -1,10 +1,8 @@
 /**
  * 房源详情页面 JavaScript 模块
  */
-
 // 全局变量（页面传入）
 let houseId, landlordPhone, currentUser;
-
 // 初始化全局变量
 function initGlobalVariables(config) {
     houseId = config.houseId;
@@ -12,7 +10,6 @@ function initGlobalVariables(config) {
     currentUser = config.currentUser;
     window.houseId = houseId; // 兼容旧代码
 }
-
 // 显示电话号码
 function showPhone() {
     const phoneElement = document.getElementById('landlord-phone');
@@ -20,31 +17,30 @@ function showPhone() {
         phoneElement.textContent = landlordPhone;
     }
 }
-
 // 维修申请相关函数
 function showRepairModal() {
     document.getElementById('repairModal').style.display = 'flex';
 }
-
 function closeRepairModal() {
     document.getElementById('repairModal').style.display = 'none';
     document.getElementById('repairForm').reset();
 }
-
 // 提交维修申请
 function initRepairForm() {
     const repairForm = document.getElementById('repairForm');
     if (!repairForm) return;
-    
     repairForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const content = document.getElementById('repairContent').value.trim();
 
         if (!content) {
-            messageToast.warning('请填写维修内容描述');
+            if (window.showMessage) {
+                window.showMessage('请填写维修内容描述', 'warning');
+            } else {
+                alert('请填写维修内容描述');
+            }
             return;
         }
-
         fetch('/house/repair/request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -54,23 +50,33 @@ function initRepairForm() {
             })
         }).then(response => response.json()).then(data => {
             if (data.success) {
-                messageToast.success(data.message);
+                if (window.showMessage) {
+                    window.showMessage(data.message, 'success');
+                } else {
+                    alert(data.message);
+                }
                 closeRepairModal();
             } else {
-                messageToast.error('提交失败：' + data.message);
+                if (window.showMessage) {
+                    window.showMessage('提交失败：' + data.message, 'error');
+                } else {
+                    alert('提交失败：' + data.message);
+                }
             }
         }).catch(error => {
             console.error('Error:', error);
-            messageToast.error('提交失败，请稍后重试');
+            if (window.showMessage) {
+                window.showMessage('提交失败，请稍后重试', 'error');
+            } else {
+                alert('提交失败，请稍后重试');
+            }
         });
     });
 }
-
 // 预约看房相关函数
 function showAppointmentModal() {
     const modal = document.getElementById('appointmentModal');
     modal.style.display = 'flex';
-
     // 设置最小时间为当前时间
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -79,50 +85,57 @@ function showAppointmentModal() {
         timeInput.min = now.toISOString().slice(0, 16);
     }
 }
-
 function closeAppointmentModal() {
     document.getElementById('appointmentModal').style.display = 'none';
     document.getElementById('appointmentForm').reset();
 }
-
 // 初始化预约表单
 function initAppointmentForm() {
     const appointmentForm = document.getElementById('appointmentForm');
     if (!appointmentForm) return;
-    
     appointmentForm.addEventListener('submit', function (e) {
         e.preventDefault();
         const formData = new FormData(this);
         const data = Object.fromEntries(formData);
-
         fetch('/house/appointment', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         }).then(response => response.json()).then(data => {
             if (data.code === 200) {
-                messageToast.success(data.msg);
+                if (window.showMessage) {
+                    window.showMessage(data.msg, 'success');
+                } else {
+                    alert(data.msg);
+                }
                 closeAppointmentModal();
                 setTimeout(() => {
                     location.reload();
                 }, 1500);
             } else {
-                messageToast.error(data.msg || '预约失败');
+                if (window.showMessage) {
+                    window.showMessage(data.msg || '预约失败', 'error');
+                } else {
+                    alert(data.msg || '预约失败');
+                }
             }
         }).catch(error => {
             console.error('Error:', error);
-            messageToast.error('提交失败，请稍后重试');
+            if (window.showMessage) {
+                window.showMessage('提交失败，请稍后重试', 'error');
+            } else {
+                alert('提交失败，请稍后重试');
+            }
         });
     });
 }
-
 // 评论回复功能
 function replyToComment(commentId, username) {
     const atCommentIdInput = document.getElementById('at-comment-id');
     const atText = document.getElementById('at-text');
     const atInfo = document.querySelector('.at-info');
     const commentInput = document.querySelector('.comment-input');
-    
+
     if (atCommentIdInput) atCommentIdInput.value = commentId;
     if (atText) atText.textContent = `回复 @${username}：`;
     if (atInfo) atInfo.style.display = 'block';
@@ -133,25 +146,22 @@ function replyToComment(commentId, username) {
 function initCancelReply() {
     const cancelAt = document.getElementById('cancel-at');
     if (!cancelAt) return;
-    
     cancelAt.addEventListener('click', function() {
         const atCommentIdInput = document.getElementById('at-comment-id');
         const atText = document.getElementById('at-text');
         const atInfo = document.querySelector('.at-info');
-        
+
         if (atCommentIdInput) atCommentIdInput.value = '';
         if (atText) atText.textContent = '';
         if (atInfo) atInfo.style.display = 'none';
     });
 }
-
 // 初始化评论提交
 function initCommentSubmit() {
     const submitButton = document.getElementById('submit-comment-btn');
     if (!submitButton) return;
-    
     let isSubmitting = false;
-    
+
     submitButton.addEventListener('click', function() {
         if (isSubmitting) return;
 
@@ -161,62 +171,74 @@ function initCommentSubmit() {
         const atCommentId = atCommentIdInput.value;
 
         if (!content) {
-            messageToast.warning('请输入评论内容');
+            if (window.showMessage) {
+                window.showMessage('请输入评论内容', 'warning');
+            } else {
+                alert('请输入评论内容');
+            }
             return;
         }
-
         isSubmitting = true;
         submitButton.disabled = true;
         submitButton.textContent = '提交中...';
-
         const formData = new FormData();
         formData.append('house_id', houseId);
         formData.append('comment', content);
         if (atCommentId) {
             formData.append('at', atCommentId);
         }
-
         fetch('/house/add_comment_form', {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // 清空输入框和回复状态
-                commentInput.value = '';
-                atCommentIdInput.value = '';
-                document.getElementById('at-text').textContent = '';
-                document.querySelector('.at-info').style.display = 'none';
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 清空输入框和回复状态
+                    commentInput.value = '';
+                    atCommentIdInput.value = '';
+                    document.getElementById('at-text').textContent = '';
+                    document.querySelector('.at-info').style.display = 'none';
 
-                // 动态添加新评论到页面顶部
-                addCommentToPage(data.comment);
-                
-                // 更新评论总数
-                updateCommentCount(1);
-                
-                messageToast.success('评论发表成功！');
-            } else {
-                messageToast.error('评论提交失败：' + (data.message || '未知错误'));
-            }
-        })
-        .catch(error => {
-            console.error('Error submitting comment:', error);
-            messageToast.error('评论提交失败，网络错误或服务器无响应，请稍后重试');
-        })
-        .finally(() => {
-            isSubmitting = false;
-            submitButton.disabled = false;
-            submitButton.textContent = '提交评论';
-        });
+                    // 动态添加新评论到页面顶部
+                    addCommentToPage(data.comment);
+
+                    // 更新评论总数
+                    updateCommentCount(1);
+
+                    if (window.showMessage) {
+                        window.showMessage('评论发表成功！', 'success');
+                    } else {
+                        alert('评论发表成功！');
+                    }
+                } else {
+                    if (window.showMessage) {
+                        window.showMessage('评论提交失败：' + (data.message || '未知错误'), 'error');
+                    } else {
+                        alert('评论提交失败：' + (data.message || '未知错误'));
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting comment:', error);
+                if (window.showMessage) {
+                    window.showMessage('评论提交失败，网络错误或服务器无响应，请稍后重试', 'error');
+                } else {
+                    alert('评论提交失败，网络错误或服务器无响应，请稍后重试');
+                }
+            })
+            .finally(() => {
+                isSubmitting = false;
+                submitButton.disabled = false;
+                submitButton.textContent = '提交评论';
+            });
     });
 }
-
 // 动态添加评论到页面
 function addCommentToPage(commentData) {
     const commentsList = document.querySelector('.comments-list');
     if (!commentsList) return;
-    
+
     const commentHtml = `
         <div class="comment" data-comment-id="${commentData.comment_id}" data-username="${commentData.username}" data-desc="${commentData.desc}">
             <div class="comment-header">
@@ -233,9 +255,7 @@ function addCommentToPage(commentData) {
             </div>
         </div>
     `;
-    
     commentsList.insertAdjacentHTML('afterbegin', commentHtml);
-    
     // 添加回复按钮悬停效果
     const newComment = commentsList.firstElementChild;
     initCommentHoverEffect(newComment);
@@ -249,7 +269,7 @@ function initCommentHoverEffects() {
 function initCommentHoverEffect(commentEl) {
     const replyBtn = commentEl.querySelector('.reply-btn');
     if (!replyBtn) return;
-    
+
     commentEl.addEventListener('mouseenter', function() {
         replyBtn.style.display = 'inline-block';
     });
@@ -257,12 +277,10 @@ function initCommentHoverEffect(commentEl) {
         replyBtn.style.display = 'none';
     });
 }
-
 // 更新评论总数
 function updateCommentCount(increment) {
     const commentSection = document.querySelector('.comments-section h2');
     if (!commentSection) return;
-    
     const currentText = commentSection.textContent;
     const match = currentText.match(/\((\d+)条\)/);
     if (match) {
@@ -271,41 +289,60 @@ function updateCommentCount(increment) {
         commentSection.textContent = currentText.replace(/\(\d+条\)/, `(${newCount}条)`);
     }
 }
-
 // 删除房源（房东专用）
-function deleteHouse(houseId) {
-    if (!confirm('确定要删除这套房源吗？此操作不可恢复。')) return;
-    
+async function deleteHouse(houseId) { // MODIFIED: Added async
+    let confirmed = false;
+    if (window.showConfirm) {
+        confirmed = await window.showConfirm('确定要删除这套房源吗？此操作不可恢复。', {
+            title: '删除确认',
+            type: 'warning',
+            confirmText: '确定删除',
+            cancelText: '取消'
+        });
+    } else { // Fallback to native confirm
+        confirmed = confirm('确定要删除这套房源吗？此操作不可恢复。');
+    }
+    if (!confirmed) return;
     fetch(`/house/delete/${houseId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            messageToast.success(data.message);
-            setTimeout(() => {
-                window.location.href = '/account/landlord/home';
-            }, 1500);
-        } else {
-            messageToast.error('删除失败：' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        messageToast.error('删除失败，请稍后重试');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (window.showMessage) {
+                    window.showMessage(data.message, 'success');
+                } else {
+                    alert(data.message);
+                }
+                setTimeout(() => {
+                    window.location.href = '/account/landlord/home'; // Redirect to landlord's home page
+                }, 1500);
+            } else {
+                if (window.showMessage) {
+                    window.showMessage('删除失败：' + data.message, 'error');
+                } else {
+                    alert('删除失败：' + data.message);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (window.showMessage) {
+                window.showMessage('删除失败，请稍后重试', 'error');
+            } else {
+                alert('删除失败，请稍后重试');
+            }
+        });
 }
-
 // 时间格式化（从 show-date.js 中整合）
 function formatCommentTimes() {
     document.querySelectorAll('.comment-time').forEach(function(el) {
         const rawTime = el.getAttribute('data-raw');
         if (!rawTime) return;
-        
-        const date = new Date(rawTime.replace(/-/g, '/'));
+        const date = new Date(rawTime.replace(/-/g, '/')); // Ensure cross-browser date parsing
         const now = new Date();
         const diffSeconds = Math.floor((now - date) / 1000);
         const diffMinutes = Math.floor(diffSeconds / 60);
@@ -327,12 +364,10 @@ function formatCommentTimes() {
         }
     });
 }
-
 // 初始化地图
 function initMap(houseData) {
     const mapContainer = document.getElementById('map-container');
     if (!mapContainer || typeof BMapGL === 'undefined') return;
-    
     const map = new BMapGL.Map('map-container', {
         enableMapClick: true,
         displayOptions: {
@@ -341,25 +376,23 @@ function initMap(houseData) {
             indoor: false
         }
     });
-    
     map.setMapStyleV2({
-        styleId: '01e6259d6df0835e035b80a7ee838682'
+        styleId: '01e6259d6df0835e035b80a7ee838682' // 你的百度地图个性化样式ID
     });
-    
     map.addControl(new BMapGL.ScaleControl());
     map.addControl(new BMapGL.ZoomControl());
     map.enableScrollWheelZoom(true);
 
     const fullAddress = `${houseData.region} ${houseData.addr}`;
     const myGeo = new BMapGL.Geocoder();
-    
+
     myGeo.getPoint(fullAddress, function(point) {
         if (point) {
             map.centerAndZoom(point, 17);
-            
+
             const marker = new BMapGL.Marker(point);
             map.addOverlay(marker);
-            
+
             const content = `
                 <div style="padding:12px;max-width:300px;">
                     <h4 style="margin:0 0 8px 0;color:#1296db;font-size:16px;">${houseData.house_name}</h4>
@@ -368,17 +401,17 @@ function initMap(houseData) {
                     <p style="margin:5px 0 0;color:#666;font-size:13px;line-height:1.5;"><strong>所在区域：</strong>${houseData.region}</p>
                     <p style="margin:5px 0 0;color:#666;font-size:13px;line-height:1.5;"><strong>价格：</strong>${houseData.price}元/月</p>
                     <div style="margin-top:10px;text-align:right;">
-                        <a href="https://map.baidu.com/search/${houseData.region} ${houseData.addr}/?querytype=s&wd=${houseData.region} ${houseData.addr}" 
+                        <a href="https://map.baidu.com/search/${encodeURIComponent(houseData.region + ' ' + houseData.addr)}/?querytype=s&wd=${encodeURIComponent(houseData.region + ' ' + houseData.addr)}" 
                         target="_blank" style="color:#1296db;text-decoration:none;font-size:13px;">在百度地图查看 &raquo;</a>
                     </div>
                 </div>
             `;
-                
+
             const infoWindow = new BMapGL.InfoWindow(content, {
                 title: "房源信息",
                 enableMessage: false
             });
-            
+
             marker.openInfoWindow(infoWindow);
             marker.addEventListener('click', function() {
                 this.openInfoWindow(infoWindow);
@@ -388,7 +421,6 @@ function initMap(houseData) {
         }
     }, "全国");
 }
-
 // 处理地图错误
 function handleMapError(map, region) {
     const myGeo = new BMapGL.Geocoder();
@@ -397,7 +429,7 @@ function handleMapError(map, region) {
             map.centerAndZoom(regionPoint, 14);
             const regionMarker = new BMapGL.Marker(regionPoint);
             map.addOverlay(regionMarker);
-            
+
             document.getElementById('map-container').insertAdjacentHTML(
                 'beforeend',
                 '<div style="position:absolute;bottom:10px;left:10px;right:10px;background:rgba(255,255,255,0.9);padding:10px;border-radius:4px;text-align:center;color:#f56c6c;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,0.2);">无法精确定位房源地址，已显示所在地区</div>'
@@ -407,27 +439,22 @@ function handleMapError(map, region) {
         }
     }, "全国");
 }
-
 // 主初始化函数
 function initHouseDetail(config) {
     initGlobalVariables(config);
-    
     // 初始化各个模块
     initRepairForm();
     initAppointmentForm();
     initCancelReply();
     initCommentSubmit();
     initCommentHoverEffects();
-    
     // 格式化时间
     formatCommentTimes();
-    
     // 初始化地图（需要等待页面加载完成）
     if (config.houseData) {
         initMap(config.houseData);
     }
 }
-
 // 暴露全局函数（供HTML调用）
 window.showPhone = showPhone;
 window.showRepairModal = showRepairModal;

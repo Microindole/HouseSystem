@@ -5,12 +5,13 @@
 {% block head %}
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/feedback/message.css') }}">
+    {# 如果 message-toast.js 的 CSS 不是全局加载，也需要在这里引入 #}
+    {# <link rel="stylesheet" href="{{ url_for('static', filename='js/common/message-toast.css') }}"> #}
 {% endblock %}
 
 {% block body %}
     <div class="chat-container">
-
-        {# 左侧聊天列表 #}
+        {# 左侧聊天列表 (结构不变) #}
         <div class="chat-sidebar">
             <div class="sidebar-header">
                 <h2>聊天列表</h2>
@@ -18,24 +19,24 @@
             <div class="chat-list">
                 {% for item in channels %}
                     <a href="#" data-channel-id="{{ item.channel.channel_id }}"
-                       class="chat-list-item">
+                       class="chat-list-item {% if channel and channel.channel_id == item.channel.channel_id %}active{% endif %}">
                         <div class="chat-info">
                             <div class="chat-info-header">
-                        <span class="chat-name">
-                            {{ item.channel.tenant_username if g.username == item.channel.landlord_username else item.channel.landlord_username }}
-                        </span>
+                                <span class="chat-name">
+                                    {{ item.channel.tenant_username if g.username == item.channel.landlord_username else item.channel.landlord_username }}
+                                </span>
                                 {% if item.last_message %}
                                     <span class="chat-time">{{ item.last_message.timestamp.strftime('%H:%M') }}</span>
                                 {% endif %}
                                 {% if item.unread_count > 0 %}
-                                    <span class="unread-badge" id="unread-badge-{{ item.channel.channel_id }}" style="background:#f56c6c;color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;margin-left:8px;">
-                            {{ item.unread_count }}
-                        </span>
+                                    <span class="unread-badge" id="unread-badge-{{ item.channel.channel_id }}">
+                                        {{ item.unread_count }}
+                                    </span>
                                 {% endif %}
                             </div>
                             <p class="last-message">
                                 {% if item.last_message %}
-                                    {{ item.last_message.content }}
+                                    {{ item.last_message.content | truncate(30) }} {# 示例：截断消息 #}
                                 {% else %}
                                     暂无消息
                                 {% endif %}
@@ -46,20 +47,15 @@
             </div>
         </div>
 
-        {# 右侧聊天窗口 #}
+        {# 右侧聊天窗口 (结构不变) #}
         <div class="chat-main">
-            {# 聊天窗口头部 #}
             <div class="chat-header" id="chat-header">
-                <h2>请选择一个聊天</h2>
+                <h2>{% if channel %}{{ channel.tenant_username if g.username == channel.landlord_username else channel.landlord_username }} <span style="font-size: 12px; color: #666; font-weight: normal;">({{ '租客' if g.username == channel.landlord_username else '房东' }})</span> <span style="font-size: 13px; color: #888; margin-left: 16px;">房源：{{ house_name_for_header | default('未知房源') }}</span> {% if channel.house_status == 0 and g.username == channel.landlord_username %}<span style="color:green;margin-left:10px;margin-right:10px;">可出租</span><button id="send-contract-btn" class="send-button" style="margin-left:10px;display:inline-block;">发送合同</button>{% elif channel.house_status == 1 %}<span style="color:orange;margin-left:10px;">出租中</span>{% elif channel.house_status in [2,4,5] %}<span style="color:red;margin-left:10px;">未上架</span>{% endif %} {% else %}请选择一个聊天{% endif %}</h2>
             </div>
-
-            {# 消息显示区域 #}
             <div id="message-container" class="message-area">
                 <p class="no-messages-placeholder">请在左侧选择一个聊天开始对话</p>
             </div>
-
-            {# 输入区域 #}
-            <div class="input-area" id="input-area" style="display:none;">
+            <div class="input-area" id="input-area" style="display: {% if channel %}flex{% else %}none{% endif %};">
                 <div style="display: flex; width: 100%; height: 100%; align-items: center;">
                     <textarea id="message-input" placeholder="输入消息..." required class="message-input"></textarea>
                     <button id="send-button" class="send-button">发送</button>
@@ -68,386 +64,41 @@
         </div>
     </div>
 
-    {# 合同弹窗 #}
+    {# 合同弹窗 (结构不变) #}
     <div id="contract-modal" class="contract-modal" style="display:none;">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/order/order_submit.css') }}">
         <div class="contract-modal-content">
-            <span class="close-btn">&times;</span>
+            <span class="close-btn" id="close-contract-modal-btn">&times;</span>
             <h2>发送租房合同</h2>
             <form id="contract-form">
                 <label>租客：<strong id="tenant-name-display"></strong></label><br>
                 <label>房源：<strong id="house-name-display"></strong></label><br><br>
-
                 <label for="start-date">开始日期：</label>
                 <input type="date" id="start-date" required><br><br>
-
                 <label for="months">出租月数：</label>
                 <input type="number" id="months" min="1" required><br><br>
-
                 <label>结束日期：</label>
                 <span id="calculated-end-date">--</span><br><br>
-
                 <label>总金额（元）：</label>
                 <span id="calculated-amount">--</span><br><br>
-
-                <!-- 隐藏字段用于提交 -->
                 <input type="hidden" id="end-date">
                 <input type="hidden" id="amount">
-
                 <button type="submit" class="send-button">确认发送合同</button>
             </form>
         </div>
     </div>
 
+    {# 向 message.js 传递初始数据 #}
     <script>
-        // 全局变量 - 初始状态
-        window.currentUsername = "{{ g.username | e }}";
-        window.activeChannelId = null;
-        window.activeTenantUsername = null;
-        window.activeLandlordUsername = null;
-        window.activeHousePrice = 0;
-        window.activeHouseDeposit = 0;
-
-        // 如果是从频道链接直接进入的，设置初始频道
-        {% if channel %}
-            window.initialChannelId = "{{ channel.channel_id }}";
-        {% else %}
-            window.initialChannelId = null;
-        {% endif %}
+        window.chatConfig = {
+            currentUsername: "{{ g.username | e }}",
+            initialChannelId: {% if channel %}"{{ channel.channel_id }}"{% else %}null{% endif %},
+            // 基本URL，如果JS中需要动态构建
+            baseUrl: "{{ request.script_root | e }}", // 例如 /your_app_prefix
+            feedbackBaseUrl: "{{ url_for('feedback.index', _external=False).replace('/feedback/', '/feedback') }}" // 获取feedback蓝图的基础路径
+        };
     </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 获取DOM元素
-            const chatListItems = document.querySelectorAll('.chat-list-item');
-            const chatHeader = document.getElementById('chat-header');
-            const messageContainer = document.getElementById('message-container');
-            const inputArea = document.getElementById('input-area');
-            const messageInput = document.getElementById('message-input');
-            const sendButton = document.getElementById('send-button');
-            const contractModal = document.getElementById('contract-modal');
-            const tenantNameDisplay = document.getElementById('tenant-name-display');
-            const houseNameDisplay = document.getElementById('house-name-display');
-
-            // 加载聊天函数
-            async function loadChat(channelId) {
-                if (!channelId) return;
-
-                // 更新UI，显示所选聊天
-                chatListItems.forEach(item => {
-                    item.classList.remove('active');
-                    if (item.dataset.channelId === channelId.toString()) {
-                        item.classList.add('active');
-                    }
-                });
-
-                try {
-                    // 请求聊天数据
-                    const response = await fetch(`/feedback/get_chat_data/${channelId}`);
-                    if (!response.ok) throw new Error('获取聊天数据失败');
-
-                    const data = await response.json();
-                    if (!data.success) throw new Error(data.error || '获取聊天数据失败');
-
-                    // 更新全局状态
-                    window.activeChannelId = channelId;
-                    window.activeTenantUsername = data.channel.tenant_username;
-                    window.activeLandlordUsername = data.channel.landlord_username;
-                    if (data.house) {
-                        window.activeHousePrice = data.house.price;
-                        window.activeHouseDeposit = data.house.deposit;
-                    }
-
-                    // 更新聊天头部
-                    updateChatHeader(data.channel, data.house);
-
-                    // 更新消息列表
-                    updateMessages(data.messages);
-
-                    // 显示输入区域
-                    inputArea.style.display = 'flex';
-
-                    // 标记消息为已读
-                    markMessagesAsRead(channelId);
-
-                } catch (error) {
-                    console.error('加载聊天失败:', error);
-                    messageContainer.innerHTML = `<p class="no-messages-placeholder">加载聊天失败: ${error.message}</p>`;
-                }
-            }
-
-            // 更新聊天头部
-            function updateChatHeader(channel, house) {
-                const isLandlord = window.currentUsername === channel.landlord_username;
-                const contactName = isLandlord ? channel.tenant_username : channel.landlord_username;
-                const contactRole = isLandlord ? '租客' : '房东';
-                const houseName = house ? house.house_name : '未知房源';
-
-                let headerHTML = `
-            <h2 style="position:relative;">
-                ${contactName}
-                <span style="font-size: 12px; color: #666; font-weight: normal;">
-                    (${contactRole})
-                </span>
-                <span style="font-size: 13px; color: #888; margin-left: 16px;">
-                    房源：${houseName}
-                </span>
-        `;
-
-                // 添加房源状态
-                if (channel.house_status === 0) {
-                    headerHTML += `<span style="color:green;margin-left:10px;margin-right:10px;">可出租</span>`;
-                    // 只有房东可以发送合同，按钮放在状态文本的右边
-                    if (isLandlord) {
-                        headerHTML += `<button id="send-contract-btn" class="send-button" style="margin-left:10px;display:inline-block;">发送合同</button>`;
-                    }
-                } else if (channel.house_status === 1) {
-                    headerHTML += `<span style="color:orange;margin-left:10px;">出租中</span>`;
-                } else if ([2, 4, 5].includes(channel.house_status)) {
-                    headerHTML += `<span style="color:red;margin-left:10px;">未上架</span>`;
-                }
-
-                headerHTML += `</h2>`;
-                chatHeader.innerHTML = headerHTML;
-
-                // 重新绑定发送合同按钮事件
-                const sendContractBtn = document.getElementById('send-contract-btn');
-                if (sendContractBtn) {
-                    sendContractBtn.addEventListener('click', () => {
-                        // 设置弹窗中的租客名和房源名
-                        tenantNameDisplay.textContent = channel.tenant_username;
-                        houseNameDisplay.textContent = houseName;
-
-                        // 显示合同弹窗
-                        contractModal.style.display = 'block';
-                    });
-                }
-            }
-
-            // 更新消息列表
-            function updateMessages(messages) {
-                if (!messages || messages.length === 0) {
-                    messageContainer.innerHTML = '<p class="no-messages-placeholder">开始你们的对话吧！</p>';
-                    return;
-                }
-
-                let messagesHTML = '';
-                messages.forEach(message => {
-                    const isSent = message.sender_username === window.currentUsername;
-
-                    // 修改这里 - 强制手动处理为北京时间，添加 8 小时
-                    const timestamp = new Date(message.timestamp);
-                    // 强制转换为北京时间 (不依赖浏览器时区)
-                    const beijingTimestamp = new Date(timestamp.getTime() + (8 - timestamp.getTimezoneOffset() / 60) * 3600000);
-                    const year = beijingTimestamp.getFullYear();
-                    const month = String(beijingTimestamp.getMonth() + 1).padStart(2, '0');
-                    const day = String(beijingTimestamp.getDate()).padStart(2, '0');
-                    const hour = String(beijingTimestamp.getHours()).padStart(2, '0');
-                    const minute = String(beijingTimestamp.getMinutes()).padStart(2, '0');
-                    const formattedTime = `${year}-${month}-${day} ${hour}:${minute}`;
-
-                    messagesHTML += `
-                <div class="message-item ${isSent ? 'sent' : 'received'}" data-timestamp="${message.timestamp}">
-                    <div class="message-content">
-                        <div class="message-bubble">${message.content}</div>
-                        <span class="message-timestamp">${formattedTime}</span>
-                    </div>
-                </div>
-            `;
-                });
-
-                messageContainer.innerHTML = messagesHTML;
-                messageContainer.scrollTop = messageContainer.scrollHeight; // 滚动到底部
-            }
-
-            // 标记消息为已读
-            function markMessagesAsRead(channelId) {
-                fetch(`/feedback/set_read/${channelId}`, {
-                    method: 'POST'
-                }).then(() => {
-                    // 隐藏未读标记
-                    const unreadBadge = document.getElementById(`unread-badge-${channelId}`);
-                    if (unreadBadge) {
-                        unreadBadge.style.display = 'none';
-                    }
-                }).catch(error => {
-                    console.error('标记消息为已读失败:', error);
-                });
-            }
-
-            // 发送消息
-            async function sendMessage(content) {
-                if (!content || !window.activeChannelId) return;
-
-                try {
-                    const formData = new FormData();
-                    formData.append('content', content);
-
-                    const response = await fetch(`/feedback/send_message/${window.activeChannelId}`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // 清空输入框
-                        messageInput.value = '';
-
-                        // 添加新消息到消息列表
-                        const placeholderEl = messageContainer.querySelector('.no-messages-placeholder');
-                        if (placeholderEl) {
-                            messageContainer.removeChild(placeholderEl);
-                        }
-
-                        // 修改这里 - 强制手动处理为北京时间，添加 8 小时
-                        const timestamp = new Date(data.message.timestamp);
-                        // 强制转换为北京时间 (不依赖浏览器时区)
-                        const beijingTimestamp = new Date(timestamp.getTime() + (8 - timestamp.getTimezoneOffset() / 60) * 3600000);
-                        const year = beijingTimestamp.getFullYear();
-                        const month = String(beijingTimestamp.getMonth() + 1).padStart(2, '0');
-                        const day = String(beijingTimestamp.getDate()).padStart(2, '0');
-                        const hour = String(beijingTimestamp.getHours()).padStart(2, '0');
-                        const minute = String(beijingTimestamp.getMinutes()).padStart(2, '0');
-                        const formattedTime = `${year}-${month}-${day} ${hour}:${minute}`;
-
-                        const newMessageEl = document.createElement('div');
-                        newMessageEl.className = 'message-item sent';
-                        newMessageEl.dataset.timestamp = data.message.timestamp;
-                        newMessageEl.innerHTML = `
-                    <div class="message-content">
-                        <div class="message-bubble">${data.message.content}</div>
-                        <span class="message-timestamp">${formattedTime}</span>
-                    </div>
-                `;
-
-                        messageContainer.appendChild(newMessageEl);
-                        messageContainer.scrollTop = messageContainer.scrollHeight; // 滚动到底部
-                    } else {
-                        alert('发送消息失败: ' + (data.error || '未知错误'));
-                    }
-                } catch (error) {
-                    console.error('发送消息失败:', error);
-                    alert('发送消息请求失败');
-                }
-            }
-
-            // 监听聊天列表点击事件
-            chatListItems.forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault(); // 阻止默认跳转
-                    const channelId = item.dataset.channelId;
-                    if (channelId !== window.activeChannelId) {
-                        loadChat(channelId);
-                    }
-                });
-            });
-
-            // 监听发送按钮点击事件
-            sendButton.addEventListener('click', () => {
-                const content = messageInput.value.trim();
-                if (content) {
-                    sendMessage(content);
-                }
-            });
-
-            // 监听输入框按键事件，Enter 发送
-            messageInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault(); // 阻止默认换行
-                    const content = messageInput.value.trim();
-                    if (content) {
-                        sendMessage(content);
-                    }
-                }
-            });
-
-            // 关闭合同弹窗
-            document.querySelector('.close-btn').addEventListener('click', () => {
-                contractModal.style.display = 'none';
-            });
-
-            // 监听日期和月数变动，自动计算
-            document.getElementById('start-date').addEventListener('change', updateCalculation);
-            document.getElementById('months').addEventListener('input', updateCalculation);
-
-            // 计算结束日期和总金额
-            function updateCalculation() {
-                const startDateStr = document.getElementById('start-date').value;
-                const months = parseInt(document.getElementById('months').value);
-
-                if (!startDateStr || isNaN(months) || months <= 0) {
-                    document.getElementById('calculated-end-date').textContent = '--';
-                    document.getElementById('calculated-amount').textContent = '--';
-                    return;
-                }
-
-                const startDate = new Date(startDateStr);
-                const endDate = new Date(startDate);
-                endDate.setMonth(endDate.getMonth() + months);
-
-                // 修正月份溢出问题
-                if (endDate.getDate() !== startDate.getDate()) {
-                    endDate.setDate(0); // 回退到上月最后一天
-                }
-
-                const endDateStr = endDate.toISOString().split('T')[0];
-                const totalAmount = (window.activeHousePrice * months + window.activeHouseDeposit).toFixed(2);
-
-                document.getElementById('calculated-end-date').textContent = endDateStr;
-                document.getElementById('calculated-amount').textContent = totalAmount;
-                document.getElementById('end-date').value = endDateStr;
-                document.getElementById('amount').value = totalAmount;
-            }
-
-            // 提交合同表单
-            document.getElementById('contract-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const startDate = document.getElementById('start-date').value;
-                const endDate = document.getElementById('end-date').value;
-                const amount = document.getElementById('amount').value;
-
-                if (!startDate || !endDate || !amount) {
-                    alert("请填写完整信息");
-                    return;
-                }
-
-                fetch("/feedback/send_contract", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        channel_id: window.activeChannelId,
-                        start_date: startDate,
-                        end_date: endDate,
-                        amount: amount,
-                        receiver_username: window.activeTenantUsername
-                    })
-                })
-                    .then(res => {
-                        if (!res.ok) throw new Error("网络或服务器错误：" + res.status);
-                        return res.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            alert("合同已发送");
-                            contractModal.style.display = 'none';
-                            // 重新加载聊天以显示新消息
-                            loadChat(window.activeChannelId);
-                        } else {
-                            alert("发送失败：" + data.msg);
-                        }
-                    })
-                    .catch(err => {
-                        console.error("请求出错：", err);
-                        alert("请求失败：" + err.message);
-                    });
-            });
-
-            // 初始加载聊天（如果有）
-            if (window.initialChannelId) {
-                loadChat(window.initialChannelId);
-            }
-        });
-    </script>
+    {# 确保 message-toast.js 在 message.js 之前加载 #}
+    <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/feedback/message.js') }}" defer></script>
 {% endblock %}

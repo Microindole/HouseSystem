@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const elementsToRemove = [
                 '#ai-chat-icon-container',
                 '#ai-chat-window',
-                '.user-sidebar',
+                '.user-sidebar', // 假设这是用户侧边栏的选择器
                 'script',
                 'style'
             ];
@@ -61,7 +61,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (node.nodeType === Node.ELEMENT_NODE) {
                                 const tagName = node.tagName.toLowerCase();
                                 // 忽略脚本、样式等标签
-                                if (['script', 'style', 'noscript'].includes(tagName)) {
+                                if (['script', 'style', 'noscript', 'button', 'input', 'textarea', 'select', 'option', 'label', 'form', 'a'].includes(tagName)) {
+                                    // 对于链接，可以考虑提取其文本或href，但这里简单忽略
+                                    return NodeFilter.FILTER_REJECT;
+                                }
+                                // 忽略具有特定类名的交互元素，例如导航栏中的按钮
+                                if (node.closest('nav') || node.closest('.header-nav') || node.closest('.footer-nav')) {
                                     return NodeFilter.FILTER_REJECT;
                                 }
                                 return NodeFilter.FILTER_ACCEPT;
@@ -81,14 +86,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else if (node.nodeType === Node.ELEMENT_NODE) {
                         const tagName = node.tagName.toLowerCase();
                         // 在某些标签后添加换行
-                        if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'br', 'li'].includes(tagName)) {
-                            content += '\n';
+                        if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'br', 'li', 'tr', 'article', 'section'].includes(tagName)) {
+                            if (!content.endsWith('\n')) { // 避免连续换行
+                                content += '\n';
+                            }
                         }
                     }
                 }
 
                 // 清理多余的空白字符
-                content = content.replace(/\s+/g, ' ').replace(/\n\s+/g, '\n').trim();
+                content = content.replace(/\s+/g, ' ').replace(/\n\s+/g, '\n').replace(/\n{2,}/g, '\n').trim();
                 return content;
             }
 
@@ -104,8 +111,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!aiChatHeader || !aiChatWindow) return;
 
         aiChatHeader.addEventListener('mousedown', function(e) {
-            // 检查是否点击的是按钮
-            if (e.target.tagName === 'BUTTON') return;
+            // 检查是否点击的是按钮或调整大小手柄
+            if (e.target.tagName === 'BUTTON' || e.target.classList.contains('resize-handle')) return;
 
             isDragging = true;
             aiChatWindow.classList.add('dragging');
@@ -150,11 +157,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function initializeResizing() {
         if (!aiChatWindow) return;
 
-        // 创建调整大小的手柄（如果不存在的话）
         let resizeHandle = aiChatWindow.querySelector('.resize-handle');
         if (!resizeHandle) {
             resizeHandle = document.createElement('div');
             resizeHandle.className = 'resize-handle';
+            // 样式可以移到CSS文件中
             resizeHandle.style.cssText = `
                 position: absolute;
                 bottom: 0;
@@ -162,7 +169,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 width: 20px;
                 height: 20px;
                 cursor: se-resize;
-                z-index: 1001;
+                z-index: 1001; /* Ensure it's above other elements in the chat window */
+                /* background: rgba(0,0,0,0.1); // Optional: make handle visible for debugging */
             `;
             aiChatWindow.appendChild(resizeHandle);
         }
@@ -174,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
             resizeStartWidth = parseInt(window.getComputedStyle(aiChatWindow).width, 10);
             resizeStartHeight = parseInt(window.getComputedStyle(aiChatWindow).height, 10);
             e.preventDefault();
-            e.stopPropagation();
+            e.stopPropagation(); // 防止触发拖拽
         });
 
         document.addEventListener('mousemove', function(e) {
@@ -183,11 +191,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const newWidth = resizeStartWidth + (e.clientX - resizeStartX);
             const newHeight = resizeStartHeight + (e.clientY - resizeStartY);
 
-            // 限制最小和最大尺寸
             const minWidth = 320;
             const minHeight = 400;
-            const maxWidth = Math.min(800, window.innerWidth - 40);
-            const maxHeight = Math.min(800, window.innerHeight - 40);
+            // 确保不会拖动到屏幕外或过小
+            const maxWidth = Math.min(800, window.innerWidth - parseFloat(aiChatWindow.style.left || 0) - 20);
+            const maxHeight = Math.min(800, window.innerHeight - parseFloat(aiChatWindow.style.top || 0) - 20);
+
 
             const finalWidth = Math.max(minWidth, Math.min(newWidth, maxWidth));
             const finalHeight = Math.max(minHeight, Math.min(newHeight, maxHeight));
@@ -201,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Auto-resize textarea
     if (chatInput) {
         chatInput.addEventListener('input', function () {
             this.style.height = 'auto';
@@ -210,21 +218,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function addMessageToUI(message, role, isStreamingUpdate = false) {
+        if (!chatMessagesContainer) return;
+
         if (role === 'assistant') {
             if (isStreamingUpdate && currentAssistantMessageElement) {
-                // Append new content to accumulated text
                 accumulatedStreamContent += message;
-                // Sanitize and render markdown for the full accumulated text
-                const unsafeHtml = marked.parse(accumulatedStreamContent);
-                currentAssistantMessageElement.innerHTML = DOMPurify.sanitize(unsafeHtml);
+                const unsafeHtml = marked.parse(accumulatedStreamContent); // Assuming 'marked' is available
+                currentAssistantMessageElement.innerHTML = DOMPurify.sanitize(unsafeHtml); // Assuming 'DOMPurify' is available
 
-                // Add cursor if still streaming
                 const cursorSpan = document.createElement('span');
                 cursorSpan.className = 'ai-chat-streaming-cursor';
                 currentAssistantMessageElement.appendChild(cursorSpan);
 
-            } else { // New assistant message (first part or full)
-                accumulatedStreamContent = message; // Reset for new message
+            } else {
+                accumulatedStreamContent = message;
                 const messageDiv = document.createElement('div');
                 messageDiv.classList.add('ai-chat-message', `ai-chat-${role}`);
 
@@ -234,19 +241,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 chatMessagesContainer.appendChild(messageDiv);
                 currentAssistantMessageElement = messageDiv;
 
-                if (message === "" || isStreamingUpdate) { // If empty or explicitly streaming, add cursor
+                if (message === "" || isStreamingUpdate) {
                     const cursorSpan = document.createElement('span');
                     cursorSpan.className = 'ai-chat-streaming-cursor';
                     currentAssistantMessageElement.appendChild(cursorSpan);
                 }
             }
-        } else { // User or System messages
+        } else {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('ai-chat-message', `ai-chat-${role}`);
-            // For user/system messages, just set textContent, no Markdown processing
-            messageDiv.textContent = message;
+            messageDiv.textContent = message; // For user/system messages, plain text is usually fine
             chatMessagesContainer.appendChild(messageDiv);
-            currentAssistantMessageElement = null; // Not streaming into user/system messages
+            currentAssistantMessageElement = null;
         }
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
     }
@@ -254,14 +260,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function finalizeAssistantMessage() {
         if (currentAssistantMessageElement) {
             const unsafeHtml = marked.parse(accumulatedStreamContent);
-            currentAssistantMessageElement.innerHTML = DOMPurify.sanitize(unsafeHtml); // Final render without cursor
+            currentAssistantMessageElement.innerHTML = DOMPurify.sanitize(unsafeHtml);
             currentAssistantMessageElement = null;
             accumulatedStreamContent = '';
         }
     }
 
     async function loadChatHistory() {
-        if (chatHistoryLoaded && !clearHistoryButton.disabled) return;
+        if (chatHistoryLoaded && clearHistoryButton && !clearHistoryButton.disabled) return;
         if (aiChatTypingIndicator) aiChatTypingIndicator.style.display = 'block';
 
         try {
@@ -272,12 +278,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             const history = await response.json();
-            chatMessagesContainer.innerHTML = '';
+            if (chatMessagesContainer) chatMessagesContainer.innerHTML = '';
             history.forEach(item => {
                 if (item.role === 'user') {
                     addMessageToUI(item.content, item.role);
                 } else if (item.role === 'assistant') {
-                    // For historical assistant messages, render them fully
                     accumulatedStreamContent = item.content;
                     addMessageToUI(item.content, item.role, false);
                     finalizeAssistantMessage();
@@ -289,11 +294,12 @@ document.addEventListener('DOMContentLoaded', function () {
             addMessageToUI('加载历史记录时出错。', 'system');
         } finally {
             if (aiChatTypingIndicator) aiChatTypingIndicator.style.display = 'none';
-            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+            if (chatMessagesContainer) chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
         }
     }
 
     function toggleChatWindow() {
+        if (!aiChatWindow || !aiChatIcon || !chatInput) return;
         const isHidden = aiChatWindow.classList.contains('hidden');
         if (isHidden) {
             aiChatWindow.classList.remove('hidden');
@@ -310,9 +316,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 页面分析功能
     async function analyzePage() {
-        if (!analyzePageButton) return;
+        if (!analyzePageButton || !chatInput || !chatSendButton || !clearHistoryButton || !chatMessagesContainer) return;
 
         analyzePageButton.classList.add('analyzing');
         analyzePageButton.disabled = true;
@@ -328,28 +333,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 addMessageToUI('无法获取页面内容进行分析。', 'system');
                 return;
             }
-
-            // 添加用户消息显示正在分析
             addMessageToUI('请分析当前页面的内容', 'user');
-
-            // 初始化新的助手消息泡泡用于流式输出
-            addMessageToUI("", 'assistant', false);
+            addMessageToUI("", 'assistant', false); // Initialize assistant message bubble
 
             const response = await fetch('/ai_chat/send_message', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: '请分析当前页面的内容，包括主要功能、页面结构和用户可以进行的操作。',
                     pageContent: pageContent
                 }),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                finalizeAssistantMessage();
-                if (currentAssistantMessageElement) currentAssistantMessageElement.remove();
+            if (!response.ok || !response.body) {
+                finalizeAssistantMessage(); // Clean up empty bubble
+                if(currentAssistantMessageElement) currentAssistantMessageElement.remove(); // remove bubble
+                const errorData = response.ok ? { error: "响应体为空" } : await response.json().catch(() => ({error: response.statusText}));
                 addMessageToUI(`分析页面时出错: ${errorData.error || response.statusText}`, 'system');
                 return;
             }
@@ -364,13 +363,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     finalizeAssistantMessage();
                     break;
                 }
-
                 buffer += decoder.decode(value, { stream: true });
                 let separatorIndex;
                 while ((separatorIndex = buffer.indexOf('\n\n')) >= 0) {
                     const line = buffer.substring(0, separatorIndex);
                     buffer = buffer.substring(separatorIndex + 2);
-
                     if (line.startsWith('data: ')) {
                         const chunk = line.substring(6).trim();
                         if (chunk) {
@@ -378,15 +375,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const jsonResponse = JSON.parse(chunk);
                                 if (jsonResponse.error) {
                                     finalizeAssistantMessage();
-                                    if (currentAssistantMessageElement) currentAssistantMessageElement.remove();
+                                    if(currentAssistantMessageElement) currentAssistantMessageElement.remove();
                                     addMessageToUI(`AI 分析错误: ${jsonResponse.error}`, 'system');
-                                    return;
+                                    return; // Stop further processing on error
                                 }
                                 if (jsonResponse.content) {
                                     addMessageToUI(jsonResponse.content, 'assistant', true);
                                 }
                                 if (jsonResponse.done) {
-                                    finalizeAssistantMessage();
+                                    finalizeAssistantMessage(); // Finalize even if more chunks might come, safety
                                 }
                             } catch (e) {
                                 console.error('Error parsing JSON chunk:', e, "Chunk:", chunk);
@@ -398,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error analyzing page:', error);
             finalizeAssistantMessage();
-            if (currentAssistantMessageElement) currentAssistantMessageElement.remove();
+            if(currentAssistantMessageElement) currentAssistantMessageElement.remove();
             addMessageToUI('页面分析时出错，请检查网络连接或联系管理员。', 'system');
         } finally {
             if (aiChatTypingIndicator) aiChatTypingIndicator.style.display = 'none';
@@ -412,17 +409,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    if (aiChatIcon) {
-        aiChatIcon.addEventListener('click', toggleChatWindow);
-    }
-
-    if (closeChatButton) {
-        closeChatButton.addEventListener('click', toggleChatWindow);
-    }
-
-    if (analyzePageButton) {
-        analyzePageButton.addEventListener('click', analyzePage);
-    }
+    if (aiChatIcon) aiChatIcon.addEventListener('click', toggleChatWindow);
+    if (closeChatButton) closeChatButton.addEventListener('click', toggleChatWindow);
+    if (analyzePageButton) analyzePageButton.addEventListener('click', analyzePage);
 
     document.addEventListener('keydown', function (event) {
         if (event.ctrlKey && event.altKey && (event.key === 'h' || event.key === 'H')) {
@@ -432,6 +421,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     async function sendMessage() {
+        if (!chatInput || !chatSendButton || !clearHistoryButton || !chatMessagesContainer) return;
         const messageText = chatInput.value.trim();
         if (!messageText) return;
 
@@ -444,28 +434,20 @@ document.addEventListener('DOMContentLoaded', function () {
         if (analyzePageButton) analyzePageButton.disabled = true;
         if (aiChatTypingIndicator) aiChatTypingIndicator.style.display = 'block';
 
-        // Initialize new assistant message bubble for streaming
-        addMessageToUI("", 'assistant', false);
+        addMessageToUI("", 'assistant', false); // Initialize assistant message bubble
 
         try {
-            // 获取当前页面内容
             const pageContent = getPageContent();
-
             const response = await fetch('/ai_chat/send_message', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: messageText,
-                    pageContent: pageContent
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: messageText, pageContent: pageContent }),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
+            if (!response.ok || !response.body) {
                 finalizeAssistantMessage();
-                if (currentAssistantMessageElement) currentAssistantMessageElement.remove();
+                if(currentAssistantMessageElement) currentAssistantMessageElement.remove();
+                const errorData = response.ok ? { error: "响应体为空" } : await response.json().catch(() => ({error: response.statusText}));
                 addMessageToUI(`错误: ${errorData.error || response.statusText}`, 'system');
                 return;
             }
@@ -480,13 +462,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     finalizeAssistantMessage();
                     break;
                 }
-
                 buffer += decoder.decode(value, { stream: true });
                 let separatorIndex;
                 while ((separatorIndex = buffer.indexOf('\n\n')) >= 0) {
                     const line = buffer.substring(0, separatorIndex);
                     buffer = buffer.substring(separatorIndex + 2);
-
                     if (line.startsWith('data: ')) {
                         const chunk = line.substring(6).trim();
                         if (chunk) {
@@ -494,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const jsonResponse = JSON.parse(chunk);
                                 if (jsonResponse.error) {
                                     finalizeAssistantMessage();
-                                    if (currentAssistantMessageElement) currentAssistantMessageElement.remove();
+                                    if(currentAssistantMessageElement) currentAssistantMessageElement.remove();
                                     addMessageToUI(`AI 错误: ${jsonResponse.error}`, 'system');
                                     return;
                                 }
@@ -514,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error sending message:', error);
             finalizeAssistantMessage();
-            if (currentAssistantMessageElement) currentAssistantMessageElement.remove();
+            if(currentAssistantMessageElement) currentAssistantMessageElement.remove();
             addMessageToUI('发送消息时出错，请检查网络连接或联系管理员。', 'system');
         } finally {
             if (aiChatTypingIndicator) aiChatTypingIndicator.style.display = 'none';
@@ -527,10 +507,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    if (chatSendButton) {
-        chatSendButton.addEventListener('click', sendMessage);
-    }
-
+    if (chatSendButton) chatSendButton.addEventListener('click', sendMessage);
     if (chatInput) {
         chatInput.addEventListener('keypress', function (event) {
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -547,9 +524,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (clearHistoryButton) {
         clearHistoryButton.addEventListener('click', async () => {
-            if (!confirm("确定要清除当前对话的所有记录吗？系统提示将保留。")) {
+            if (!chatInput || !chatSendButton || !clearHistoryButton || !chatMessagesContainer) return;
+
+            let confirmed = false;
+            // MODIFIED: Using window.showConfirm
+            if (window.showConfirm) {
+                confirmed = await window.showConfirm("确定要清除当前对话的所有记录吗？此操作将保留系统提示。", { // Clarified system messages retention
+                    title: "清除确认",
+                    type: "warning",
+                    confirmText: "确定清除",
+                    cancelText: "取消"
+                });
+            } else { // Fallback to native confirm
+                confirmed = confirm("确定要清除当前对话的所有记录吗？此操作将保留系统提示。");
+            }
+
+            if (!confirmed) {
                 return;
             }
+
             chatInput.disabled = true;
             chatSendButton.disabled = true;
             clearHistoryButton.disabled = true;
@@ -559,15 +552,16 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const response = await fetch('/ai_chat/clear_history', { method: 'POST' });
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    const errorData = await response.json().catch(() => ({ message: response.statusText }));
                     addMessageToUI(`清除历史记录失败: ${errorData.message || response.statusText}`, 'system');
                     return;
                 }
-                chatMessagesContainer.innerHTML = '';
-                addMessageToUI('聊天记录已清除。新的对话开始了。', 'system');
-                chatHistoryLoaded = false;
+                chatMessagesContainer.innerHTML = ''; // Clear UI
+                addMessageToUI('聊天记录已清除。新的对话开始了。', 'system'); // Add system message to chat UI
+                chatHistoryLoaded = false; // Allow reloading history if needed, or set to true if new session starts clean
                 currentAssistantMessageElement = null;
                 accumulatedStreamContent = '';
+                // Optionally, call loadChatHistory() if you want to fetch a "new session started" message from backend
             } catch (error) {
                 console.error('Error clearing chat history:', error);
                 addMessageToUI('清除历史记录时出错。', 'system');
@@ -582,7 +576,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 初始化拖拽和调整大小功能
     initializeDragging();
     initializeResizing();
 });

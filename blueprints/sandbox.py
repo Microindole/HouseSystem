@@ -11,44 +11,44 @@ pay_bp = Blueprint('pay', __name__)
 def index():
     return render_template('index.html')
 
-@pay_bp.route('/pay', methods=['GET', 'POST'])
-@login_required
-def good_list_view():
-    if request.method == 'GET':
-        return render_template('paytest.html')
-    # 如果是post，我们认为是购买
-    alipay = alipay_obj()
-
-    # 生成唯一的订单号
-    # 方法1: 时间戳（到秒）+ 4位随机数
-    # current_time_str = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    # random_suffix = "".join(random.sample("0123456789", 4))
-    # unique_out_trade_no = f"{current_time_str}{random_suffix}"
-
-    # 方法2: 更精确的时间戳（到毫秒）
-    unique_out_trade_no = str(int(time.time() * 1000)) + str(random.randint(1000,9999))
-
-
-    # 生成支付路由
-    # 拼接url--返回url
-    # 电脑网站支付，需要跳转到：https://openapi-sandbox.dl.alipaydev.com/gateway.do + order_string
-    order_string = alipay.api_alipay_trade_page_pay(
-        # 这个订单号根据具体的商品名称进行修改，注意，路由可能要相应修改，这里是用时间戳生成随机订单号
-        out_trade_no=unique_out_trade_no,  # 使用动态生成的唯一订单号
-
-        # 注意，这里商品价格和商品名称也要实时修改
-
-        total_amount=99999,  # 商品价格
-        subject='999克拉的钻石',  # 商品的名称
-
-
-
-
-        return_url=ALIPAY_SETTING.get('ALIPAY_RETURN_URL'),  # 同步回调网址--用于前端，付成功之后回调
-        notify_url=ALIPAY_SETTING.get('ALIPAY_NOTIFY_URL')  # 异步回调网址---后端使用，post请求，网站未上线，post无法接收到响应内容
-    )
-    url = ALIPAY_SETTING.get('APIPAY_GATEWAY') + '?' + order_string
-    return jsonify({'url': url, 'status': 1})
+# @pay_bp.route('/pay', methods=['GET', 'POST'])
+# @login_required
+# def good_list_view():
+#     if request.method == 'GET':
+#         return render_template('paytest.html')
+#     # 如果是post，我们认为是购买
+#     alipay = alipay_obj()
+#
+#     # 生成唯一的订单号
+#     # 方法1: 时间戳（到秒）+ 4位随机数
+#     # current_time_str = time.strftime("%Y%m%d%H%M%S", time.localtime())
+#     # random_suffix = "".join(random.sample("0123456789", 4))
+#     # unique_out_trade_no = f"{current_time_str}{random_suffix}"
+#
+#     # 方法2: 更精确的时间戳（到毫秒）
+#     unique_out_trade_no = str(int(time.time() * 1000)) + str(random.randint(1000,9999))
+#
+#
+#     # 生成支付路由
+#     # 拼接url--返回url
+#     # 电脑网站支付，需要跳转到：https://openapi-sandbox.dl.alipaydev.com/gateway.do + order_string
+#     order_string = alipay.api_alipay_trade_page_pay(
+#         # 这个订单号根据具体的商品名称进行修改，注意，路由可能要相应修改，这里是用时间戳生成随机订单号
+#         out_trade_no=unique_out_trade_no,  # 使用动态生成的唯一订单号
+#
+#         # 注意，这里商品价格和商品名称也要实时修改
+#
+#         total_amount=99999,  # 商品价格
+#         subject='999克拉的钻石',  # 商品的名称
+#
+#
+#
+#
+#         return_url=ALIPAY_SETTING.get('ALIPAY_RETURN_URL'),  # 同步回调网址--用于前端，付成功之后回调
+#         notify_url=ALIPAY_SETTING.get('ALIPAY_NOTIFY_URL')  # 异步回调网址---后端使用，post请求，网站未上线，post无法接收到响应内容
+#     )
+#     url = ALIPAY_SETTING.get('APIPAY_GATEWAY') + '?' + order_string
+#     return jsonify({'url': url, 'status': 1})
 
 @pay_bp.route('/alipay/success_result/', methods=['POST', 'GET'])
 @login_required

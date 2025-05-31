@@ -43,11 +43,16 @@
         </tbody>
     </table>
 </div>
+<script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 <script>
 function rejectAudit(auditId) {
     const reason = prompt("请输入拒绝理由：");
     if (reason === null || reason.trim() === "") {
-        alert("拒绝理由不能为空！");
+        if (window.showMessage) {
+            window.showMessage("拒绝理由不能为空！", "warning");
+        } else {
+            alert("拒绝理由不能为空！");
+        }
         return;
     }
 
@@ -64,15 +69,27 @@ function rejectAudit(auditId) {
     .then(response => response.json())
     .then(data => {
         if (data.code === 200) {
-            alert("拒绝成功！");
+            if (window.showMessage) {
+                window.showMessage("拒绝成功！", "success");
+            } else {
+                alert("拒绝成功！");
+            }
             location.reload();
         } else {
-            alert("操作失败：" + data.msg);
+            if (window.showMessage) {
+                window.showMessage("操作失败", "error");
+            } else {
+                alert("操作失败");
+            }
         }
     })
     .catch(err => {
         console.error(err);
-        alert("请求出错！");
+        if (window.showMessage) {
+            window.showMessage("请求出错", "error");
+        } else {
+            alert("请求出错");
+        }
     });
 }
 

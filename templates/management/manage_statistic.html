@@ -34,6 +34,7 @@
       text-align: center;
     }
   </style>
+  <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
   <script>
       function fetchRentRateData() {
     // 获取开始和结束日期
@@ -41,7 +42,11 @@
     const endDate = document.getElementById('endDate').value;
 
     if (!startDate || !endDate) {
-      alert('请填写开始和结束日期');
+        if (window.showMessage) {
+            window.showMessage('请填写开始和结束日期', "info");
+        } else {
+            alert('请填写开始和结束日期');
+        }
       return;
     }
     // 获取并绘制出租率数据
@@ -88,10 +93,18 @@
         return response.json();
       })
       .then(data => {
-        alert(`操作成功：${data.message}\n出租率为 ${data.rent_rate}%`);
+          if (window.showMessage) {
+              window.showMessage(`操作成功：${data.message}\n出租率为 ${data.rent_rate}%`, "success");
+          } else {
+              alert(`操作成功：${data.message}\n出租率为 ${data.rent_rate}%`);
+          }
       })
       .catch(error => {
-        alert("手动更新失败：" + error.message);
+          if (window.showMessage) {
+              window.showMessage("手动更新失败：" + error.message, "warning");
+          } else {
+              alert("手动更新失败：" + error.message);
+          }
         console.error("更新失败:", error);
       });
   });
