@@ -1,11 +1,7 @@
 from datetime import datetime, timedelta
-import os
-from werkzeug.utils import secure_filename
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, session, flash ,current_app,request, jsonify, session, g
-from sqlalchemy import func, cast, Date
 from sqlalchemy.orm import joinedload
 import jwt
-from functools import wraps
 from flask import make_response
 
 from models import LoginModel, db, TenantModel, LandlordModel, HouseStatusModel, DailyRentRateModel, \

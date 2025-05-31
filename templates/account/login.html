@@ -2,106 +2,153 @@
 
 {% block title %}登录{% endblock %}
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/account/login.css') }}">
-
+    <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account/login.css') }}">
+    {# Add a style to hide the original flash message ul if it's not removed #}
+    <style>
+        ul.flash-messages {
+            display: none !important; /* Hide original flash message display */
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-<div class="login-page">
-    <div class="login-container">
-        <div class="login-header">
-            <h1>登录到智能房屋租赁系统</h1>
-        </div>
-        <!-- 处理 flash 消息 -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <ul class="flash-messages">
-                {% for category, message in messages %}
-                    <li class="error-message">{{ message }}</li>
-                {% endfor %}
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>登录到智能房屋租赁系统</h1>
+            </div>
+
+            {# This section will now be hidden by the style in block head, toasts will be used instead #}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flash-messages">
+                        {% for category, message in messages %}
+                            {# This list item will be hidden by CSS. The script below will handle display. #}
+                            <li class="error-message">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            {# These conditional blocks for 'error' and 'errors' might display other types of errors #}
+            {# not sent via flash, or could be part of an older error display mechanism. #}
+            {# If all errors from account.py's login flow are now flashed, these might be redundant #}
+            {# or could be integrated into the toast system if desired, but that's a separate step. #}
+            {% if error %}
+                <p class="error-message">{{ error }}</p>
+            {% endif %}
+            {% if errors %} {# This is typically for WTForms form.errors passed directly to template #}
+                <ul class="error-list">
+                    {% for field, field_errors in errors.items() %} {# Renamed 'messages' to 'field_errors' for clarity #}
+                        {% for e_msg in field_errors %} {# Renamed 'message' to 'e_msg' #}
+                            <li class="error-message">{{ field }}: {{ e_msg }}</li>
+                        {% endfor %}
+                    {% endfor %}
                 </ul>
             {% endif %}
-        {% endwith %}
-        {% if error %}
-        <p class="error-message">{{ error }}</p>
-        {% endif %}
-        {% if errors %}
-        <ul class="error-list">
-            {% for field, messages in errors.items() %}
-                {% for message in messages %}
-                    <li class="error-message">{{ field }}: {{ message }}</li>
-                {% endfor %}
-            {% endfor %}
-        </ul>
-        {% endif %}
-        <div id="login-main-panel">
-            <form method="POST" action="/account/login" class="login-form">
-                <div class="form-group">
-                    <label for="username">用户名</label>
-                    <input type="text" id="username" name="username" placeholder="请输入用户名" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">密码</label>
-                    <input type="password" id="password" name="password" placeholder="请输入密码" required>
-                </div>
-                <div class="form-group">
-                    <label for="role">角色</label>
-                    <select id="role" name="role" required>
-                        <option value="tenant">租客</option>
-                        <option value="landlord">房东</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">登录</button>
-            </form>
-            <p class="register-link">
-                若无账号，请 <a href="{{ url_for('account.register') }}">点我注册</a>
-            </p>
-            <p class="register-link">
-                <a href="javascript:void(0);" id="forget-password-link">忘记密码？</a>
-            </p>
-        </div>
-        <div id="forget-password-panel" style="display:none;">
-            <form id="forget-password-form">
-                <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" id="fp-username" required>
-                </div>
-                <div class="form-group">
-                    <label>邮箱</label>
-                    <input type="email" id="fp-email" required>
-                </div>
-                <div class="form-group">
-                    <label>验证码</label>
-                    <div class="code-row">
-                        <input type="text" id="fp-code" placeholder="请输入验证码" required>
-                        <button type="button" id="fp-send-code-btn" class="btn">获取验证码</button>
+
+            <div id="login-main-panel">
+                <form method="POST" action="{{ url_for('account.login') }}" class="login-form">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" name="username" placeholder="请输入用户名" required>
                     </div>
-                </div>
-                <div class="fp-btn-row">
-                    <button type="button" id="fp-back-login-btn" class="fp-back-link">返回登录</button>
-                    <button type="button" id="fp-next-btn" class="btn">下一步</button>
-                </div>
-            </form>
-            <div id="fp-error-msg" style="color:red;display:none;"></div>
-            
-        </div>
-        <div id="reset-password-panel" style="display:none;">
-            <form id="reset-password-form">
-                <div class="form-group">
-                    <label>新密码</label>
-                    <input type="password" id="rp-password" required>
-                </div>
-                <div class="form-group">
-                    <label>确认新密码</label>
-                    <input type="password" id="rp-confirm-password" required>
-                </div>
-                <button class="btn" type="button" id="rp-submit-btn">提交</button>
-            </form>
-        </div>
-        <div style="text-align: right; font-size: 0.8em; margin-top: 30px; opacity: 0.5;">
-            <a href="{{ url_for('account.admin_login') }}" style="color: #777; text-decoration: none;">管理员入口</a>
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" name="password" placeholder="请输入密码" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">角色</label>
+                        <select id="role" name="role" required>
+                            <option value="tenant">租客</option>
+                            <option value="landlord">房东</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">登录</button>
+                </form>
+                <p class="register-link">
+                    若无账号，请 <a href="{{ url_for('account.register') }}">点我注册</a>
+                </p>
+                <p class="register-link">
+                    <a href="javascript:void(0);" id="forget-password-link">忘记密码？</a>
+                </p>
+            </div>
+            <div id="forget-password-panel" style="display:none;">
+                <form id="forget-password-form">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="fp-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="fp-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>验证码</label>
+                        <div class="code-row">
+                            <input type="text" id="fp-code" placeholder="请输入验证码" required>
+                            <button type="button" id="fp-send-code-btn" class="btn">获取验证码</button>
+                        </div>
+                    </div>
+                    <div class="fp-btn-row">
+                        <button type="button" id="fp-back-login-btn" class="fp-back-link">返回登录</button>
+                        <button type="button" id="fp-next-btn" class="btn">下一步</button>
+                    </div>
+                </form>
+                <div id="fp-error-msg" style="color:red;display:none;"></div>
+            </div>
+            <div id="reset-password-panel" style="display:none;">
+                <form id="reset-password-form">
+                    <div class="form-group">
+                        <label>新密码</label>
+                        <input type="password" id="rp-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>确认新密码</label>
+                        <input type="password" id="rp-confirm-password" required>
+                    </div>
+                    <button class="btn" type="button" id="rp-submit-btn">提交</button>
+                </form>
+            </div>
+            <div style="text-align: right; font-size: 0.8em; margin-top: 30px; opacity: 0.5;">
+                <a href="{{ url_for('account.admin_login') }}" style="color: #777; text-decoration: none;">管理员入口</a>
+            </div>
         </div>
     </div>
-</div>
-<script src="{{ url_for('static', filename='js/account/login.js') }}" defer></script>
+
+    <script src="{{ url_for('static', filename='js/account/login.js') }}" defer></script>
+
+    {# JavaScript to render flashed messages as toasts #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        var toastType = '{{ category }}';
+                        // Flask's default category for flash(message) is 'message'. Map to 'info'.
+                        // Other categories ('error', 'success', 'warning') from account.py are already standard.
+                        if (toastType === 'message') {
+                            toastType = 'info';
+                        }
+                        // Ensure toastType is one of the valid types for message-toast, default to 'info'
+                        const validToastTypes = ['success', 'error', 'warning', 'info'];
+                        if (!validToastTypes.includes(toastType)) {
+                            console.warn('Unknown flash category received: ' + toastType + '. Defaulting to info type for toast.');
+                            toastType = 'info';
+                        }
+
+                        if (window.showMessage) {
+                            // Use tojson filter to correctly escape message for JavaScript string
+                            window.showMessage({{ message|tojson|safe }}, toastType);
+                        } else {
+                            // Fallback if message-toast.js or window.showMessage isn't available
+                            console.warn("MessageToast's showMessage function is not available. Displaying as alert. Message: [" + toastType + "] " + {{ message|tojson|safe }});
+                            alert("[" + toastType + "] " + {{ message|tojson|safe }}); // Basic alert fallback
+                        }
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        });
+    </script>
 {% endblock %}

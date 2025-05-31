@@ -415,7 +415,7 @@ function performDelete(houseId) {
             if (typeof messageToast !== 'undefined') {
                 messageToast.success(data.message);
             } else {
-                alert('删除成功: ' + data.message);
+                window.showAlert('删除成功: ' + data.message);
             }
             setTimeout(() => {
                 location.reload();
@@ -424,7 +424,7 @@ function performDelete(houseId) {
             if (typeof messageToast !== 'undefined') {
                 messageToast.error('删除失败：' + data.message);
             } else {
-                alert('删除失败：' + data.message);
+                window.showAlert('删除失败：' + data.message);
             }
         }
     })

@@ -2,20 +2,6 @@
 let fpCodeTimer = null;
 let fpCodeCountdown = 60;
 
-// 显示错误提示
-function showFpError(msg) {
-    let err = document.getElementById('fp-error-msg');
-    if (!err) {
-        err = document.createElement('div');
-        err.id = 'fp-error-msg';
-        err.style.color = 'red';
-        err.style.margin = '8px 0';
-        document.getElementById('forget-password-panel').insertBefore(err, document.getElementById('forget-password-form'));
-    }
-    err.textContent = msg;
-    err.style.display = msg ? 'block' : 'none';
-}
-
 // 发送验证码倒计时
 function startFpCodeCountdown() {
     const btn = document.getElementById('fp-send-code-btn');
@@ -27,7 +13,7 @@ function startFpCodeCountdown() {
             clearInterval(fpCodeTimer);
             btn.disabled = false;
             btn.textContent = '获取验证码';
-            fpCodeCountdown = 60;
+            fpCodeCountdown = 60; // Reset countdown
         } else {
             btn.textContent = `${fpCodeCountdown}s后重试`;
         }
@@ -39,7 +25,7 @@ document.getElementById('forget-password-link').onclick = function() {
     document.getElementById('login-main-panel').style.display = 'none';
     document.getElementById('forget-password-panel').style.display = '';
     document.getElementById('reset-password-panel').style.display = 'none';
-    showFpError('');
+    // showFpError(''); // No longer needed
 };
 
 // 2. 获取验证码
@@ -47,7 +33,11 @@ document.getElementById('fp-send-code-btn').onclick = function() {
     const username = document.getElementById('fp-username').value.trim();
     const email = document.getElementById('fp-email').value.trim();
     if (!username || !email) {
-        showFpError('请输入用户名和邮箱');
+        if (window.showMessage) {
+            window.showMessage('请输入用户名和邮箱', 'warning');
+        } else {
+            alert('请输入用户名和邮箱');
+        }
         return;
     }
     fetch('/account/send_reset_code', {
@@ -55,19 +45,31 @@ document.getElementById('fp-send-code-btn').onclick = function() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({username, email})
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showFpError('');
-            startFpCodeCountdown();
-        } else {
-            showFpError(data.msg || '发送失败');
-        }
-        // alert(data.msg);
-    })
-    .catch(() => {
-        showFpError('网络错误，请稍后重试');
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // showFpError(''); // No longer needed
+                if (window.showMessage) {
+                    window.showMessage(data.msg || '验证码已发送，请查收！', 'success');
+                } else {
+                    alert(data.msg || '验证码已发送，请查收！');
+                }
+                startFpCodeCountdown();
+            } else {
+                if (window.showMessage) {
+                    window.showMessage(data.msg || '发送失败', 'error');
+                } else {
+                    alert(data.msg || '发送失败');
+                }
+            }
+        })
+        .catch(() => {
+            if (window.showMessage) {
+                window.showMessage('网络错误，请稍后重试', 'error');
+            } else {
+                alert('网络错误，请稍后重试');
+            }
+        });
 };
 
 // 3. 下一步，校验验证码
@@ -76,7 +78,11 @@ document.getElementById('fp-next-btn').onclick = function() {
     const email = document.getElementById('fp-email').value.trim();
     const code = document.getElementById('fp-code').value.trim();
     if (!username || !email || !code) {
-        showFpError('请填写完整信息');
+        if (window.showMessage) {
+            window.showMessage('请填写完整信息', 'warning');
+        } else {
+            alert('请填写完整信息');
+        }
         return;
     }
     fetch('/account/verify_reset_code', {
@@ -84,34 +90,51 @@ document.getElementById('fp-next-btn').onclick = function() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({username, email, code})
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showFpError('');
-            document.getElementById('forget-password-panel').style.display = 'none';
-            document.getElementById('reset-password-panel').style.display = '';
-        } else {
-            showFpError(data.msg);
-        }
-    })
-    .catch(() => {
-        showFpError('网络错误，请稍后重试');
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                // showFpError(''); // No longer needed
+                document.getElementById('forget-password-panel').style.display = 'none';
+                document.getElementById('reset-password-panel').style.display = '';
+            } else {
+                if (window.showMessage) {
+                    window.showMessage(data.msg || '验证码校验失败', 'error');
+                } else {
+                    alert(data.msg || '验证码校验失败');
+                }
+            }
+        })
+        .catch(() => {
+            if (window.showMessage) {
+                window.showMessage('网络错误，请稍后重试', 'error');
+            } else {
+                alert('网络错误，请稍后重试');
+            }
+        });
 };
 
 // 4. 提交新密码
-document.getElementById('rp-submit-btn').onclick = function() {
+document.getElementById('rp-submit-btn').onclick = function() { // Removed async
     const username = document.getElementById('fp-username').value.trim();
     const email = document.getElementById('fp-email').value.trim();
     const code = document.getElementById('fp-code').value.trim();
     const password = document.getElementById('rp-password').value.trim();
-    const confirm = document.getElementById('rp-confirm-password').value.trim();
+    const confirm_password = document.getElementById('rp-confirm-password').value.trim();
+
     if (!password || password.length < 6) {
-        alert('密码至少6位');
+        if (window.showMessage) {
+            window.showMessage('密码至少6位', 'warning');
+        } else {
+            alert('密码至少6位');
+        }
         return;
     }
-    if (password !== confirm) {
-        alert('两次密码不一致');
+    if (password !== confirm_password) {
+        if (window.showMessage) {
+            window.showMessage('两次密码不一致', 'warning');
+        } else {
+            alert('两次密码不一致');
+        }
         return;
     }
     fetch('/account/reset_password', {
@@ -119,19 +142,39 @@ document.getElementById('rp-submit-btn').onclick = function() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({username, email, code, password})
     })
-    .then(res => res.json())
-    .then(data => {
-        // alert(data.msg);
-        if (data.success) {
-            location.reload();
-        }
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                if (window.showMessage) {
+                    window.showMessage(data.msg || '密码重置成功！', 'success');
+                } else {
+                    alert(data.msg || '密码重置成功！');
+                }
+                // Add a slight delay before reload to allow user to see the message
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                if (window.showMessage) {
+                    window.showMessage(data.msg || '密码重置失败。', 'error');
+                } else {
+                    alert(data.msg || '密码重置失败。');
+                }
+            }
+        })
+        .catch(() => {
+            if (window.showMessage) {
+                window.showMessage('网络错误，请稍后重试', 'error');
+            } else {
+                alert('网络错误，请稍后重试');
+            }
+        });
 };
 
 // 返回登录按钮事件
-document.getElementById('fp-back-login-btn').onclick = function() {
+    document.getElementById('fp-back-login-btn').onclick = function() {
     document.getElementById('login-main-panel').style.display = '';
     document.getElementById('forget-password-panel').style.display = 'none';
     document.getElementById('reset-password-panel').style.display = 'none';
-    showFpError('');
+    // showFpError(''); // No longer needed
 };

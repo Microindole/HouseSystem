@@ -1,7 +1,3 @@
-/**
- * 消息提示模块
- * 用于显示成功、错误、警告等类型的提示消息
- */
 class MessageToast {
     constructor() {
         this.toastContainer = null;
@@ -13,14 +9,14 @@ class MessageToast {
      */
     init() {
         if (this.initialized) return;
-        
+
         // 确保 DOM 已加载
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.initContainer());
         } else {
             this.initContainer();
         }
-        
+
         this.initialized = true;
     }
 
@@ -45,7 +41,7 @@ class MessageToast {
         this.toastContainer.className = 'toast-container';
         this.toastContainer.style.cssText = `
             position: fixed;
-            top: 20px;
+            top: 30px; /* MODIFIED: 原来是 20px, 向下移动一点 */
             right: 20px;
             z-index: 10000;
             pointer-events: none;
@@ -74,15 +70,15 @@ class MessageToast {
      */
     show(message, type = 'success', duration = 3000) {
         this.ensureInitialized();
-        
+
         // 创建消息元素
         const messageDiv = document.createElement('div');
         messageDiv.className = `message-toast message-${type}`;
         messageDiv.textContent = message;
-        
+
         // 设置基础样式
         messageDiv.style.cssText = `
-            padding: 12px 20px;
+            padding: 15px 25px; /* MODIFIED: 原来是 12px 20px, 增大内边距使其更大 */
             margin-bottom: 10px;
             border-radius: 6px;
             color: white;
@@ -94,7 +90,7 @@ class MessageToast {
             word-wrap: break-word;
             pointer-events: auto;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px; /* MODIFIED: 原来是 14px, 增大字体使其更大 */
             line-height: 1.5;
             position: relative;
             overflow: hidden;
@@ -104,7 +100,7 @@ class MessageToast {
         this.setTypeStyle(messageDiv, type);
 
         // 添加关闭按钮
-        this.addCloseButton(messageDiv);
+        this.addCloseButton(messageDiv); // addCloseButton 会调整 paddingRight
 
         // 添加到容器
         this.toastContainer.appendChild(messageDiv);
@@ -136,7 +132,7 @@ class MessageToast {
      */
     confirm(message, options = {}) {
         this.ensureInitialized();
-        
+
         return new Promise((resolve) => {
             const {
                 title = '确认操作',
@@ -196,14 +192,14 @@ class MessageToast {
                 align-items: center;
                 justify-content: center;
             `;
-            
+
             const iconStyles = {
                 warning: { text: '⚠️', color: '#ffc107' },
                 error: { text: '❌', color: '#dc3545' },
                 info: { text: 'ℹ️', color: '#17a2b8' },
                 success: { text: '✅', color: '#28a745' }
             };
-            
+
             const iconConfig = iconStyles[type] || iconStyles.warning;
             icon.textContent = iconConfig.text;
             icon.style.color = iconConfig.color;
@@ -269,14 +265,14 @@ class MessageToast {
             // 确认按钮
             const confirmButton = document.createElement('button');
             confirmButton.textContent = confirmText;
-            
+
             const buttonStyles = {
                 warning: '#ffc107',
                 error: '#dc3545',
                 info: '#17a2b8',
                 success: '#28a745'
             };
-            
+
             const buttonColor = buttonStyles[type] || buttonStyles.warning;
             confirmButton.style.cssText = `
                 padding: 8px 20px;
@@ -318,7 +314,7 @@ class MessageToast {
             };
 
             confirmButton.addEventListener('click', () => handleClose(true));
-            
+
             // 点击遮罩层关闭
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
@@ -337,7 +333,7 @@ class MessageToast {
 
             // 显示对话框
             document.body.appendChild(overlay);
-            
+
             // 动画显示
             setTimeout(() => {
                 overlay.style.opacity = '1';
@@ -386,7 +382,7 @@ class MessageToast {
             warning: 'linear-gradient(135deg, #ffc107, #fd7e14)',
             info: 'linear-gradient(135deg, #17a2b8, #007bff)'
         };
-        
+
         element.style.background = styles[type] || styles.info;
     }
 
@@ -399,9 +395,9 @@ class MessageToast {
         closeBtn.innerHTML = '&times;';
         closeBtn.style.cssText = `
             position: absolute;
-            top: 8px;
+            top: 8px; /* 调整关闭按钮位置以适应新的padding */
             right: 12px;
-            font-size: 18px;
+            font-size: 20px; /* 可选：稍微增大关闭按钮 */
             font-weight: bold;
             cursor: pointer;
             opacity: 0.8;
@@ -413,8 +409,10 @@ class MessageToast {
             closeBtn.style.opacity = '0.8';
         });
         element.appendChild(closeBtn);
-        
-        // 为了给关闭按钮留空间，调整padding
+
+        // 为了给关闭按钮留空间，调整padding-right
+        // 基于新的 padding: 15px 25px; 和关闭按钮尺寸，40px 可能仍然合适
+        // 如果关闭按钮变大很多，或者希望右侧有更多空间，可以增加这个值
         element.style.paddingRight = '40px';
     }
 
@@ -425,7 +423,7 @@ class MessageToast {
     hide(element) {
         element.style.transform = 'translateX(100%)';
         element.style.opacity = '0';
-        
+
         setTimeout(() => {
             if (element.parentNode) {
                 element.parentNode.removeChild(element);
