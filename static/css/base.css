@@ -1,59 +1,81 @@
 /* 顶部导航栏样式 */
 .navbar {
-    background-color: #24292f; /* GitHub 登录成功后的深灰色背景 */
-    color: white;
-    padding: 5px 15px; /* 减小顶部条的内边距 */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: #24292f; /* 深灰色背景 */
+    color: white;
+    padding: 10px 20px; /* 增加内边距 */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
-    height: 50px; /* 固定高度 */
-    position: relative; /* 确保子元素定位正常 */
-    z-index: 1000; /* 确保导航栏在最上层 */
+    height: 60px; /* 固定高度 */
+    position: relative;
+    z-index: 1000;
 }
 
-.navbar a {
+/* 乐居阁字样样式 */
+.navbar .logo {
+    font-size: 1.8rem;
+    font-weight: bold;
     color: white;
     text-decoration: none;
-    margin-right: 15px;
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 1.5; /* 调整文字的行高 */
+    display: inline-block; /* 确保横向显示 */
+    margin-right: 20px; /* 与其他元素保持间距 */
 }
 
-.navbar a:hover {
-    text-decoration: underline;
-}
-
+/* 搜索框样式 */
 .navbar .search-bar {
     display: flex;
     align-items: center;
-    margin: 0; /* 确保搜索按钮没有额外的外边距 */
+    flex: 1; /* 搜索框占据中间部分 */
+    justify-content: center;
 }
 
 .navbar .search-bar input[type="text"] {
-    padding: 5px;
-    border: none;
-    border-radius: 3px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     margin-right: 10px;
+    width: 300px; /* 固定宽度 */
 }
 
 .navbar .search-bar button {
-    padding: 5px 10px;
-    background-color: #2ea44f; /* GitHub 的绿色按钮 */
+    padding: 8px 16px;
+    background-color: #2ea44f; /* 绿色按钮 */
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s ease;
-    height: 30px; /* 按钮高度与导航条一致 */
-    margin: 0; /* 确保按钮没有额外的外边距 */
-    z-index: 1001; /* 确保按钮在导航栏内 */
 }
 
 .navbar .search-bar button:hover {
-    background-color: #2c974b; /* 按钮悬停时的颜色 */
+    background-color: #22863a; /* 按钮悬停时颜色 */
+}
+
+/* 用户菜单样式 */
+.navbar .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 控制间距 */
+}
+
+.navbar .user-menu a,
+.navbar .user-menu button {
+    padding: 8px 16px;
+    background-color: #007bff; /* 蓝色按钮 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.navbar .user-menu a:hover,
+.navbar .user-menu button:hover {
+    background-color: #0056b3; /* 悬停时颜色 */
 }
 
 /* 底部栏样式 */

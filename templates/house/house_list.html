@@ -4,6 +4,169 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/house/house_list.css') }}">
 <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 <script src="{{ url_for('static', filename='js/house/show-news.js') }}"></script>
+<style>
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+/* 新闻区样式优化 */
+.news-section {
+    margin-bottom: 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+}
+.news-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.news-header h2 {
+    color: #1976d2;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.news-controls button {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+.news-controls button:disabled {
+    background: #ccc;
+}
+.news-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+}
+.news-item {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.news-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+.news-desc {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 12px;
+}
+.news-footer {
+    font-size: 0.9rem;
+    color: #777;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 房源列表样式优化 */
+.house-list-section {
+    margin-top: 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+}
+.house-list-section h2 {
+    color: #1976d2;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+}
+.house-cards-horizontal {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
+}
+.house-card-horizontal {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+}
+.house-image-horizontal {
+    width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #eaeaea;
+}
+.house-info-horizontal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.house-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.house-title-horizontal {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+}
+.house-price-horizontal {
+    color: #ff5722;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+.house-detail-row {
+    font-size: 1rem;
+    color: #555;
+    display: flex;
+    gap: 8px;
+}
+.btn-detail-horizontal {
+    margin-top: 12px;
+    background: #1976d2;
+    color: #fff;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.2s;
+}
+.btn-detail-horizontal:hover {
+    background: #1256a3;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+    .news-container {
+        grid-template-columns: 1fr;
+    }
+    .house-cards-horizontal {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 {% endblock %}
 
 
@@ -25,7 +188,7 @@
                 <button id="next-news" class="nav-btn">›</button>
             </div>
         </div>
-        
+
         {% if news_list %}
         <div class="news-container">
             <div class="news-carousel" id="news-carousel">
@@ -45,13 +208,13 @@
                 {% endfor %}
             </div>
         </div>
-        
+
         <div class="news-indicators">
             {% for i in range((news_list|length + 2) // 3) %}
             <span class="indicator {% if loop.index0 == 0 %}active{% endif %}" data-slide="{{ loop.index0 }}"></span>
             {% endfor %}
         </div>
-        
+
         <div class="news-footer-section">
             <button id="load-more-news" class="btn btn-primary">查看更多新闻</button>
             <span class="news-stats">共 <span id="total-news">{{ news_list|length }}</span> 条资讯</span>
@@ -157,3 +320,4 @@
 
 </div>
 {% endblock %}
+

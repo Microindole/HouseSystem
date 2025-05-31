@@ -15,93 +15,42 @@
     {% block head %}
     {% endblock %}
     <title>{% block title %}智能房屋租赁系统{% endblock %}</title>
+
 </head>
 
 <body>
-<div class="navbar animated-navbar">
-    <div>
-        <a href="{{ url_for('house.house_list') }}">房源首页</a>
-    </div>
-
-    <div>
-        <form method="get" action="{{ url_for('house.house_list') }}" style="display: inline;">
-            <label for="provinceSelect">切换地区：</label>
-            <select name="region" id="provinceSelect" onchange="updateCities();">
-                <option value="">选择省份</option>
-                {% for province in cities_data.keys() %}
-                    <option value="{{ province }}" {% if province == selected_region %}selected{% endif %}>{{ province }}</option>
+<div class="navbar animated-navbar" style="background-image: url('{{ url_for('static', filename='images/background-pattern.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center; background-color: #222; padding: 20px 40px; color: #fff; display: flex; align-items: center; justify-content: space-between; border-radius: 8px;">
+    <div style="display: flex; align-items: center; gap: 20px;">
+{#        <a href="{{ url_for('house.house_list') }}" style="font-size: 1.8rem; font-weight: bold; color: #fff; text-decoration: none; writing-mode: horizontal-tb;">乐居阁</a>#}
+    <a href="{{ url_for('house.house_list') }}" >乐居阁</a>
+        <select name="region" id="provinceSelect" onchange="updateCities();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background-color: rgba(255, 255, 255, 0.8); color: #333; outline: none; font-size: 1rem;">
+            <option value="">选择省份</option>
+            {% for province in cities_data.keys() %}
+                <option value="{{ province }}" {% if province == selected_region %}selected{% endif %}>{{ province }}</option>
+            {% endfor %}
+        </select>
+        <select name="city" id="citySelect" onchange="this.form.submit();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background-color: rgba(255, 255, 255, 0.8); color: #333; outline: none; font-size: 1rem;">
+            <option value="">选择城市</option>
+            {% if selected_region %}
+                {% for city in cities_data[selected_region] %}
+                    <option value="{{ city }}" {% if city == selected_city %}selected="selected"{% endif %}>{{ city }}</option>
                 {% endfor %}
-            </select>
-
-            <label for="citySelect">城市：</label>
-            <select name="city" id="citySelect" onchange="this.form.submit();">
-                <option value="">选择城市</option>
-                {% if selected_region %}
-                    {% for city in cities_data[selected_region] %}
-                        <option value="{{ city }}" {% if city == selected_city %}selected="selected"{% endif %}>{{ city }}</option>
-                    {% endfor %}
-                {% endif %}
-            </select>
+            {% endif %}
+        </select>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
+        <form method="get" action="{{ url_for('house.house_list') }}" style="display: flex; align-items: center; gap: 10px; width: 100%; max-width: 600px;">
+            <input type="text" name="keyword" placeholder="搜索房源" value="{{ filters.keyword if filters else '' }}" style="flex: 1; padding: 12px 16px; border-radius: 6px; border: 1px solid #ccc; background-color: rgba(255, 255, 255, 0.8); color: #333; outline: none; font-size: 1rem;">
+            <button type="submit" class="git-search-button" style="padding: 12px 20px; background-color: #28a745; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">搜索</button>
         </form>
     </div>
-
-    <div class="search-box">
-        <form method="get" action="{{ url_for('house.house_list') }}">
-            <input type="text" name="keyword" placeholder="搜索房源" value="{{ filters.keyword if filters else '' }}">
-            <input type="hidden" name="region" value="{{ filters.region if filters else '' }}">
-            <input type="hidden" name="city" value="{{ filters.city if filters else '' }}">
-            <button type="submit" class="git-search-button">搜索</button>
-        </form>
-    </div>
-
-    <div class="auth-buttons">
+    <div style="display: flex; align-items: center; gap: 20px;">
         {% if g.username %}
-            <button id="user-menu-button" class="username-button">{{ g.username }}</button>
+            <button id="user-menu-button" class="username-button" style="padding: 8px 16px; background-color: #007bff; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">{{ g.username }}</button>
         {% else %}
-            <a href="{{ url_for('account.login') }}" class="login-button">登录</a>
+            <a href="{{ url_for('account.login') }}" class="login-button" style="padding: 8px 16px; background-color: #dc3545; color: #fff; border-radius: 6px; text-decoration: none; font-size: 1rem;">登录</a>
         {% endif %}
     </div>
-
-    <script>
-        // 省份选择变化时，动态更新城市选择框
-        function updateCities() {
-            var provinceSelect = document.getElementById('provinceSelect');
-            if (!provinceSelect) return; // Guard clause
-            var province = provinceSelect.value;
-            var cities_data_json = JSON.parse('{{ cities_data | tojson | safe }}'); // Use safe filter
-            var citySelect = document.getElementById('citySelect');
-            var selectedCityFromServer = "{{ selected_city }}";
-
-            citySelect.innerHTML = '<option value="">选择城市</option>';
-
-            if (province && cities_data_json[province]) {
-                cities_data_json[province].forEach(function(city) {
-                    var option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    if (city === selectedCityFromServer) {
-                        option.selected = true;
-                    }
-                    citySelect.appendChild(option);
-                });
-            }
-        }
-
-        // 初始加载时，更新城市下拉框
-        window.addEventListener('load', function() {
-            updateCities();
-            // Ensure region-button related script is also robust
-            const regionButton = document.getElementById('region-button');
-            if (regionButton) {
-                regionButton.addEventListener('click', function() {
-                    const dropdown = document.getElementById('region-dropdown');
-                    if (dropdown) {
-                        dropdown.classList.toggle('hidden');
-                    }
-                });
-            }
-        });
-    </script>
 </div>
 
 <div id="user-sidebar" class="user-sidebar hidden">
@@ -198,3 +147,4 @@
 
 </body>
 </html>
+
