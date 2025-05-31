@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // 拖拽相关变量
     let isDragging = false;
     let dragOffset = { x: 0, y: 0 };
-
     // 调整大小相关变量
     let isResizing = false;
     let resizeStartX = 0;
