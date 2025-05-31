@@ -34,7 +34,8 @@
     <div class="form-container">
         <h1>编辑房源</h1>
 
-        {% if house_status.status == 1 %}
+        {# 确保 house_status 对象存在后再访问 status 属性 #}
+        {% if house_status and house_status.status == 1 %}
             <div class="warning-box">
                 <strong>注意：</strong>该房源目前处于出租状态，主要信息无法编辑。请等待房源恢复空置或下架后再进行重要信息的修改。可修改项：联系电话、房源亮点、图片。
             </div>
@@ -46,30 +47,30 @@
             <div class="form-group">
                 <label for="house_name">房源名称 <span class="required">*</span></label>
                 <input type="text" id="house_name" name="house_name" required
-                       value="{{ house_info.house_name }}" maxlength="255" {% if house_status.status == 1 %}readonly{% endif %}>
+                       value="{{ house_info.house_name if house_info else '' }}" maxlength="255" {% if house_status and house_status.status == 1 %}readonly{% endif %}>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="rooms">户型 <span class="required">*</span></label>
-                    <select id="rooms" name="rooms" required {% if house_status.status == 1 %}disabled{% endif %}>
+                    <select id="rooms" name="rooms" required {% if house_status and house_status.status == 1 %}disabled{% endif %}>
                         <option value="">请选择户型</option>
-                        <option value="1室1厅" {% if house_info.rooms == '1室1厅' %}selected{% endif %}>1室1厅</option>
-                        <option value="1室2厅" {% if house_info.rooms == '1室2厅' %}selected{% endif %}>1室2厅</option>
-                        <option value="2室1厅" {% if house_info.rooms == '2室1厅' %}selected{% endif %}>2室1厅</option>
-                        <option value="2室2厅" {% if house_info.rooms == '2室2厅' %}selected{% endif %}>2室2厅</option>
-                        <option value="3室1厅" {% if house_info.rooms == '3室1厅' %}selected{% endif %}>3室1厅</option>
-                        <option value="3室2厅" {% if house_info.rooms == '3室2厅' %}selected{% endif %}>3室2厅</option>
-                        <option value="4室1厅" {% if house_info.rooms == '4室1厅' %}selected{% endif %}>4室1厅</option>
-                        <option value="4室2厅" {% if house_info.rooms == '4室2厅' %}selected{% endif %}>4室2厅</option>
-                        <option value="5室1厅" {% if house_info.rooms == '5室1厅' %}selected{% endif %}>5室1厅</option>
-                        <option value="5室2厅" {% if house_info.rooms == '5室2厅' %}selected{% endif %}>5室2厅</option>
+                        <option value="1室1厅" {% if house_info and house_info.rooms == '1室1厅' %}selected{% endif %}>1室1厅</option>
+                        <option value="1室2厅" {% if house_info and house_info.rooms == '1室2厅' %}selected{% endif %}>1室2厅</option>
+                        <option value="2室1厅" {% if house_info and house_info.rooms == '2室1厅' %}selected{% endif %}>2室1厅</option>
+                        <option value="2室2厅" {% if house_info and house_info.rooms == '2室2厅' %}selected{% endif %}>2室2厅</option>
+                        <option value="3室1厅" {% if house_info and house_info.rooms == '3室1厅' %}selected{% endif %}>3室1厅</option>
+                        <option value="3室2厅" {% if house_info and house_info.rooms == '3室2厅' %}selected{% endif %}>3室2厅</option>
+                        <option value="4室1厅" {% if house_info and house_info.rooms == '4室1厅' %}selected{% endif %}>4室1厅</option>
+                        <option value="4室2厅" {% if house_info and house_info.rooms == '4室2厅' %}selected{% endif %}>4室2厅</option>
+                        <option value="5室1厅" {% if house_info and house_info.rooms == '5室1厅' %}selected{% endif %}>5室1厅</option>
+                        <option value="5室2厅" {% if house_info and house_info.rooms == '5室2厅' %}selected{% endif %}>5室2厅</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="phone">联系电话 <span class="required">*</span></label>
                     <input type="tel" id="phone" name="phone" required
-                           pattern="[0-9]{11}" value="{{ house_status.phone }}">
+                           pattern="[1][3-9]\d{9}" value="{{ house_status.phone if house_status else '' }}">
                 </div>
             </div>
 
@@ -78,9 +79,10 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="province">省份 <span class="required">*</span></label>
-                    <select id="province" name="province" required {% if house_status.status == 1 %}disabled{% endif %}>
+                    <select id="province" name="province" required {% if house_status and house_status.status == 1 %}disabled{% endif %}>
                         <option value="">请选择省份</option>
-                        {% for province_name_iter in cities_data.keys() %} {# Renamed province to province_name_iter #}
+                        {# 确保后端传递的是 pca_data，并且其结构正确 #}
+                        {% for province_name_iter in pca_data.keys() %}
                             <option value="{{ province_name_iter }}"
                                     {% if current_province == province_name_iter %}selected{% endif %}>
                                 {{ province_name_iter }}
@@ -90,13 +92,13 @@
                 </div>
                 <div class="form-group">
                     <label for="city">城市 <span class="required">*</span></label>
-                    <select id="city" name="city" required {% if house_status.status == 1 %}disabled{% endif %}>
+                    <select id="city" name="city" required {% if house_status and house_status.status == 1 %}disabled{% endif %}>
                         <option value="">请先选择省份</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="district">区县 <span class="required">*</span></label>
-                    <select id="district" name="district" required {% if house_status.status == 1 %}disabled{% endif %}>
+                    <select id="district" name="district" required {% if house_status and house_status.status == 1 %}disabled{% endif %}>
                         <option value="">请先选择城市</option>
                     </select>
                 </div>
@@ -105,45 +107,43 @@
             <div class="form-group">
                 <label for="addr">详细地址 <span class="required">*</span></label>
                 <input type="text" id="addr" name="addr" required
-                       value="{{ house_info.addr }}" maxlength="255" {% if house_status.status == 1 %}readonly{% endif %}>
+                       value="{{ house_info.addr if house_info else '' }}" maxlength="255" {% if house_status and house_status.status == 1 %}readonly{% endif %}>
             </div>
 
             <div class="section-title">租金信息</div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label for="price">月租金 (元) <span class="required">*</span></label>
                     <input type="number" id="price" name="price" required
-                           value="{{ house_info.price }}" min="1" step="1" {% if house_status.status == 1 %}readonly{% endif %}>
+                           value="{{ house_info.price if house_info else '' }}" min="1" step="1" {% if house_status and house_status.status == 1 %}readonly{% endif %}>
                 </div>
                 <div class="form-group">
                     <label for="deposit">押金 (元)</label>
                     <input type="number" id="deposit" name="deposit"
-                           value="{{ house_info.deposit or '' }}" min="0" step="1" {% if house_status.status == 1 %}readonly{% endif %}>
+                           value="{{ house_info.deposit if house_info and house_info.deposit is not none else '' }}" min="0" step="1" {% if house_status and house_status.status == 1 %}readonly{% endif %}>
                 </div>
             </div>
 
             <div class="section-title">房源描述</div>
-
             <div class="form-group">
                 <label for="situation">装修情况</label>
-                <select id="situation" name="situation" {% if house_status.status == 1 %}disabled{% endif %}>
+                <select id="situation" name="situation" {% if house_status and house_status.status == 1 %}disabled{% endif %}>
                     <option value="">请选择装修情况</option>
-                    <option value="毛坯" {% if house_info.situation == '毛坯' %}selected{% endif %}>毛坯</option>
-                    <option value="简装" {% if house_info.situation == '简装' %}selected{% endif %}>简装</option>
-                    <option value="精装" {% if house_info.situation == '精装' %}selected{% endif %}>精装</option>
-                    <option value="豪装" {% if house_info.situation == '豪装' %}selected{% endif %}>豪装</option>
+                    <option value="毛坯" {% if house_info and house_info.situation == '毛坯' %}selected{% endif %}>毛坯</option>
+                    <option value="简装" {% if house_info and house_info.situation == '简装' %}selected{% endif %}>简装</option>
+                    <option value="精装" {% if house_info and house_info.situation == '精装' %}selected{% endif %}>精装</option>
+                    <option value="豪装" {% if house_info and house_info.situation == '豪装' %}selected{% endif %}>豪装</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="highlight">房源亮点</label>
-                <textarea id="highlight" name="highlight" maxlength="255">{{ house_info.highlight or '' }}</textarea>
+                <textarea id="highlight" name="highlight" maxlength="255">{{ house_info.highlight if house_info and house_info.highlight else '' }}</textarea>
             </div>
 
             <div class="section-title">房源图片</div>
 
-            {% if house_info.image %}
+            {% if house_info and house_info.image %}
                 <div class="current-image">
                     <label>当前图片：</label>
                     <img src="{{ house_info.image }}" alt="当前房源图片">
@@ -163,64 +163,181 @@
         </form>
     </div>
 
-    {# 引入共享JS文件 #}
-    <script src="{{ url_for('static', filename='js/house/house_form_common.js') }}"></script>
     <script>
-        // cities_data 是从后端模板传递过来的，包含省市区信息
-        // current_province, current_city, current_district 也是从后端模板传递，用于初始化下拉框
-        const pcaData = {{ cities_data | tojson | safe }};
+        // 确保后端传递的是 pca_data，并且其结构正确
+        const pcaData = {{ pca_data | tojson | safe if pca_data else '{}' }};
         const currentProvince = "{{ current_province | default('', true) | e }}";
         const currentCity = "{{ current_city | default('', true) | e }}";
         const currentDistrict = "{{ current_district | default('', true) | e }}";
 
-        function initializeAddressForEdit(pcaData, provinceSelect, citySelect, districtSelect) {
-            if (currentProvince) {
-                provinceSelect.value = currentProvince;
-                // 调用共享函数更新城市，并传递元素本身
-                updateCities(pcaData, provinceSelect, citySelect, districtSelect);
-                // 设置延时以确保城市列表已填充
-                setTimeout(() => {
-                    if (currentCity) {
-                        citySelect.value = currentCity;
-                        // 调用共享函数更新区县
-                        updateDistricts(pcaData, provinceSelect, citySelect, districtSelect);
-                        setTimeout(() => {
-                            if (currentDistrict) {
-                                districtSelect.value = currentDistrict;
-                                // 如果区县值不在选项中（可能由于数据源不完全匹配），可以考虑添加它或标记
-                                if (districtSelect.value !== currentDistrict) {
-                                    console.warn(`区县 "${currentDistrict}" 在当前城市选项中未找到，可能需要数据核对。`);
-                                }
-                            }
-                        }, 100); // 短暂延时确保区县列表填充
-                    }
-                }, 100); // 短暂延时确保城市列表填充
+        const provinceSelectEl = document.getElementById('province');
+        const citySelectEl = document.getElementById('city');
+        const districtSelectEl = document.getElementById('district');
+
+        /**
+         * 更新城市下拉框的选项 (内联版本)
+         */
+        function updateCitiesInternal() {
+            const selectedProvince = provinceSelectEl.value;
+            citySelectEl.innerHTML = '<option value="">请选择城市</option>';
+            districtSelectEl.innerHTML = '<option value="">请先选择城市</option>';
+
+            if (selectedProvince && pcaData && pcaData[selectedProvince]) {
+                const cities = Object.keys(pcaData[selectedProvince]);
+                cities.forEach(function(cityName) {
+                    const option = document.createElement('option');
+                    option.value = cityName;
+                    option.textContent = cityName;
+                    citySelectEl.appendChild(option);
+                });
             }
         }
+
+        /**
+         * 更新区县下拉框的选项 (内联版本)
+         */
+        function updateDistrictsInternal() {
+            const selectedProvince = provinceSelectEl.value;
+            const selectedCity = citySelectEl.value;
+            districtSelectEl.innerHTML = '<option value="">请选择区县</option>';
+
+            if (selectedProvince && selectedCity &&
+                pcaData &&
+                pcaData[selectedProvince] &&
+                pcaData[selectedProvince][selectedCity]) {
+
+                const districts = pcaData[selectedProvince][selectedCity];
+                if (Array.isArray(districts)) {
+                    districts.forEach(function(districtName) {
+                        const option = document.createElement('option');
+                        option.value = districtName;
+                        option.textContent = districtName;
+                        districtSelectEl.appendChild(option);
+                    });
+                } else {
+                    console.error("未能获取到有效的区县列表 (pcaData[selectedProvince][selectedCity]): ", districts);
+                }
+            }
+        }
+
+        /**
+         * 验证房源表单的通用逻辑 (内联版本)
+         * @param {HTMLFormElement} formElement - 当前提交的表单元素
+         * @returns {boolean} - 如果验证通过返回 true，否则返回 false
+         */
+        function validateHouseFormInternal(formElement) {
+            const phoneInput = formElement.querySelector('#phone');
+            if (phoneInput) {
+                const phone = phoneInput.value;
+                const phonePattern = /^[1][3-9]\d{9}$/;
+                if (!phonePattern.test(phone)) {
+                    if (window.showMessage) {
+                        window.showMessage('请输入正确的11位手机号码。', 'warning');
+                    } else {
+                        alert('请输入正确的11位手机号码。');
+                    }
+                    phoneInput.focus();
+                    return false;
+                }
+            }
+
+            const priceInput = formElement.querySelector('#price');
+            if (priceInput) {
+                const price = parseFloat(priceInput.value);
+                if (isNaN(price) || price <= 0) {
+                    if (window.showMessage) {
+                        window.showMessage('月租金必须为大于0的有效数字。', 'warning');
+                    } else {
+                        alert('月租金必须为大于0的有效数字。');
+                    }
+                    priceInput.focus();
+                    return false;
+                }
+            }
+
+            const depositInput = formElement.querySelector('#deposit');
+            if (depositInput) {
+                const depositValue = depositInput.value;
+                if (depositValue) {
+                    const deposit = parseFloat(depositValue);
+                    if (isNaN(deposit) || deposit < 0) {
+                        if (window.showMessage) {
+                            window.showMessage('押金金额不能为负数，且必须为有效数字。', 'warning');
+                        } else {
+                            alert('押金金额不能为负数，且必须为有效数字。');
+                        }
+                        depositInput.focus();
+                        return false;
+                    }
+                }
+            }
+
+            const selects = formElement.querySelectorAll('select[required]');
+            for (let i = 0; i < selects.length; i++) {
+                if (selects[i].value === "") {
+                    const labelElement = formElement.querySelector(`label[for='${selects[i].id}']`);
+                    const labelText = labelElement ? labelElement.textContent.replace('*','').trim() : '该必选项';
+                    const message = `请选择${labelText}。`;
+                    if (window.showMessage) {
+                        window.showMessage(message, 'warning');
+                    } else {
+                        alert(message);
+                    }
+                    selects[i].focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
+        function initializeAddressForEdit() {
+            if (Object.keys(pcaData).length === 0) {
+                console.warn("省市区数据 (pcaData) 为空，无法初始化地址下拉框。");
+                return;
+            }
+
+            if (currentProvince && provinceSelectEl) {
+                provinceSelectEl.value = currentProvince;
+                updateCitiesInternal(); // 使用内联版本
+
+                setTimeout(() => {
+                    if (currentCity && citySelectEl) {
+                        citySelectEl.value = currentCity;
+                        updateDistrictsInternal(); // 使用内联版本
+
+                        setTimeout(() => {
+                            if (currentDistrict && districtSelectEl) {
+                                districtSelectEl.value = currentDistrict;
+                                if (districtSelectEl.value !== currentDistrict && currentDistrict !== "") {
+                                    console.warn(`区县 "${currentDistrict}" 在当前城市选项中未找到。`);
+                                }
+                            }
+                        }, 50);
+                    }
+                }, 50);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('editHouseForm');
-            const provinceSelect = document.getElementById('province');
-            const citySelect = document.getElementById('city');
-            const districtSelect = document.getElementById('district');
 
-            // 初始化地址下拉框（编辑页面特有）
-            initializeAddressForEdit(pcaData, provinceSelect, citySelect, districtSelect);
-            if (provinceSelect) {
-                provinceSelect.addEventListener('change', function() {
-                    // 调用共享函数
-                    updateCities(pcaData, provinceSelect, citySelect, districtSelect);
-                });
+            initializeAddressForEdit();
+
+            if (provinceSelectEl) {
+                provinceSelectEl.addEventListener('change', updateCitiesInternal);
             }
-            if (citySelect) {
-                citySelect.addEventListener('change', function() {
-                    // 调用共享函数
-                    updateDistricts(pcaData, provinceSelect, citySelect, districtSelect);
-                });
+            if (citySelectEl) {
+                citySelectEl.addEventListener('change', updateDistrictsInternal);
             }
+
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    // 如果房源状态为1 (出租中)，则跳过大部分验证，只验证电话
-                    const houseStatus = parseInt("{{ house_status.status }}", 10);
+                    let houseStatus = -1;
+                    {% if house_status and house_status.status is defined and house_status.status is not none %}
+                        houseStatus = parseInt("{{ house_status.status }}", 10);
+                    {% endif %}
+
                     if (houseStatus === 1) {
                         const phoneInput = form.querySelector('#phone');
                         if (phoneInput) {
@@ -236,9 +353,9 @@
                                 phoneInput.focus();
                             }
                         }
-                        return; // 结束验证
+                        return;
                     }
-                    if (!validateHouseForm(this)) { // 'this' is the form element
+                    if (!validateHouseFormInternal(this)) { // 使用内联版本
                         e.preventDefault();
                     }
                 });

@@ -346,11 +346,15 @@ def edit_house_logic(house_id):
         flash('出租中的房源不允许编辑', 'error')
         return redirect(url_for('account.landlord_home'))
     cities_data = get_cities_data()
+    pca_json_path = os.path.join(current_app.static_folder, 'json', 'pca-code.json')
+    with open(pca_json_path, 'r', encoding='utf-8') as f:
+        pca_data = json.load(f)
     if request.method == 'GET':
         return render_template('house/edit_house.html',
                              house_info=house_info,
                              house_status=house_status,
-                             cities_data=cities_data)
+                             cities_data=cities_data,
+                             pca_data=pca_data)
     try:
         house_name = request.form.get('house_name')
         rooms = request.form.get('rooms')
@@ -369,7 +373,8 @@ def edit_house_logic(house_id):
             return render_template('house/edit_house.html',
                                  house_info=house_info,
                                  house_status=house_status,
-                                 cities_data=cities_data)
+                                 cities_data=cities_data,
+                                 pca_data=pca_data)
         if 'image' in request.files:
             file = request.files['image']
             if file.filename != '' and allowed_file(file.filename):
@@ -398,7 +403,8 @@ def edit_house_logic(house_id):
         return render_template('house/edit_house.html',
                              house_info=house_info,
                              house_status=house_status,
-                             cities_data=cities_data)
+                             cities_data=cities_data,
+                             pca_data=pca_data)
 
 def delete_house_logic(house_id):
     if getattr(g, 'user_type', None) != 2:

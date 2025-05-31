@@ -92,10 +92,10 @@
     <script>
         window.chatConfig = {
             currentUsername: "{{ g.username | e }}",
-            initialChannelId: {% if channel %}"{{ channel.channel_id }}"{% else %}null{% endif %},
+            initialChannelId: {% if channel %}"{{ channel.channel_id }}",{% else %}null{% endif %},
             // 基本URL，如果JS中需要动态构建
             baseUrl: "{{ request.script_root | e }}", // 例如 /your_app_prefix
-            feedbackBaseUrl: "{{ url_for('feedback.index', _external=False).replace('/feedback/', '/feedback') }}" // 获取feedback蓝图的基础路径
+            feedbackBaseUrl: "{{ request.script_root }}/feedback" // 获取feedback蓝图的基础路径
         };
     </script>
     {# 确保 message-toast.js 在 message.js 之前加载 #}
