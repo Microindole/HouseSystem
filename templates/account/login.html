@@ -4,30 +4,27 @@
 {% block head %}
     <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/account/login.css') }}">
+    {# Add a style to hide the original flash message ul if it's not removed #}
+    <style>
+        ul.flash-messages {
+            display: none !important; /* Hide original flash message display */
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
     <div class="login-page">
-        <!-- 左侧装饰区域 -->
-        <div class="login-decoration">
-            <div class="decoration-shapes">
-                <div class="shape"></div>
-                <div class="shape"></div>
-                <div class="shape"></div>
-            </div>
-            <div class="decoration-content">
-                <h2>智能房屋租赁系统</h2>
-                <p>连接房东与租客的智能平台<br>让租房变得更简单</p>
-            </div>
-        </div>
-
-        <!-- 右侧登录区域 -->
         <div class="login-container">
-            {# 隐藏的flash消息，由JavaScript处理 #}
+            <div class="login-header">
+                <h1>登录到智能房屋租赁系统</h1>
+            </div>
+
+            {# This section will now be hidden by the style in block head, toasts will be used instead #}
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     <ul class="flash-messages">
                         {% for category, message in messages %}
+                            {# This list item will be hidden by CSS. The script below will handle display. #}
                             <li class="error-message">{{ message }}</li>
                         {% endfor %}
                     </ul>
@@ -47,13 +44,7 @@
                 </ul>
             {% endif %}
 
-            <!-- 登录标题 -->
-            <div class="login-header">
-                <h1>用户登录</h1>
-            </div>
-
-            <!-- 账号登录面板 -->
-            <div id="login-main-panel" class="tab-content active panel-transition">
+            <div id="login-main-panel">
                 <form method="POST" action="{{ url_for('account.login') }}" class="login-form">
                     <div class="form-group">
                         <label for="username">用户名</label>
@@ -70,76 +61,73 @@
                             <option value="landlord">房东</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-primary">登录</button>
+                    <button type="submit" class="btn">登录</button>
                 </form>
-                <div class="form-links">
-                    <a href="{{ url_for('account.register') }}">注册新账号</a>
+                <p class="register-link">
+                    若无账号，请 <a href="{{ url_for('account.register') }}">点我注册</a>
+                </p>
+                <p class="register-link">
                     <a href="javascript:void(0);" id="forget-password-link">忘记密码？</a>
-                </div>
+                </p>
             </div>
-
-            <!-- 忘记密码面板 -->
-            <div id="forget-password-panel" class="tab-content panel-transition">
-                <div class="panel-header">
-                    <h3>找回密码</h3>
-                </div>
+            <div id="forget-password-panel" style="display:none;">
                 <form id="forget-password-form">
                     <div class="form-group">
                         <label>用户名</label>
-                        <input type="text" id="fp-username" placeholder="请输入用户名" required>
+                        <input type="text" id="fp-username" required>
                     </div>
                     <div class="form-group">
                         <label>邮箱</label>
-                        <input type="email" id="fp-email" placeholder="请输入邮箱地址" required>
+                        <input type="email" id="fp-email" required>
                     </div>
                     <div class="form-group">
                         <label>验证码</label>
                         <div class="code-row">
                             <input type="text" id="fp-code" placeholder="请输入验证码" required>
-                            <button type="button" id="fp-send-code-btn" class="btn-secondary">获取验证码</button>
+                            <button type="button" id="fp-send-code-btn" class="btn">获取验证码</button>
                         </div>
                     </div>
                     <div class="fp-btn-row">
                         <button type="button" id="fp-back-login-btn" class="fp-back-link">返回登录</button>
-                        <button type="button" id="fp-next-btn" class="btn-primary" style="width: auto; padding: 12px 24px;">下一步</button>
+                        <button type="button" id="fp-next-btn" class="btn">下一步</button>
                     </div>
                 </form>
+                <div id="fp-error-msg" style="color:red;display:none;"></div>
             </div>
-
-            <!-- 重置密码面板 -->
-            <div id="reset-password-panel" class="tab-content panel-transition">
-                <div class="panel-header">
-                    <h3>重置密码</h3>
-                </div>
+            <div id="reset-password-panel" style="display:none;">
                 <form id="reset-password-form">
                     <div class="form-group">
                         <label>新密码</label>
-                        <input type="password" id="rp-password" placeholder="请输入新密码" required>
+                        <input type="password" id="rp-password" required>
                     </div>
                     <div class="form-group">
                         <label>确认新密码</label>
-                        <input type="password" id="rp-confirm-password" placeholder="请再次输入新密码" required>
+                        <input type="password" id="rp-confirm-password" required>
                     </div>
-                    <button class="btn-primary" type="button" id="rp-submit-btn">提交</button>
+                    <button class="btn" type="button" id="rp-submit-btn">提交</button>
                 </form>
             </div>
-
-            <a href="{{ url_for('account.admin_login') }}" class="admin-link">管理员入口</a>
+            <div style="text-align: right; font-size: 0.8em; margin-top: 30px; opacity: 0.5;">
+                <a href="{{ url_for('account.admin_login') }}" style="color: #777; text-decoration: none;">管理员入口</a>
+            </div>
         </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/account/login.js') }}" defer></script>
 
+    {# JavaScript to render flashed messages as toasts #}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 处理Flask flash消息
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
                         var toastType = '{{ category }}';
+                        // Flask's default category for flash(message) is 'message'. Map to 'info'.
+                        // Other categories ('error', 'success', 'warning') from account.py are already standard.
                         if (toastType === 'message') {
                             toastType = 'info';
                         }
+                        // Ensure toastType is one of the valid types for message-toast, default to 'info'
                         const validToastTypes = ['success', 'error', 'warning', 'info'];
                         if (!validToastTypes.includes(toastType)) {
                             console.warn('Unknown flash category received: ' + toastType + '. Defaulting to info type for toast.');
@@ -147,10 +135,12 @@
                         }
 
                         if (window.showMessage) {
+                            // Use tojson filter to correctly escape message for JavaScript string
                             window.showMessage({{ message|tojson|safe }}, toastType);
                         } else {
+                            // Fallback if message-toast.js or window.showMessage isn't available
                             console.warn("MessageToast's showMessage function is not available. Displaying as alert. Message: [" + toastType + "] " + {{ message|tojson|safe }});
-                            alert("[" + toastType + "] " + {{ message|tojson|safe }});
+                            alert("[" + toastType + "] " + {{ message|tojson|safe }}); // Basic alert fallback
                         }
                     {% endfor %}
                 {% endif %}
