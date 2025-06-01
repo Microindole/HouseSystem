@@ -21,7 +21,13 @@
     display: inline-block; /* 确保横向显示 */
     margin-right: 20px; /* 与其他元素保持间距 */
 }
-
+/* 乐居阁字样 */
+.house-link {
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
 /* 搜索框样式 */
 .navbar .search-bar {
     display: flex;
