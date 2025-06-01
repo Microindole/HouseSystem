@@ -1,4 +1,9 @@
 import json
+from datetime import datetime
+
+import redis
+from flask import Flask, render_template, g, session, request
+from flask_apscheduler import APScheduler
 
 from flask import Flask, render_template, g, session, request
 import config
@@ -11,6 +16,7 @@ from blueprints.feedback import feedback_bp
 from blueprints.sandbox import pay_bp
 from blueprints.ai_chat_bp import ai_chat_bp
 from models import MessageModel, ComplaintModel, DailyRentRateModel, HouseStatusModel
+from task.visit_tasks import store_daily_visit_stats
 from decorators import login_required, verify_token
 
 
@@ -107,6 +113,36 @@ def landlord_home():
 @app.route('/admin/dashboard')
 def admin_dashboard():
     return "管理后台"
+
+r = redis.Redis(host='localhost', port=6379, db=0)
+
+def record_ip_visit():
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    today_key = 'visits:' + datetime.now().strftime('%Y%m%d')
+    r.sadd(today_key, ip)
+
+
+@app.before_request
+def before_request():
+    if request.endpoint != 'static':
+        record_ip_visit()
+
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+print("[Scheduler] APScheduler 启动完成")
+
+
+@scheduler.task('cron', id='daily_visit_stats', hour=0, minute=5)
+def scheduled_task():
+    from task.visit_tasks import store_daily_visit_stats
+    with app.app_context():
+        store_daily_visit_stats()
+
+@app.route('/test/save_visit')
+def test_save():
+    store_daily_visit_stats()
+    return "测试写入成功"
 
 
 if __name__ == '__main__':

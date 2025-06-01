@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}房源审核{% endblock %}
-{% block body %}
 
+{% block body %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/audit-list.css') }}">
+    <style>
+    body {
+    margin: 0;
+    padding: 0;
+}
+</style>
   <h2 class="mb-4">房源审核列表</h2>
 
   <div>
@@ -31,8 +38,9 @@
                     {% endif %}
                 </td>
                 <td>
+                <button class="btn-view" onclick="location.href=`/house/{{ audit.id }}`">查看房源</button>
                     {% if audit.audit_status == 0 %}
-                        <a href="{{ url_for('account.approve_audit', audit_id=audit.id) }}" class="git-search-button">同意</a>
+                        <a href="{{ url_for('account.approve_audit', audit_id=audit.id) }}" class="git-search-bt">同意</a>
                         <button class="btn-dangerous" onclick="rejectAudit({{ audit.id }})">拒绝</button>
                     {% else %}
                         -

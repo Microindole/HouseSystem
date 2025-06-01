@@ -1,6 +1,8 @@
 # contract.py
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, g
-from models import db, RentalContract, HouseInfoModel, PrivateChannelModel, HouseStatusModel
+from sqlalchemy import func
+
+from models import db, RentalContract, HouseInfoModel, PrivateChannelModel, HouseStatusModel, VisitStatsModel
 from datetime import datetime, timedelta
 from functools import wraps
 from decorators import verify_token
@@ -129,3 +131,54 @@ def return_house(contract_id):
     db.session.commit()
     flash("归还成功，房屋状态已设为装修中", "success")
     return redirect(url_for('contract.view_contracts'))
+
+@contract_bp.route('/api/income/cancel_stats')
+@login_required
+def cancel_income_stats():
+    start_str = request.args.get('start_date')
+    end_str = request.args.get('end_date')
+
+    # 默认最近七天
+    if not start_str or not end_str:
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=6)
+    else:
+        start_date = datetime.strptime(start_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_str, '%Y-%m-%d').date()
+
+    results = db.session.query(
+        func.date(RentalContract.updated_at).label('date'),
+        func.count(RentalContract.id).label('order_count'),
+        func.sum(RentalContract.total_amount).label('total_amount')
+    ).filter(
+        RentalContract.status == 1,
+        RentalContract.updated_at >= start_date,
+        RentalContract.updated_at <= end_date + timedelta(days=1)
+    ).group_by(
+        func.date(RentalContract.updated_at)
+    ).order_by(
+        func.date(RentalContract.updated_at)
+    ).all()
+
+    data = [
+        {
+            "date": row.date.strftime('%Y-%m-%d'),
+            "order_count": row.order_count,
+            "total_amount": float(row.total_amount or 0)
+        }
+        for row in results
+    ]
+    return jsonify(data)
+
+# routes/stats.py（或者你的蓝图中）
+@contract_bp.route('/api/visit/stats')
+@login_required
+def get_visit_stats():
+    stats = VisitStatsModel.query.order_by(VisitStatsModel.visit_date).all()
+    data = [
+        {
+            'date': s.visit_date.strftime('%Y-%m-%d'),
+            'visits': s.unique_visits
+        } for s in stats
+    ]
+    return jsonify(data)

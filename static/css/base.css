@@ -520,23 +520,7 @@
     background-color: #1f2327;
 }
 
-.user-section {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 20px;
-}
 
-.user-box {
-  width: 48%;
-}
-
-.section-title {
-  font-size: 18px;
-  margin-bottom: 10px;
-  font-weight: bold;
-  color: #24292e;
-}
 
 .table-container {
   max-height: 400px;
@@ -551,30 +535,6 @@
   border-collapse: collapse;
 }
 
-.fixed-header-table thead th {
-  position: sticky;
-  top: 0;
-  background-color: #f6f8fa;
-  color: #24292e;
-  font-weight: bold;
-  padding: 8px;
-  border-bottom: 2px solid #e3e1e1;
-  z-index: 1;
-}
-
-.fixed-header-table td {
-  padding: 8px;
-  border-bottom: 2px solid #cdcccc;
-  text-align: center;
-}
-/* 滚动条样式可选 */
-.table-container::-webkit-scrollbar {
-  width: 6px;
-}
-.table-container::-webkit-scrollbar-thumb {
-  background-color: #888;
-  border-radius: 3px;
-}
 
 /* GitHub 风格按钮 */
 .gh-btn {

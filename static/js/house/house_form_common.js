@@ -6,7 +6,6 @@
  * @param {HTMLSelectElement} provinceSelectEl - 省份选择框元素
  * @param {HTMLSelectElement} citySelectEl - 城市选择框元素
  * @param {HTMLSelectElement} districtSelectEl - 区县选择框元素
- */
 function updateCities(pcaData, provinceSelectEl, citySelectEl, districtSelectEl) {
     const selectedProvince = provinceSelectEl.value;
     citySelectEl.innerHTML = '<option value="">请选择城市</option>'; // 重置城市选项
@@ -21,7 +20,7 @@ function updateCities(pcaData, provinceSelectEl, citySelectEl, districtSelectEl)
             citySelectEl.appendChild(option);
         });
     }
-}
+}*/
 
 /**
  * 更新区县下拉框的选项

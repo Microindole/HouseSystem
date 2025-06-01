@@ -23,6 +23,7 @@
     <div style="display: flex; align-items: center; gap: 20px;">
 {#        <a href="{{ url_for('house.house_list') }}" style="font-size: 1.8rem; font-weight: bold; color: #fff; text-decoration: none; writing-mode: horizontal-tb;">乐居阁</a>#}
     <a href="{{ url_for('house.house_list') }}" class="house-link">乐居阁</a>
+    <form style="display: flex; gap: 12px; align-items: center;">
         <select name="region" id="provinceSelect" onchange="updateCities();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background-color: rgba(255, 255, 255, 0.8); color: #333; outline: none; font-size: 1rem;">
             <option value="">选择省份</option>
             {% for province in cities_data.keys() %}
@@ -37,6 +38,7 @@
                 {% endfor %}
             {% endif %}
         </select>
+    </form>
     </div>
     <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
         <form method="get" action="{{ url_for('house.house_list') }}" style="display: flex; align-items: center; gap: 10px; width: 100%; max-width: 600px;">
@@ -144,7 +146,47 @@
 {% if g.username %}
     <script src="{{ url_for('static', filename='js/ai.js') }}" defer></script>
 {% endif %}
+<script>
+        // 省份选择变化时，动态更新城市选择框
+        function updateCities() {
+            var provinceSelect = document.getElementById('provinceSelect');
+            if (!provinceSelect) return; // Guard clause
+            var province = provinceSelect.value;
+            var cities_data_json = JSON.parse('{{ cities_data | tojson | safe }}'); // Use safe filter
+            var citySelect = document.getElementById('citySelect');
+            var selectedCityFromServer = "{{ selected_city }}";
 
+            citySelect.innerHTML = '<option value="">选择城市</option>';
+
+            if (province && cities_data_json[province]) {
+                cities_data_json[province].forEach(function(city) {
+                    var option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    if (city === selectedCityFromServer) {
+                        option.selected = true;
+                    }
+                    citySelect.appendChild(option);
+                });
+            }
+        }
+
+        // 初始加载时，更新城市下拉框
+        window.addEventListener('load', function() {
+            updateCities();
+            // Ensure region-button related script is also robust
+            const regionButton = document.getElementById('region-button');
+            if (regionButton) {
+                regionButton.addEventListener('click', function() {
+                    const dropdown = document.getElementById('region-dropdown');
+                    if (dropdown) {
+                        dropdown.classList.toggle('hidden');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
+
 </html>
 

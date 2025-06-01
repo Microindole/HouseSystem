@@ -525,7 +525,33 @@ def down_house():
         db.session.commit()
         return jsonify({'success': True})
     return jsonify({'success': False, 'message': '房源不存在或无法下架'}), 400
+@account_bp.route('/api/rent_rate_history', methods=['GET'])
+def rent_rate_history():
+    # 获取请求中的日期参数
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
 
+    if not start_date or not end_date:
+        return jsonify({'error': '缺少开始日期或结束日期'}), 400
+
+    # 将字符串转换为日期对象
+    start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+    # 查询指定日期范围内的出租率数据
+    records = db.session.query(DailyRentRateModel).filter(
+        DailyRentRateModel.date.between(start_date, end_date)
+    ).all()
+
+    # 格式化返回的数据
+    dates = [record.date.strftime('%Y-%m-%d') for record in records]
+    rates = [round(record.rent_rate, 2) for record in records]
+
+    return jsonify({
+        'dates': dates,
+        'rates': rates
+    })
+#跳转系统设置页面
 @account_bp.route('/admin/system_setting')
 @login_required
 def system_setting():

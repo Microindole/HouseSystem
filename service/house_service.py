@@ -140,7 +140,7 @@ def get_house_detail(house_id):
         abort(404)
     user_type = getattr(g, 'user_type', None)
     username = getattr(g, 'username', None)
-    if user_type != 2 or (user_type == 2 and status.landlord_name != username):
+    if user_type == 1 or (user_type == 2 and status.landlord_name != username):
         if status.status != 0:
             flash('该房源暂不可查看', 'error')
             return redirect(url_for('house.house_list'))

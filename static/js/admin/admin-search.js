@@ -74,6 +74,7 @@ async function showHouses(landlordName) {
                 <td>${h.region || ''}</td>
                 <td>${h.addr || ''}</td>
                 <td>
+                 <button class="btn-view" onclick="location.href='/house/${h.house_id}'">查看</button>
                 ${h.status === 0 ? `<button class="btn-dangerous" onclick="downHouse(${h.house_id}, '${landlordName}')">下架</button>` : ''}
                 </td>
             `;
@@ -95,6 +96,8 @@ async function showHouses(landlordName) {
     }
   }
 }
+
+
 
 // 函数仍然是 async 因为内部有 await fetch, await res.json() 和 await showHouses()
 async function downHouse(houseId, landlordName) {
@@ -131,6 +134,23 @@ async function downHouse(houseId, landlordName) {
       alert('请求失败，请稍后重试');
     }
   }
+}
+function showTenantSection() {
+  document.getElementById('tenantSection').style.display = 'block';
+  document.getElementById('landlordSection').style.display = 'none';
+  document.querySelector('.toggle-btn.active').classList.remove('active');
+  document.querySelectorAll('.toggle-btn')[0].classList.add('active');
+  document.getElementById('tenantCount').style.display = 'inline';
+  document.getElementById('landlordCount').style.display = 'none';
+}
+
+function showLandlordSection() {
+  document.getElementById('tenantSection').style.display = 'none';
+  document.getElementById('landlordSection').style.display = 'block';
+  document.querySelector('.toggle-btn.active').classList.remove('active');
+  document.querySelectorAll('.toggle-btn')[1].classList.add('active');
+  document.getElementById('tenantCount').style.display = 'none';
+  document.getElementById('landlordCount').style.display = 'inline';
 }
 
 function closeModal() {

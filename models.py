@@ -239,3 +239,12 @@ class RepairRequestModel(db.Model):
 
     def __repr__(self):
         return f'<RepairRequestModel {self.id} by {self.tenant_username} for house {self.house_id}>'
+
+class VisitStatsModel(db.Model):
+        __tablename__ = 'visit_stats'
+
+        id = db.Column(db.Integer, primary_key=True)
+        visit_date = db.Column(db.Date, nullable=False)
+        unique_visits = db.Column(db.Integer, default=0)
+        created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
