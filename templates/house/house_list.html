@@ -4,182 +4,19 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/house/house_list.css') }}">
 <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 <script src="{{ url_for('static', filename='js/house/show-news.js') }}"></script>
-<style>
-.container {
-    max-width: 1200px;
-    margin: 20px auto;
-    background: #f8f9fa;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    padding: 24px;
-}
-
-/* 新闻区样式优化 */
-.news-section {
-    margin-bottom: 24px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-}
-.news-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-.news-header h2 {
-    color: #1976d2;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-.news-controls button {
-    background: #1976d2;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-.news-controls button:disabled {
-    background: #ccc;
-}
-.news-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 16px;
-}
-.news-item {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-.news-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 8px;
-}
-.news-desc {
-    font-size: 1rem;
-    color: #555;
-    margin-bottom: 12px;
-}
-.news-footer {
-    font-size: 0.9rem;
-    color: #777;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* 房源列表样式优化 */
-.house-list-section {
-    margin-top: 24px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-}
-.house-list-section h2 {
-    color: #1976d2;
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 16px;
-}
-.house-cards-horizontal {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 20px;
-}
-.house-card-horizontal {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
-    padding: 16px;
-    display: flex;
-    gap: 12px;
-}
-.house-image-horizontal {
-    width: 120px;
-    height: 90px;
-    object-fit: cover;
-    border-radius: 8px;
-    background: #eaeaea;
-}
-.house-info-horizontal {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.house-title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.house-title-horizontal {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
-}
-.house-price-horizontal {
-    color: #ff5722;
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-.house-detail-row {
-    font-size: 1rem;
-    color: #555;
-    display: flex;
-    gap: 8px;
-}
-.btn-detail-horizontal {
-    margin-top: 12px;
-    background: #1976d2;
-    color: #fff;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 1rem;
-    text-decoration: none;
-    text-align: center;
-    transition: background 0.2s;
-}
-.btn-detail-horizontal:hover {
-    background: #1256a3;
-}
-
-/* 响应式优化 */
-@media (max-width: 768px) {
-    .container {
-        padding: 16px;
-    }
-    .news-container {
-        grid-template-columns: 1fr;
-    }
-    .house-cards-horizontal {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
 {% endblock %}
-
-
 
 {% block title %}房源列表{% endblock %}
 
 {% block body %}
-<div class="container">
-{% if filters.city %}
-<p>当前选择地区：<strong>{{ filters.city}}</strong></p>
-{% endif %}
+<div class="house-list-container">  <!-- 改为更具体的类名 -->
+    {% if filters.city %}
+    <div class="current-location">
+        当前选择地区：<strong>{{ filters.city}}</strong>
+    </div>
+    {% endif %}
 
-   <!-- 新闻区 -->
+    <!-- 新闻区 -->
     <div class="news-section">
         <div class="news-header">
             <h2>最新资讯</h2>
@@ -227,77 +64,93 @@
         {% endif %}
     </div>
 
-<!-- house_list.html 中的筛选表单 -->
-<form method="get" action="{{ url_for('house.house_list') }}" class="filter-form">
 
-  <!-- 省市联动（只读展示，实际从导航栏已切换） -->
-  <input type="hidden" name="region" value="{{ selected_region }}">
-  <input type="hidden" name="city" value="{{ selected_city }}">
+    <!-- 筛选表单 -->
+    <form method="get" action="{{ url_for('house.house_list') }}" class="filter-form">
+        <input type="hidden" name="region" value="{{ selected_region }}">
+        <input type="hidden" name="city" value="{{ selected_city }}">
 
-<label>地址关键词：</label>
-<input type="text" name="address" placeholder="例如：朝阳、五道口" value="{{ filters.address or '' }}">
-  <label>户型：</label>
-  <select name="rooms">
-    <option value="">不限</option>
-    <option value="1室" {% if filters.rooms == '1室' %}selected{% endif %}>1室</option>
-    <option value="2室" {% if filters.rooms == '2室' %}selected{% endif %}>2室</option>
-    <option value="3室" {% if filters.rooms == '3室' %}selected{% endif %}>3室</option>
-    <option value="4室" {% if filters.rooms == '4室' %}selected{% endif %}>4室</option>
-    <option value="4室及以上" {% if filters.rooms == '4室及以上' %}selected{% endif %}>4室及以上</option>
-  </select>
+        <div>
+            <label>地址关键词：</label>
+            <input type="text" name="address" placeholder="例如：朝阳、五道口" value="{{ filters.address or '' }}">
+        </div>
 
-  <label>价格范围：</label>
-  <input type="number" name="min_price" placeholder="最低价" value="{{ filters.min_price }}">
-  -
-  <input type="number" name="max_price" placeholder="最高价" value="{{ filters.max_price }}">
+        <div>
+            <label>户型：</label>
+            <select name="rooms">
+                <option value="">不限</option>
+                <option value="1室" {% if filters.rooms == '1室' %}selected{% endif %}>1室</option>
+                <option value="2室" {% if filters.rooms == '2室' %}selected{% endif %}>2室</option>
+                <option value="3室" {% if filters.rooms == '3室' %}selected{% endif %}>3室</option>
+                <option value="4室" {% if filters.rooms == '4室' %}selected{% endif %}>4室</option>
+                <option value="4室及以上" {% if filters.rooms == '4室及以上' %}selected{% endif %}>4室及以上</option>
+            </select>
+        </div>
 
-  <button type="submit">筛选</button>
-</form>
+        <div>
+            <label>价格范围：</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="number" name="min_price" placeholder="最低价" value="{{ filters.min_price }}" style="flex: 1;">
+                <span style="align-self: center; color: #64748b;">-</span>
+                <input type="number" name="max_price" placeholder="最高价" value="{{ filters.max_price }}" style="flex: 1;">
+            </div>
+        </div>
+
+        <button type="submit">筛选</button>
+    </form>
+
     <!-- 房源列表 -->
     <div class="house-list-section">
         <h2>房源列表</h2>
-        <div class="house-cards-horizontal">
-            {% if houses %}
-                {% for house in houses %}
-                <div class="house-card-horizontal">
-                    {% if house.image %}
-                        <img src="{{ house.image }}" class="house-image-horizontal" alt="房屋图片">
-                    {% else %}
-                        <img src="{{ url_for('static', filename='images/default_house_thumbnail.png') }}" class="house-image-horizontal" alt="暂无图片">
-                    {% endif %}
-                    <div class="house-info-horizontal">
-                        <div class="house-title-row">
-                            <span class="house-title-horizontal">{{ house.house_name }}</span>
-                            <span class="house-price-horizontal">{{ house.price }} 元/月</span>
-                        </div>
-                        <div class="house-detail-row">
-                            <span>户型：{{ house.rooms }}</span>
-                            <span>地区：{{ house.region }}</span>
-                        </div>
-                        <div class="house-detail-row">
-                            <span>地址：{{ house.addr }}</span>
-                        </div>
+        {% if houses %}
+            {% for house in houses %}
+            <div class="house-card">
+                {% if house.image %}
+                    <img src="{{ house.image }}" class="house-image" alt="房屋图片">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default_house_thumbnail.png') }}" class="house-image" alt="暂无图片">
+                {% endif %}
+                
+                <div class="house-info">
+                    <h3 class="house-title">{{ house.house_name }}</h3>
+                    
+                    <div class="house-details">
+                        <span><strong>户型：</strong>{{ house.rooms }}</span>
+                        <span><strong>地区：</strong>{{ house.region }}</span>
+                        <span><strong>地址：</strong>{{ house.addr }}</span>
+                    </div>
+                    
+                    <div class="house-features">
                         {% if house.highlight %}
-                        <div class="house-highlight">亮点：{{ house.highlight }}</div>
+                        <span class="house-highlight">🌟 {{ house.highlight }}</span>
                         {% endif %}
                         {% if house.situation %}
-                        <div class="house-situation">装修：{{ house.situation }}</div>
+                        <span class="house-situation">🏠 装修：{{ house.situation }}</span>
                         {% endif %}
-                        {% if house.deposit %}
-                        <div class="house-deposit">押金：{{ house.deposit }} 元</div>
-                        {% endif %}
-                        <a href="{{ url_for('house.house_detail', house_id=house.house_id) }}" class="btn-detail-horizontal">查看详情</a>
                     </div>
+                    
+                    {% if house.deposit %}
+                    <div class="house-deposit">💰 押金：{{ house.deposit }} 元</div>
+                    {% endif %}
                 </div>
-                {% endfor %}
-            {% else %}
-                <p class="no-houses-message">暂无符合条件的房源。</p>
-            {% endif %}
-        </div>
+                
+                <div class="house-price-section">
+                    <div class="house-price">
+                        <span class="price-amount">{{ house.price }}</span>
+                        <span class="price-unit">元/月</span>
+                    </div>
+                    <a href="{{ url_for('house.house_detail', house_id=house.house_id) }}" class="btn-detail">查看详情</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-houses-message">暂无符合条件的房源。</p>
+        {% endif %}
     </div>
-<!-- 分页控制 -->
-<div class="pagination">
+
+    <!-- 分页控制 -->
     {% if pagination.pages > 1 %}
+    <div class="pagination">
         <ul class="pagination-list">
             {% if pagination.has_prev %}
                 <li><a href="{{ url_for('house.house_list', page=1, **filters) }}">首页</a></li>
@@ -315,9 +168,8 @@
                 <li><a href="{{ url_for('house.house_list', page=pagination.pages, **filters) }}">末页</a></li>
             {% endif %}
         </ul>
+    </div>
     {% endif %}
-</div>
-
 </div>
 {% endblock %}
 
