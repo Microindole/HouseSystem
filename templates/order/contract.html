@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>房屋租赁合同（示范文本）</title>
+    <title>房屋租赁合同</title>
     <style>
         body { font-family: "SimSun", "宋体", serif; line-height: 1.8; margin: 20px; padding: 20px; background-color: #f8f9fa; }
         .container { max-width: 900px; margin: 0 auto; background-color: #fff; padding: 30px; border: 1px solid #dee2e6; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -12,406 +12,298 @@
         h2 { font-size: 1.5em; margin-bottom: 15px; }
         h3 { font-size: 1.3em; text-align: left; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
         h4 { font-size: 1.1em; text-align: left; margin-top: 20px; margin-bottom:10px; color: #555; }
-        .contract-id-display { text-align: left; font-weight: bold; margin-bottom: 10px; } /* Changed from .contract-id to avoid potential conflict with id attribute */
         .issued-by { text-align: center; margin-bottom: 10px; }
         .date-issued { text-align: center; margin-bottom: 30px; }
         .instructions, .special-tips { border: 1px solid #e0e0e0; background-color: #f9f9f9; padding: 15px; margin-bottom: 20px; font-size: 0.9em; border-radius: 4px;}
         .instructions h4, .special-tips h4 { margin-top: 0; color: #007bff; text-align: left; border-bottom: none;}
         .instructions ul, .special-tips ul { padding-left: 20px; }
-        .instructions li, .special-tips li { margin-bottom: 5px; }
         .form-section { margin-bottom: 20px; padding: 15px; border: 1px solid #f0f0f0; border-radius: 4px; background-color: #fff;}
         .form-section h3 { border-bottom: 1px solid #007bff; color: #007bff; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
-        .form-group .inline-label { display: inline; font-weight: normal; margin-left: 5px; }
-        input[type="text"], input[type="date"], input[type="number"], input[type="email"], textarea, select {
+        input[type="text"], input[type="date"], input[type="number"], textarea {
             width: calc(100% - 18px); padding: 8px; margin-top: 3px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
         }
-        textarea { min-height: 60px; }
+        textarea {
+            min-height: 60px;
+            resize: none; /* 禁止用户调整文本区域大小 */
+        }
         input.inline-fill { width: auto; display: inline-block; border: none; border-bottom: 1px solid #555; padding: 2px 5px; margin: 0 5px; box-shadow: none; border-radius: 0;}
-        span.inline-fill { border-bottom: 1px solid #555; padding: 0 5px; display: inline-block; min-width: 80px; text-align: center; } /* For non-input blanks */
-        .checkbox-group label, .radio-group label { margin-right: 15px; font-weight: normal; }
-        .checkbox-group input[type="checkbox"], .radio-group input[type="radio"] { margin-right: 5px; vertical-align: middle; }
-        table.appendix-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em;} /* Added class for appendix tables */
-        table.appendix-table th, table.appendix-table td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top;} /* Added class for appendix tables */
-        table.appendix-table th { background-color: #e9ecef; font-weight: bold; } /* Added class for appendix tables */
-        /* Removed input styling from appendix td as inputs are removed */
+        span.inline-fill-placeholder { border-bottom: 1px solid #555; padding: 0 5px; display: inline-block; min-width: 80px; text-align: center; background-color: #f0f0f0; color: #777; font-style: italic; }
         .signature-area { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; }
         .signature-section { display: flex; justify-content: space-between; flex-wrap: wrap;}
         .signature-block { width: 48%; margin-bottom: 20px;}
-        .signature-block .form-group { margin-bottom: 8px; }
+        .signature-block p { margin-bottom: 8px;} /* Reduced margin for signature block paragraphs */
         .appendix { margin-top: 30px; padding-top:20px; border-top: 2px solid #007bff; }
         .appendix h3 { color: #007bff; }
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .clause-title { font-weight: bold; margin-bottom: 8px; }
         p { margin: 0 0 10px 0; }
-        .choice { display: inline-block; margin-right: 10px; }
+        .fixed-clause { color: #444; font-size: 0.95em; }
+        .signature-value { /* Style for displaying actual signature data if pre-filled */
+            font-style: italic;
+            color: #333;
+            border-bottom: 1px solid #888;
+            padding: 2px 5px;
+            min-width: 150px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="form-group">
-        <label for="contract_document_id">合同示范文本编号：</label> <input type="text" id="contract_document_id" name="contract_document_id" value="GF—2025—2614">
+        <label for="contract_document_id_display">合同示范文本编号：</label>
+        <input type="text" id="contract_document_id" name="contract_document_id" value="{{ contract_info.contract_document_id }}" readonly>
     </div>
     <h1>房屋租赁合同</h1>
-    <h2>（示范文本）</h2>
+    <h2 class="text-center">（示范文本）</h2>
     <div class="issued-by">国家市场监督管理总局 制定</div>
     <div class="date-issued">二〇二五年四月</div>
 
     <div class="instructions">
         <h4>使用说明</h4>
-        <ol>
-            <li>本合同文本为示范文本，主要供城镇房屋的出租人将房屋租赁给承租人居住时参照使用，其他用途的房屋租赁当事人可在参照本合同文本的基础上根据具体情况另行约定。</li>
-            <li>租赁期限不得超过二十年，超过二十年的，超过部分无效。双方当事人应当按照法律法规的规定办理房屋租赁合同登记备案。</li>
-            <li>双方当事人在签约之前应当仔细阅读本合同文本全部内容，结合具体情况确定具有选择性、补充性、填充性、修改性的内容，内容以手写项为优先，并承担合同订立、履行所产生的法律后果。</li>
-            <li>本合同文本的相关条款中留有空白位置，供当事人自行约定或者补充约定。双方当事人可以选择文本条款中所提供的选择项，同意的在选择项前的□打√，不同意的打×。双方当事人可以对文本条款的内容进行修改、增补或者删减，但不得违反法律、行政法规的强制性规定，不得违背公序良俗。</li>
-            <li>如当事人为无民事行为能力人或者限制民事行为能力人，则本合同应当由监护人签订。</li>
-            <li>名词解释
-                <ul>
-                    <li>（一）房屋租赁合同：出租人将房屋交付承租人使用、收益，承租人支付租金的合同。</li>
-                    <li>（二）承租人的优先承租权：租赁期间届满，房屋承租人享有以同等条件优先承租的权利。</li>
-                    <li>（三）承租人的优先购买权：出租人出卖租赁房屋的，应当在出卖之前的合理期限内通知承租人，承租人享有以同等条件优先购买的权利。</li>
-                    <li>（四）次承租人的代为清偿权：承租人拖欠租金的，次承租人可以代承租人支付其欠付的租金和违约金，但是转租合同对出租人不具有法律约束力的除外。次承租人代为支付的租金和违约金，可以充抵次承租人应当向承租人支付的租金；超出其应付的租金数额的，可以向承租人追偿。</li>
-                </ul>
-            </li>
-        </ol>
+        <ul>
+            <li class="fixed-clause">本合同文本为示范文本，主要供城镇房屋的出租人将房屋租赁给承租人居住时参照使用，其他用途的房屋租赁当事人可在参照本合同文本的基础上根据具体情况另行约定。</li>
+            <li class="fixed-clause">租赁期限不得超过二十年，超过二十年的，超过部分无效。双方当事人应当按照法律法规的规定办理房屋租赁合同登记备案。</li>
+            <li class="fixed-clause">双方当事人在签约之前应当仔细阅读本合同文本全部内容，结合具体情况确定具有选择性、补充性、填充性、修改性的内容，内容以手写项为优先，并承担合同订立、履行所产生的法律后果。</li>
+        </ul>
     </div>
 
     <div class="special-tips">
         <h4>特别提示</h4>
-        <h5>一、对出租人的提示</h5>
+        <h5 class="fixed-clause">一、对出租人的提示</h5>
         <ul>
-            <li>（一）出租人应当对承租人的身份、租赁房屋用途进行核验，并注意留存复印件，提示承租人不得利用房屋从事违法违规行为。</li>
-            <li>（二）出租人应当注意提示承租人遵守物业管理相关规定、遵守小区管理规约、不得损害相邻关系权利人的合法权益。</li>
-            <li>（三）出租人应当注意留存房屋租赁前后的对比照片，仔细填写房屋交割单，以便双方当事人确认租赁前后房屋的状态。</li>
-            <li>（四）出租人应当保持房屋及附属设施的良好使用状况，采取必要措施防范安全事故的发生。</li>
+            <li class="fixed-clause">（一）出租人应当对承租人的身份、租赁房屋用途进行核验，并注意留存复印件，提示承租人不得利用房屋从事违法违规行为。</li>
+            <li class="fixed-clause">（二）出租人应当注意提示承租人遵守物业管理相关规定、遵守小区管理规约、不得损害相邻关系权利人的合法权益。</li>
         </ul>
-        <h5>二、对承租人的提示</h5>
+        <h5 class="fixed-clause">二、对承租人的提示</h5>
         <ul>
-            <li>（一）承租人应当对出租人的身份证件、房屋权属证明以及与该房屋出租事宜的相关证明进行核验，确认房屋属于可租赁的房屋且出租人有权出租房屋，并注意留存复印件。</li>
-            <li>（二）承租人应当注意留存支付租金、押金及其他相关费用的凭据。</li>
-            <li>（三）承租人应当按照正确使用方法使用房屋及附属设施，避免发生因使用不当导致的安全事故。</li>
+            <li class="fixed-clause">（一）承租人应当对出租人的身份证件、房屋权属证明以及与该房屋出租事宜的相关证明进行核验，确认房屋属于可租赁的房屋且出租人有权出租房屋，并注意留存复印件。</li>
+            <li class="fixed-clause">（二）承租人应当注意留存支付租金、押金及其他相关费用的凭据。</li>
         </ul>
     </div>
 
-    <form id="houseLeaseContractForm">
+    <form id="houseLeaseContractFormSimplified">
         <div class="form-section">
             <h3>合同当事人信息</h3>
             <h4>甲方（出租人）</h4>
-            <p>出租人用户名: <span class="inline-fill">{{ landlord_username_placeholder }}</span> (此信息通常由后端提供)</p>
+            <p>出租人用户名: <span class="inline-fill-placeholder">{{ landlord_username_placeholder }}</span></p>
             <h4>乙方（承租人）</h4>
-            <p>承租人用户名: <span class="inline-fill">{{ tenant_username_placeholder }}</span> (此信息通常由后端提供)</p>
+            <p>承租人用户名: <span class="inline-fill-placeholder">{{ tenant_username_placeholder }}</span></p>
         </div>
 
-        <p>根据《中华人民共和国民法典》及其他相关法律法规的规定，甲、乙双方在平等、自愿的基础上，经友好协商，就乙方承租甲方房屋有关事宜达成以下协议：</p>
+        <p class="fixed-clause">根据《中华人民共和国民法典》及其他相关法律法规的规定，甲、乙双方在平等、自愿的基础上，经友好协商，就乙方承租甲方房屋有关事宜达成以下协议：</p>
 
         <div class="form-section">
             <h3>第一条 房屋基本状况</h3>
             <div class="form-group">
-                <label for="house_location_text_snapshot">（一）该房屋坐落于：</label>
-                <textarea id="house_location_text_snapshot" name="house_location_text_snapshot"></textarea> </div>
-            <div class="form-group">
-                <label for="house_owner_details_snapshot">（二）房屋所有权人及甲方权属情况（请详细说明所有权人名称、甲方身份[所有权人/购房人/使用权人/其他]、权属证明类型[房屋所有权证/不动产权证书/房屋买卖合同/房屋租赁合同/其他]及编号）：</label>
-                <textarea id="house_owner_details_snapshot" name="house_owner_details_snapshot"></textarea> </div>
-            <div class="form-group">
-                （三）该房屋建筑面积 <input type="number" id="house_area_sqm_snapshot" name="house_area_sqm_snapshot" class="inline-fill" style="width: 80px;"> 平方米。 <br>
-                <label for="house_mortgage_info_snapshot" style="display: inline;">房屋抵押信息（请说明是否设定抵押权，若有，抵押权人是谁）：</label>
-                <textarea id="house_mortgage_info_snapshot" name="house_mortgage_info_snapshot" style="width: calc(100% - 18px); margin-top: 5px;"></textarea> </div>
-            <div class="form-group">
-                <label for="house_layout_details_snapshot">（四）房屋户型、朝向、装修情况（请详细说明，例如：X室X厅X卫X厨；朝向XX；装修情况[毛坯/简装/精装/其他]）：</label>
-                <textarea id="house_layout_details_snapshot" name="house_layout_details_snapshot"></textarea> <p>该房屋的附属设施、设备、家具、电器、装修等状况（下文简称“附属设施、物品”），详见附件《房屋交割单》。</p>
+                <label for="house_details_text">（一）该房屋坐落、权属、面积、户型、装修及车位等基本情况描述：</label>
+                <textarea id="house_details_text" name="house_details_text" class="no-resize" {% if not edit_mode %}readonly{% endif %}>{{ contract_info.house_details_text_snapshot }}</textarea>
+                <p class="fixed-clause">房屋抵押情况：【请在上方描述中说明，若有抵押，不影响本合同在抵押权实现前的效力】。</p>
+                <p class="fixed-clause">该房屋的附属设施、设备、家具、电器、装修等状况（下文简称“附属设施、物品”），详见附件《房屋交割单》。</p>
             </div>
-            <div class="form-group">
-                <label for="garage_info_snapshot">（五）车库/车位配套信息（请说明是否有车库/车位，位置，是否一并出租）：</label>
-                <textarea id="garage_info_snapshot" name="garage_info_snapshot"></textarea> </div>
-            {# Removed (六) 其他 specific textarea for this clause #}
         </div>
 
         <div class="form-section">
             <h3>第二条 租赁用途</h3>
             <div class="form-group">
-                <label for="lease_purpose_text">该房屋的租赁用途为：</label> <input type="text" id="lease_purpose_text" name="lease_purpose_text">。
-                <p>未经甲方同意，乙方不得变更租赁用途。</p>
+                <label>该房屋的租赁用途为：</label>
+                <span style="font-weight: bold; color: #333;">居住</span>
+                <p class="fixed-clause">该房屋仅限用于普通居民住宅用途，具体包括：</p>
+                <ol class="fixed-clause" style="margin-left: 20px; margin-top: 10px;">
+                    <li>作为乙方及其家庭成员的日常居住场所；</li>
+                    <li>乙方在居住期间正常的生活起居、学习及休闲活动；</li>
+                    <li>家庭日常接待亲友及社交活动；</li>
+                    <li>符合社区规约及物业管理规定的其他居住相关活动。</li>
+                </ol>
+                <p class="fixed-clause" style="margin-top: 10px;">乙方不得将该房屋用于下列用途：</p>
+                <ol class="fixed-clause" style="margin-left: 20px; margin-top: 10px;">
+                    <li>商业经营活动，包括但不限于开设商铺、办公场所、工作室等；</li>
+                    <li>生产加工、仓储、堆放货物等工业用途；</li>
+                    <li>举办对房屋结构、设施可能造成损害的活动；</li>
+                    <li>从事违反国家法律法规或社区规约禁止的其他活动；</li>
+                    <li>超出居住人数限制（通常每居室不超过2人）的群租行为；</li>
+                    <li>未经甲方书面同意进行转租或合租。</li>
+                </ol>
+                <p class="fixed-clause" style="margin-top: 10px; font-weight: bold;">乙方应当严格遵守前述租赁用途的约定，未经甲方书面同意，不得擅自改变租赁用途。如有违反，甲方有权要求乙方立即纠正；情节严重的，甲方有权解除合同，并要求乙方赔偿由此造成的损失。</p>
             </div>
         </div>
 
         <div class="form-section">
             <h3>第三条 转租</h3>
-            <div class="form-group">
-                <label for="sublet_terms_text">（一）转租约定条款（例如：甲方是否同意乙方转租该房屋，若同意，相关条件；若乙方未经同意擅自转租，甲方的处理权限及期限，乙方的违约责任等）：</label>
-                <textarea id="sublet_terms_text" name="sublet_terms_text"></textarea> </div>
-            <p>（二）经甲方同意的转租不影响本房屋租赁合同效力，因转租造成房屋损失的，乙方应当承担损失赔偿责任。</p>
-            <p>（三）乙方经甲方同意将该房屋转租给第三人，转租的租金归乙方所有，转租期限不得超过乙方剩余租赁期间，超过部分的约定对甲方不具有法律约束力。</p>
+            <p class="fixed-clause">（一）转租约定：原则上乙方不得转租。如确需转租，需事先征得甲方书面同意，且转租合同内容不得超出本合同范围，因转租产生的责任由乙方承担。</p>
         </div>
 
         <div class="form-section">
             <h3>第四条 租赁期间</h3>
             <div class="form-group">
                 （一）该房屋租赁期自
-                <input type="date" id="start_date" name="start_date" class="inline-fill"> 年 月 日起至 <input type="date" id="end_date" name="end_date" class="inline-fill"> 年 月 日止，
+                <input type="date" id="start_date" name="start_date" class="inline-fill" value="{{ contract.start_date.strftime('%Y-%m-%d') }}" {% if not edit_mode %}readonly{% endif %}> 年 月 日起至
+                <input type="date" id="end_date" name="end_date" class="inline-fill" value="{{ contract.end_date.strftime('%Y-%m-%d') }}" {% if not edit_mode %}readonly{% endif %}> 年 月 日止。
             </div>
-            <div class="form-group">
-                <label for="rent_free_period_details">免租期详情（如：是否设置免租期，若有，天数为多少，起止日期为何）：</label> <input type="text" id="rent_free_period_details" name="rent_free_period_details" class="inline-fill">
-            </div>
-            <p>（二）租赁期间届满，甲方有权收回该房屋，乙方应当及时返还该房屋，乙方享有以同等条件优先承租的权利。</p>
-            <div class="form-group">
-                （三）乙方要求续租的，应当在租赁期间届满前 <input type="number" id="renewal_notice_days" name="renewal_notice_days" class="inline-fill" style="width:60px;"> 天通知甲方，双方协商另行订立合同。 </div>
+            <p class="fixed-clause">（二）免租期：【双方可在此处或“其他约定事项”中约定，若无则本条款不适用】。</p>
+            <p class="fixed-clause">（三）租赁期间届满，甲方有权收回该房屋，乙方应当及时返还。乙方如需续租，应在租赁期满前 30 日内向甲方提出，双方另行协商签订新合同，同等条件下乙方有优先承租权。</p>
         </div>
 
         <div class="form-section">
             <h3>第五条 租金</h3>
             <div class="form-group">
-                （一）该房屋月租金（或其他周期租金总额）为 <input type="number" id="total_amount" name="total_amount" class="inline-fill" style="width:100px;"> 元 (大写: <input type="text" id="rent_monthly_amount_text" name="rent_monthly_amount_text" class="inline-fill" style="width:200px;"> )。 </div>
+                （一）该房屋月租金（或其他周期租金总额）为
+                <input type="number" id="total_amount" name="total_amount" class="inline-fill" style="width:100px;" value="{{ contract.total_amount|float|round(2) if contract.total_amount is not none else 0 }}" {% if not edit_mode %}readonly{% endif %}> 元
+                (大写: <input type="text" id="rent_monthly_amount_text" name="rent_monthly_amount_text" class="inline-fill" style="width:200px;" placeholder="例如：人民币叁仟圆整"> )。
+            </div>
+            <p class="fixed-clause">（二）税费：本合同履行过程中产生的税费，依照国家法律法规规定各自承担。</p>
             <div class="form-group">
-                <label for="rent_tax_info">税费信息（如：税费为XXX，租金是否包含税费）：</label> <input type="text" id="rent_tax_info" name="rent_tax_info" class="inline-fill">
+                （三）该房屋租金按
+                <input type="text" id="rent_payment_frequency" name="rent_payment_frequency" class="inline-fill" value="{{ contract_info.rent_payment_frequency }}" placeholder="例如：月/季度/年" {% if not edit_mode %}readonly{% endif %}> 方式支付，具体支付方式及期限：【双方可在此处或“其他约定事项”中约定，通常为每期开始前X日内支付】。
             </div>
             <div class="form-group">
-                （二）该房屋租金按 <input type="text" id="rent_payment_frequency" name="rent_payment_frequency" class="inline-fill" placeholder="月/季度/年/一次性/其他"> 方式支付。
+                <label for="landlord_bank_account_info">（四）甲方收取租金账户信息（户名、银行账号、开户行）：</label>
+                <textarea id="landlord_bank_account_info" name="landlord_bank_account_info" class="no-resize" {% if not edit_mode %}readonly{% endif %}>{{ contract_info.landlord_bank_account_info or '' }}</textarea>
             </div>
-            <div class="form-group">
-                <label for="rent_payment_terms_details">租金具体支付期限和方式约定（例如：首期支付时间，剩余每期支付时间）：</label> <textarea id="rent_payment_terms_details" name="rent_payment_terms_details"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="landlord_bank_account_info">（三）甲方收取租金账户信息（户名、银行账号、开户行）：</label> <textarea id="landlord_bank_account_info" name="landlord_bank_account_info"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="garage_rent_info">（四）车库/车位租金详情（若与房屋一并出租，请说明月租金、大写金额、支付方式、支付时间）：</label> <textarea id="garage_rent_info" name="garage_rent_info"></textarea>
-            </div>
-            <div class="form-group">
-                （五）乙方应当向甲方及时足额支付该房屋租金，乙方逾期支付租金超过 <input type="number" id="rent_overdue_days_for_termination" name="rent_overdue_days_for_termination" class="inline-fill" style="width:60px;"> 天的，甲方有权解除本合同并收回该房屋，乙方应当按实际使用时间支付租金并承担违约责任。 </div>
+            <p class="fixed-clause">（五）车库/车位租金：【若适用，请在“其他约定事项”中明确】。</p>
+            <p class="fixed-clause">（六）乙方逾期支付租金超过 15 天的，甲方有权解除本合同并收回该房屋，乙方应按实际使用时间支付租金并承担相应违约责任。</p>
         </div>
 
         <div class="form-section">
             <h3>第六条 押金</h3>
             <div class="form-group">
-                （一）为保证在租赁期间乙方能够及时足额支付租金及其他相关费用和合理使用该房屋及附属设施、物品，乙方应当在签订本合同时，向甲方支付押金 (大写: <input type="text" id="deposit_amount_text" name="deposit_amount_text" class="inline-fill" style="width:200px;"> )。 (数字金额参考: <input type="number" id="deposit_amount_num_ref" name="deposit_amount_num_ref" class="inline-fill" style="width:100px;"> 元)
+                （一）乙方应于签订本合同时，向甲方支付押金
+                <input type="number" id="deposit_amount_numeric" name="deposit_amount_numeric" class="inline-fill" style="width:100px;" value="{{ contract_info.deposit_amount_numeric_snapshot|float|round(2) if contract_info.deposit_amount_numeric_snapshot is not none else 0 }}" {% if not edit_mode %}readonly{% endif %}> 元
+                (大写: <input type="text" id="deposit_amount_text" name="deposit_amount_text" class="inline-fill" style="width:200px;" placeholder="例如：人民币叁仟圆整"> )。
             </div>
-            <p>（二）甲方收到押金后应当向乙方出具押金收款凭证。</p>
-            <div class="form-group">
-                （三）本合同终止时，在乙方结清租赁期间产生的租金和其他相关费用后，甲方应当将押金 (<input type="text" id="deposit_interest_info" name="deposit_interest_info" class="inline-fill" placeholder="计息/不计息">)
-                全额返还乙方。乙方未结清租赁期间产生的租金和其他相关费用的，甲方有权从押金中抵扣，抵扣后如果有剩余的，甲方应当将剩余部分返还乙方；押金不足以抵扣的，甲方有权向乙方追偿差额。
-            </div>
+            <p class="fixed-clause">（二）甲方收到押金后应向乙方出具收款凭证。</p>
+            <p class="fixed-clause">（三）本合同终止，乙方结清所有应付款项并将房屋及附属设施、物品按约定返还甲方并经甲方验收合格后，甲方应将押金（不计利息）全额返还乙方。如有损坏或欠费，甲方可从中抵扣，不足部分有权追偿。</p>
         </div>
 
         <div class="form-section">
             <h3>第七条 其他相关费用</h3>
-            <p>租赁期内，与该房屋相关各项费用的承担方式为：</p>
-            <div class="form-group">
-                <label for="fees_borne_by_landlord_text">（一）甲方承担的费用明细（例如：物业费、供暖费...）：</label> <textarea id="fees_borne_by_landlord_text" name="fees_borne_by_landlord_text"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="fees_borne_by_tenant_text">（二）乙方承担的费用明细（例如：水费、电费、燃气费、网络费...）：</label> <textarea id="fees_borne_by_tenant_text" name="fees_borne_by_tenant_text"></textarea>
-            </div>
-            <p>（三）甲乙双方应当及时足额缴纳己方承担的费用。</p>
-            <div class="form-group">
-                <label for="landlord_overdue_fee_handling_text">（四）甲方逾期缴纳其承担的费用，影响乙方正常使用的处理方式约定：</label> <textarea id="landlord_overdue_fee_handling_text" name="landlord_overdue_fee_handling_text"></textarea>
-            </div>
-            <div class="form-group">
-                （五）乙方逾期缴纳其承担的费用，甲方代为缴纳的，甲方有权从押金中抵扣。押金被抵扣的，乙方应当在 <input type="number" id="deposit_replenish_days_tenant" name="deposit_replenish_days_tenant" class="inline-fill" style="width:60px;"> 天内向甲方补足。乙方逾期未补足押金的，甲方有权解除合同并要求乙方承担违约责任。 </div>
+            <p class="fixed-clause">租赁期内，（一）甲方承担：【房屋主体结构的自然损坏维修费】。（二）乙方承担：【水费、电费、燃气费、网络费、电视费、物业管理费、垃圾处理费等实际使用费用】。具体承担范围和支付方式可在“其他约定事项”中补充。</p>
         </div>
 
         <div class="form-section">
             <h3>第八条 房屋交付及返还</h3>
-            <div class="form-group">
-                <label for="house_delivery_terms_text">（一）房屋交付具体约定（例如：合同成立之日 / <input type="date" class="inline-fill" name="house_delivery_date_ref"> 年 月 日 / 其他时间）：</label> <textarea id="house_delivery_terms_text" name="house_delivery_terms_text"></textarea>
-                甲方迟延交付房屋达 <input type="number" id="landlord_delivery_delay_days_for_termination" name="landlord_delivery_delay_days_for_termination" class="inline-fill" style="width:60px;"> 日的，乙方有权解除合同并要求甲方承担违约责任。 </div>
-            <p>（二）租赁期间届满或本合同提前终止时，乙方应当将该房屋返还甲方，并保证附属设施、物品的完整良好状态(租赁期间的自然损耗除外)。</p>
-            <p>（三）甲乙双方共同验收该房屋、在《房屋交割单》签名（盖章）并移交房门钥匙，视为房屋交付或者返还完成。</p>
-            <div class="form-group">
-                <label for="tenant_return_delay_penalty_terms">（四）乙方逾期返还房屋的，乙方应当按照 <input type="text" id="tenant_return_delay_penalty_terms" name="tenant_return_delay_penalty_terms" class="inline-fill"> 的标准向甲方支付违约金，并承担逾期期间产生的与该房屋有关的各项费用，给甲方造成其他损失的，乙方应当承担赔偿责任。</label> </div>
+            <p class="fixed-clause">（一）房屋交付：甲方应于【双方约定时间，例如合同生效之日/YYYY年MM月DD日】前将符合本合同约定的房屋交付给乙方。双方共同验收并在《房屋交割单》上签字确认。</p>
+            <p class="fixed-clause">（二）房屋返还：租赁期满或合同解除后，乙方应于【期满日/解除日】内将房屋及附属设施、物品完好返还甲方（自然损耗除外），并配合甲方验收。逾期返还的，应支付逾期使用费并承担违约责任。</p>
         </div>
 
         <div class="form-section">
             <h3>第九条 房屋使用及装饰装修</h3>
-            <p>（一）乙方应当按合同约定的用途合理使用该房屋及附属设施、物品。出现毁损或者其他影响正常使用情形时，应当及时告知甲方，并采取必要措施以避免损失扩大。</p>
-            <p>（二）甲方未经乙方同意，不得擅自进入该房屋。确有必要进入的，甲方应当提前与乙方约定时间，乙方应当予以配合。</p>
-            <div class="form-group">
-                <label for="decoration_permission_terms">（三）甲方是否同意乙方装饰装修该房屋及具体条款（包括装修要求、期满后处理方式[乙方拆除恢复/折价归甲方/无偿归甲方/其他]，提前终止时残值损失承担等）：</label> <textarea id="decoration_permission_terms" name="decoration_permission_terms"></textarea>
-                <p>如甲方同意乙方装修的，乙方装修过程中严禁破坏房屋主体、承重结构，应确保房屋安全，严格遵守国家有关住宅室内装饰装修管理规定及相关小区物业管理规定。</p>
-                <p>甲方对乙方装饰装修和增设的物品不承担维修义务。因拆除造成该房屋毁损的，乙方应当承担恢复原状或者赔偿损失责任。</p>
-                <p>乙方经甲方同意装饰装修的，因合同提前终止造成的乙方装饰装修残值损失按以下方式承担：
-                    <br>（1）因违约提前终止合同的，由违约方承担剩余租赁期间装饰装修残值损失；
-                    <br>（2）因不可归责于双方的事由提前终止合同的，剩余租赁期间的装饰装修残值损失，由双方按照公平原则协商分担。
-                </p>
-                <p>乙方未经甲方同意装饰装修的，甲方有权解除合同并要求乙方承担恢复原状或者赔偿损失等责任。</p>
-            </div>
+            <p class="fixed-clause">（一）乙方应按约定用途合理使用房屋及附属设施，不得利用房屋从事违法活动。</p>
+            <p class="fixed-clause">（二）乙方如需对房屋进行装饰装修或增设他物的，须事先征得甲方书面同意，并遵守国家及物业管理规定，费用由乙方自理。期满或合同解除时，除双方另有约定外，乙方所形成的的附合装饰装修物归甲方所有，乙方不得损坏；可移动物品由乙方自行取回。</p>
         </div>
 
         <div class="form-section">
             <h3>第十条 房屋维修</h3>
-            <p>（一）租赁期间，甲方应当保障该房屋及附属设施、物品处于正常使用的状态，并承担乙方正常使用下该房屋及附属设施、物品损坏的维修义务。乙方有权在房屋及附属设施、物品需要维修时，请求甲方在合理期限内维修。</p>
-            <div class="form-group">
-                <label for="maintenance_terms">（二）房屋维修责任及条款（包括甲方不承担维修义务致使乙方无法正常使用时，乙方是否有权自行维修，维修费用是否由甲方承担等）：</label> <textarea id="maintenance_terms" name="maintenance_terms"></textarea>
-            </div>
-            <p>（三）甲方既不承担维修义务，也不愿意承担乙方维修所产生的费用的，乙方有权解除合同并要求甲方承担违约责任。</p>
-            <p>（四）乙方应当合理使用并爱护该房屋及附属设施、物品。乙方因保管不当或者使用不当造成该房屋及附属设施、物品毁坏的，乙方应当承担维修、更换或者赔偿损失责任。乙方拒绝的，甲方有权解除合同并要求乙方承担违约责任。</p>
+            <p class="fixed-clause">（一）租赁期间，房屋主体结构及配套设施的自然损坏由甲方负责维修并承担费用。乙方使用不当或人为损坏的，由乙方负责维修并承担费用。</p>
+            <p class="fixed-clause">（二）乙方发现房屋及附属设施损坏或故障时，应及时通知甲方修复。甲方应在接到乙方通知后的合理期限内进行维修。甲方未及时维修的，乙方可代为维修，费用由甲方承担，但紧急情况除外应先通知甲方。</p>
         </div>
 
         <div class="form-section">
-            <h3>第十一条 优先购买权</h3>
-            <div class="form-group">
-                甲方出卖该房屋的，应当提前 <input type="number" id="sale_preemption_notice_days" name="sale_preemption_notice_days" class="inline-fill" style="width:60px;"> 日通知乙方。乙方享有以同等条件优先购买的权利。 </div>
-        </div>
-
-        <div class="form-section">
-            <h3>第十二条 保密要求</h3>
-            <div class="form-group">
-                甲、乙双方对订立合同过程中知悉的对方的商业秘密（包括技术信息和经营信息）及双方约定的其他保密信息即 <input type="text" id="confidentiality_clause_details" name="confidentiality_clause_details" class="inline-fill">，无论本合同是否成立，均不得泄露或者不正当地使用；任何一方泄露、不正当地使用该商业秘密或者保密信息，给对方造成损失的，应当承担赔偿责任。 </div>
-        </div>
-
-        <div class="form-section">
-            <h3>第十三条 甲方权利和义务</h3>
-            <p>（一）甲方应当保证有权出租该房屋，甲方应当向乙方出示身份证明、房屋权属证明、有权决定该房屋出租事宜的相关证明。</p>
-            <p>（二）甲方有权要求乙方出示身份证明。</p>
-            <p>（三）甲方应当保证该房屋的出租不违反法律法规的相关规定，房屋产权人或者共有人对该房屋的出租无异议，该房屋不存在查封冻结等限制情形。</p>
-            <p>（四）甲方应当保证该房屋未设立居住权，不影响乙方正常使用。在租赁期间，甲方不得就该房屋设立居住权。</p>
-            <p>（五）甲方应当及时交付该房屋并在租赁期间保持该房屋及附属设施、物品符合本合同约定用途的状态。</p>
-            <p>（六）甲方有权要求乙方按照合同约定的时间、方式及时足额交付租金、押金及其他相关费用。</p>
-            <p>（七）甲方有权在租赁期间届满或者本合同终止时，要求乙方及时返还该房屋。</p>
-            <p>（八）法律规定及本合同约定的其他权利义务。</p>
-        </div>
-
-        <div class="form-section">
-            <h3>第十四条 乙方权利和义务</h3>
-            <p>（一）乙方有权要求甲方出示身份证明、房屋权属证明、有权决定该房屋出租事宜的相关证明。</p>
-            <p>（二）乙方应当向甲方出示身份证明。</p>
-            <p>（三）乙方应当按合同约定的时间、方式及时足额支付租金、押金及其他费用。</p>
-            <p>（四）乙方不得在该房屋内进行违法犯罪行为或者其他违反法律法规规定的行为。</p>
-            <p>（五）乙方应当遵守物业管理相关规定、小区管理规约，不得损害相邻关系权利人的合法权益。</p>
-            <p>（六）乙方应当注意用水、用电、用气等的安全，不得在房屋内从事危及自身和他人人身和财产安全的行为。因乙方原因致使发生火灾或其他安全性事故，造成乙方或者他人人身或财产受损害的，由乙方承担相应责任。因上述行为给甲方造成损失的，乙方应当承担赔偿责任。</p>
-            <p>（七）乙方应当在租赁期间届满或者本合同终止时，按照合同约定及时返还该房屋。</p>
-            <p>（八）法律规定或者本合同约定的其他权利义务。</p>
+            <h3>第十一条至第十四条 双方权利义务概述</h3>
+            <p class="fixed-clause">甲方保证有权出租该房屋并确保房屋符合安全使用标准。乙方应按时支付租金及其他应付费用，合法合规使用房屋，遵守物业规定，爱护房屋及设施。详细权利义务参照《中华人民共和国民法典》相关规定及本合同其他条款。</p>
         </div>
 
         <div class="form-section">
             <h3>第十五条 违约责任</h3>
-            <div class="form-group">
-                （一）甲方提前收回该房屋的，或者乙方提前退租的，应当提前 <input type="number" id="early_termination_notice_days_breach" name="early_termination_notice_days_breach" class="inline-fill" style="width:60px;"> 日书面通知对方，并经对方同意后，应当按照 <input type="text" id="early_termination_penalty_standard_breach" name="early_termination_penalty_standard_breach" class="inline-fill"> 的标准向对方支付违约金。 </div>
-            <div class="form-group">
-                （二）甲方未按约定时间交付该房屋，应当按照 <input type="text" id="landlord_delivery_delay_penalty_standard" name="landlord_delivery_delay_penalty_standard" class="inline-fill"> 的标准承担违约责任。甲方未按约定时间返还乙方的押金、租金的，应当按照 <input type="text" id="landlord_deposit_return_delay_penalty_standard" name="landlord_deposit_return_delay_penalty_standard" class="inline-fill"> 的标准承担违约责任。 </div>
-            <div class="form-group">
-                （三）乙方未按约定时间返还该房屋，其违约责任标准按本合同第八条第（四）项执行。乙方逾期返还房屋且未支付逾期期间的租金超过 <input type="number" id="tenant_return_overdue_months_limit_landlord_action" name="tenant_return_overdue_months_limit_landlord_action" class="inline-fill" style="width:60px;"> 个月时，甲方 <label for="landlord_repossess_on_return_overdue_terms">有权自行收回房屋并处置乙方放置在该房屋内的物品的约定：</label>
-                <input type="text" id="landlord_repossess_on_return_overdue_terms" name="landlord_repossess_on_return_overdue_terms" class="inline-fill">。 </div>
-            <div class="form-group">
-                （四）乙方未按约定时间支付租金、押金或者费用，应当按照 <input type="text" id="tenant_late_payment_penalty_standard" name="tenant_late_payment_penalty_standard" class="inline-fill"> 的标准承担违约责任。 </div>
-            <p>（五）任何一方有其他违约行为的，应当承担继续履行、采取补救措施或者赔偿损失等违约责任。</p>
-            <div class="form-group">
-                <label for="loss_compensation_scope_terms">（六）损失赔偿额范围约定（例如：是否包括合同按约定期限履行的租金，是否不超过预见损失）：</label>
-                <textarea id="loss_compensation_scope_terms" name="loss_compensation_scope_terms"></textarea> </div>
+            <p class="fixed-clause">（一）任何一方违反本合同约定，应向守约方支付相当于【例如：一个月租金】的违约金。若违约金不足以弥补守约方损失的，违约方还应赔偿损失与违约金的差额部分。</p>
+            <p class="fixed-clause">（二）具体违约情形（如甲方提前收房、乙方提前退租、逾期支付租金、逾期交房/返房等）的违约责任标准，除本合同其他条款已有约定外，按前款执行或在“其他约定事项”中明确。</p>
         </div>
 
         <div class="form-section">
-            <h3>第十六条 合同变更、终止</h3>
-            <p>（一）本合同经甲、乙双方协商一致可以变更。</p>
-            <p>（二）有下列情形之一的，本合同可以终止：…</p>
-            <p>（七）有下列情形之一，甲方提出解除合同的：</p>
-            <ul>
-                <li>（1）乙方擅自改变该房屋用途或者利用该房屋从事违法违规活动的；</li>
-                <li>（2）乙方擅自变动该房屋建筑主体和承重结构的；</li>
-                <li>（3）乙方擅自改建、扩建、装饰装修该房屋或者变更该房屋的附属设施、物品，经甲方要求，在 <input type="number" class="inline-fill" style="width:60px;" id="tenant_unauthorized_decoration_restore_days" name="tenant_unauthorized_decoration_restore_days"> 日内未恢复原状的；</li> </ul>
-            <div class="form-group">
-                <label for="other_termination_conditions_text">（八）其他约定终止情形：</label>
-                <textarea id="other_termination_conditions_text" name="other_termination_conditions_text"></textarea> </div>
-        </div>
-
-        <div class="form-section">
-            <h3>第十七条 不可抗力</h3>
-            <p>（一）不可抗力是指不能预见、不能避免并不能克服的客观情况。</p>
-            <div class="form-group">
-                （二）任何一方因不可抗力的原因不能履行合同或者不能完全履行合同的，应当及时向对方通报不能履行或者不能完全履行的理由，以减轻给对方造成的损失；并应当在 <input type="number" id="force_majeure_proof_days" name="force_majeure_proof_days" class="inline-fill" style="width:60px;"> 日内向对方提供不可抗力发生的证明材料，以部分或者全部免除相应的违约责任。 </div>
-            <p>（三）双方可以根据不可抗力的影响情况协商延期履行、部分履行、不履行合同或者解除合同。</p>
-        </div>
-
-        <div class="form-section">
-            <h3>第十八条 通知、送达</h3>
-            <p>（一）双方保证在本合同中记载的联系电话、联系地址、电子邮箱等信息均真实有效并作为本合同履行以及法院或者仲裁机构解决本合同争议时的有效联系方式和送达地址。</p>
-            <div class="form-group">
-                （二）任何一方变更联系电话、联系地址、电子邮箱的，应当自变更之日起 <input type="number" id="contact_info_change_notice_days" name="contact_info_change_notice_days" class="inline-fill" style="width:60px;"> 日内书面通知对方，并提供变更后的信息；未及时通知的，对方按照本合同约定的联系方式和送达地址进行送达的，视为有效送达。 </div>
-        </div>
-
-        <div class="form-section">
-            <h3>第十九条 法律适用及争议解决</h3>
-            <p>（一）本合同之订立、生效、解释、变更、终止、执行与争议解决均适用中华人民共和国的法律法规。</p>
-            <div class="form-group">
-                <label for="dispute_resolution_choice_text">（二）争议解决方式选择及具体机构名称（例如：向 XX人民法院提起民事诉讼；或向 YY仲裁委员会提请仲裁）：</label>
-                <textarea id="dispute_resolution_choice_text" name="dispute_resolution_choice_text"></textarea> </div>
+            <h3>第十六条至第十九条 合同变更、终止、不可抗力、通知送达、法律适用及争议解决</h3>
+            <p class="fixed-clause">本合同的变更需双方协商一致并书面确认。合同的终止条件依照法律规定及双方约定。因不可抗力导致合同无法履行的，根据不可抗力的影响，部分或全部免除责任。双方通讯方式以本合同所留信息为准，如有变更应及时通知对方。本合同适用中华人民共和国法律，因本合同发生的争议，双方应协商解决；协商不成的，可依法向【房屋所在地】人民法院提起诉讼。</p>
         </div>
 
         <div class="form-section">
             <h3>第二十条 附则</h3>
-            <p>（一）本合同自甲、乙双方签名（盖章）之日起成立并生效。</p>
-            <p>（二）本合同附件为本合同不可分割的组成部分，与本合同具有同等效力。</p>
-            <p>（三）本合同部分条款的无效或者变更不影响其他条款的效力。</p>
-            <p>（四）双方有权以书面形式对本合同进行变更或者补充，变更或者补充合同与本合同具有同等效力。</p>
-            <div class="form-group">
-                （五）本合同一式 <input type="number" id="contract_total_copies" name="contract_total_copies" class="inline-fill" style="width:50px;"> 份，其中甲方 <input type="number" id="contract_copies_for_landlord" name="contract_copies_for_landlord" class="inline-fill" style="width:50px;"> 份，乙方 <input type="number" id="contract_copies_for_tenant" name="contract_copies_for_tenant" class="inline-fill" style="width:50px;"> 份，具有同等效力。 </div>
+            <p class="fixed-clause">（一）本合同自甲、乙双方签名（盖章）之日起成立并生效。</p>
+            <p class="fixed-clause">（二）本合同附件（《房屋交割单》）为本合同不可分割的组成部分，与本合同具有同等效力。</p>
+            <p class="fixed-clause">（三）本合同一式两份，甲、乙双方各执一份，具有同等效力。</p>
         </div>
 
         <div class="form-section">
             <h3>第二十一条 其他</h3>
             <div class="form-group">
-                <label for="other_agreements_text">其他约定事项：</label> <textarea id="other_agreements_text" name="other_agreements_text" rows="5"></textarea>
+                <label for="other_agreements_text">其他约定事项：</label>
+                <textarea id="other_agreements_text" name="other_agreements_text" rows="5" class="no-resize" {% if not edit_mode %}readonly{% endif %}>{{ contract_info.other_agreements_text or '' }}</textarea>
             </div>
         </div>
 
         <div class="signature-area">
+            <h3>合同签署</h3>
             <div class="signature-section">
+                <!-- 甲方签名区块 -->
                 <div class="signature-block">
-                    <p>甲方（出租人）签名/盖章：<span class="inline-fill" style="min-width: 200px;">&nbsp;</span></p>
-                    <p>日期：<span class="inline-fill" style="min-width: 150px;">&nbsp;</span></p>
+                    <h4>甲方（出租人）</h4>
+                    <p>签名/盖章：
+                        <span id="landlord_signature_display" class="signature-value">
+                            {{ contract_info.landlord_signature_identifier if contract_info and contract_info.landlord_signature_identifier else '（待签署）' }}
+                        </span>
+                    </p>
+                    <p>联系电话：<span class="inline-fill-placeholder">{{ landlord_phone_placeholder }}</span></p>
+                    <p>签署日期：
+                        <span id="landlord_signature_date_display" class="signature-value">
+                            {{ contract_info.landlord_signature_datetime.strftime('%Y-%m-%d %H:%M:%S') if contract_info and contract_info.landlord_signature_datetime else '（待签署）' }}
+                        </span>
+                    </p>
                 </div>
+
+                <!-- 乙方签名区块 -->
                 <div class="signature-block">
-                    <p>乙方（承租人）签名/盖章：<span class="inline-fill" style="min-width: 200px;">&nbsp;</span></p>
-                    <p>日期：<span class="inline-fill" style="min-width: 150px;">&nbsp;</span></p>
+                    <h4>乙方（承租人）</h4>
+                    <p>签名/盖章：
+                        <span id="tenant_signature_display" class="signature-value">
+                            {{ contract_info.tenant_signature_identifier if contract_info and contract_info.tenant_signature_identifier else '（待签署）' }}
+                        </span>
+                    </p>
+                    <p>联系电话：<span class="inline-fill-placeholder">{{ tenant_phone_placeholder }}</span></p>
+                    <p>签署日期：
+                        <span id="tenant_signature_date_display" class="signature-value">
+                            {{ contract_info.tenant_signature_datetime.strftime('%Y-%m-%d %H:%M:%S') if contract_info and contract_info.tenant_signature_datetime else '（待签署）' }}
+                        </span>
+                    </p>
                 </div>
             </div>
         </div>
-    </form>
 
-    <div class="appendix">
-        <h3>附件：房屋交割单</h3>
-        <p>甲乙双方共同确认，本附件所约定房屋的附属设施、设备、家具、电器、装饰装修、相关物品等随同该房屋交付。</p>
-        <p>如果租赁房屋用于办公或者其他用途，下述房屋交割单不足以含盖双方需要交接内容的，由双方自行制作其余所涉及物品、设施等交割单，并根据交割单查验交付相关物品、设施。</p>
-        <div class="form-group">
-            <label for="handover_checklist_details_text">房屋交割单详细内容或数据 (可详细列出，或以JSON等文本格式描述)：</label> <textarea id="handover_checklist_details_text" name="handover_checklist_details_text" rows="15" placeholder="请在此处详细记录交割单内容，包括生活费用信息、各房间物品状况、钥匙凭证等。以下表格仅为项目参考。"></textarea>
-        </div>
-
-        <h4>以下为交割单项目参考（具体内容请在上方文本框填写）：</h4>
-        <h4>生活费用信息</h4>
-        <table class="appendix-table">
-            <thead><tr><th>项目</th><th>现底数</th><th>已结至</th><th>单价</th><th>余额</th><th>备注</th></tr></thead>
-            <tbody>
-            <tr><td>冷水</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>中水</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>热水</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>电</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>暖气</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>燃气</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>卫生费</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>共用电费</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>网费</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>电视费</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>电话费</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>物业费</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>停车费</td><td></td><td></td><td></td><td></td><td></td></tr>
-            <tr><td>其他</td><td></td><td></td><td></td><td></td><td></td></tr>
-            </tbody>
-        </table>
-        <p>（卧室、客厅、厨房、卫生间、遥控器钥匙、其他物品等详细项目参考，请将具体清点结果填入上方“房屋交割单详细内容”文本框。）</p>
-        <div class="signature-area">
-            <div class="signature-section">
-                <div class="signature-block">
-                    <p>甲方（出租人）交割确认：<span class="inline-fill" style="min-width: 150px;">&nbsp;</span></p>
-                    <p>日期：<span class="inline-fill" style="min-width: 120px;">&nbsp;</span></p>
-                </div>
-                <div class="signature-block">
-                    <p>乙方（承租人）交割确认：<span class="inline-fill" style="min-width: 150px;">&nbsp;</span></p>
-                    <p>日期：<span class="inline-fill" style="min-width: 120px;">&nbsp;</span></p>
+        <!-- 附件部分，作为独立区块 -->
+        <div class="appendix">
+            <h3>附件：房屋交割单</h3>
+            <p class="fixed-clause">甲乙双方共同确认，本附件所约定房屋的附属设施、设备、家具、电器、装饰装修、相关物品等随同该房屋交付。</p>
+            <div class="form-group">
+                <label for="handover_checklist_details_text">房屋交割单详细内容 (请详细记录交割时房屋及附属设施、物品状况，水、电、气等读数，钥匙凭证等)：</label>
+                <textarea id="handover_checklist_details_text" name="handover_checklist_details_text" rows="15" class="no-resize" {% if not edit_mode %}readonly{% endif %}>{{ contract_info.handover_checklist_details_text or '' }}</textarea>
+            </div>
+            <div class="signature-area">
+                <h4>交割单确认</h4>
+                <div class="signature-section">
+                    <div class="signature-block">
+                        <p>甲方（出租人）交割确认：
+                            <span id="landlord_handover_signature_display" class="signature-value">
+                                {{ contract_info.landlord_handover_signature_identifier if contract_info and contract_info.landlord_handover_signature_identifier else '（待签署）' }}
+                            </span>
+                        </p>
+                        <p>日期：
+                            <span id="landlord_handover_signature_date_display" class="signature-value">
+                                 {{ contract_info.landlord_handover_signature_datetime.strftime('%Y-%m-%d %H:%M:%S') if contract_info and contract_info.landlord_handover_signature_datetime else '（待签署）' }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="signature-block">
+                        <p>乙方（承租人）交割确认：
+                            <span id="tenant_handover_signature_display" class="signature-value">
+                                {{ contract_info.tenant_handover_signature_identifier if contract_info and contract_info.tenant_handover_signature_identifier else '（待签署）' }}
+                            </span>
+                        </p>
+                        <p>日期：
+                            <span id="tenant_handover_signature_date_display" class="signature-value">
+                                {{ contract_info.tenant_handover_signature_datetime.strftime('%Y-%m-%d %H:%M:%S') if contract_info and contract_info.tenant_handover_signature_datetime else '（待签署）' }}
+                            </span>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
 </div>
 </body>
