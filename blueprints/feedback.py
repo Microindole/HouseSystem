@@ -1,14 +1,12 @@
 import json
-
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, abort, flash, g # 导入 flash
 from sqlalchemy import or_, and_
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
-
-# 导入所需模型
 from models import HouseInfoModel, HouseStatusModel, LandlordModel, db, PrivateChannelModel, LoginModel, MessageModel, \
-    ComplaintModel, TenantModel, RentalContract  # 加入ComplaintModel, TenantModel
+    ComplaintModel, TenantModel, RentalContract, ContractInfoModel
 from decorators import login_required, admin_required
+from decimal import Decimal, InvalidOperation
 
 
 feedback_bp = Blueprint('feedback', __name__, url_prefix='/feedback')
@@ -375,61 +373,173 @@ def my_complaints():
 
     return render_template('feedback/my_complaints.html', my_complaints_list=my_complaints_list)
 
+
+
 @feedback_bp.route('/send_contract', methods=['POST'])
+@login_required
 def send_contract():
     data = request.get_json()
-    channel_id = data.get('channel_id')
-    start_date = data.get('start_date')
-    end_date = data.get('end_date')
-    amount = data.get('amount')
-    receiver = data.get('receiver_username')
+    if not data:
+        return jsonify({'success': False, 'msg': '无效的请求数据'}), 400
 
-    sender = g.username
+    try:
+        channel_id = int(data.get('channel_id'))
+        start_date_str = data.get('start_date')
+        end_date_str = data.get('end_date')
+        monthly_rent_str = data.get('total_amount')  # 前端传入的是月租金
+        receiver_username = data.get('receiver_username')  # 租客用户名
+        deposit_amount_str = data.get('deposit_amount_numeric')
+
+        # 获取ContractInfoModel相关字段
+        rent_payment_frequency = data.get('rent_payment_frequency', '月付').strip()
+        lease_purpose_text = data.get('lease_purpose_text', '居住').strip()
+        other_agreements_text = data.get('other_agreements_text', '').strip()
+
+    except (ValueError, AttributeError) as e:
+        return jsonify({'success': False, 'msg': f'请求数据格式错误: {str(e)}'}), 400
+
+    sender_username = g.username  # 房东用户名
+
+    # 修正验证逻辑：逐个验证必要字段
+    if not channel_id:
+        return jsonify({'success': False, 'msg': '缺少频道ID'}), 400
+    if not start_date_str:
+        return jsonify({'success': False, 'msg': '请填写开始日期'}), 400
+    if not end_date_str:
+        return jsonify({'success': False, 'msg': '请填写结束日期'}), 400
+    if not monthly_rent_str:
+        return jsonify({'success': False, 'msg': '请填写月租金'}), 400
+    if not receiver_username:
+        return jsonify({'success': False, 'msg': '缺少接收者用户名'}), 400
+    if deposit_amount_str is None:  # 允许押金为0
+        return jsonify({'success': False, 'msg': '请填写押金金额'}), 400
+
     channel = PrivateChannelModel.query.get(channel_id)
-
-    # 身份校验：必须是房东，且频道存在
-    if not channel or sender != channel.landlord_username:
-        return jsonify({'success': False, 'msg': '无权限发送合同'})
-
+    if not channel:
+        return jsonify({'success': False, 'msg': '聊天频道不存在'}), 404
+    if sender_username != channel.landlord_username:
+        return jsonify({'success': False, 'msg': '只有房东才能发送合同'}), 403
+    if channel.tenant_username != receiver_username:
+        return jsonify({'success': False, 'msg': '接收方与频道信息不符，请确认租客用户名。'}), 400
 
     house_id = channel.house_id
-    existing_active_contract = RentalContract.query.join(PrivateChannelModel, RentalContract.channel_id == PrivateChannelModel.channel_id) \
-        .filter(PrivateChannelModel.house_id == house_id, RentalContract.status == 0).first()
 
-    if existing_active_contract:
-        return jsonify({'success': False, 'msg': '该房源已有正在进行的合同，不能重复发送'})
+    # 检查是否已有待处理或生效的合同
+    existing_contract = RentalContract.query.filter(
+        RentalContract.channel_id == channel.channel_id,
+        RentalContract.status.in_([0, 1])  # 0:待支付/待签署, 1:支付成功/已生效
+    ).first()
+
+    if existing_contract:
+        status_msg = "待处理" if existing_contract.status == 0 else "已生效"
+        return jsonify({'success': False, 'msg': f'此聊天已存在一份{status_msg}的合同，请先处理现有合同。'}), 400
+
+    # 检查房源状态
+    house_status = HouseStatusModel.query.filter_by(house_id=house_id, landlord_name=sender_username).first()
+    if not house_status or house_status.status != 0:  # 0 表示"可出租"
+        return jsonify({'success': False, 'msg': '该房源当前状态不可出租 (可能已出租或未上架)，无法发送合同。'}), 400
 
     try:
-        new_contract = RentalContract(
-            channel_id=channel_id,
-            landlord_username=sender,
-            tenant_username=receiver,
-            start_date=datetime.strptime(start_date, '%Y-%m-%d'),
-            end_date=datetime.strptime(end_date, '%Y-%m-%d'),
-            total_amount=amount,
-            status=0
+        # 数据转换
+        start_date_obj = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date_obj = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        if end_date_obj <= start_date_obj:
+            return jsonify({'success': False, 'msg': '结束日期必须在开始日期之后。'}), 400
+
+        monthly_rent_decimal = Decimal(monthly_rent_str)
+        if monthly_rent_decimal <= Decimal('0'):
+            return jsonify({'success': False, 'msg': '月租金必须大于0。'}), 400
+
+        deposit_amount_decimal = Decimal(deposit_amount_str)
+        if deposit_amount_decimal < Decimal('0'):
+            return jsonify({'success': False, 'msg': '押金不能为负数。'}), 400
+
+        bj_now = datetime.utcnow() + timedelta(hours=8)  # 北京时间
+
+        # 创建基本合同记录
+        new_rental_contract = RentalContract(
+            channel_id=channel.channel_id,
+            landlord_username=sender_username,
+            tenant_username=receiver_username,
+            start_date=start_date_obj,
+            end_date=end_date_obj,
+            total_amount=monthly_rent_decimal,  # 月租金金额
+            status=0,  # 待签署状态
+            created_at=bj_now,
+            updated_at=bj_now
         )
-        db.session.add(new_contract)
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'success': False, 'msg': '合同保存失败: ' + str(e)})
+        db.session.add(new_rental_contract)
+        db.session.flush()  # 获取自增ID
 
-    content = f"【租房合同】租期：{start_date} 至 {end_date}，金额：¥{amount}。请确认合同信息。"
-    message = MessageModel(
-        channel_id=channel_id,
-        sender_username=sender,
-        receiver_username=receiver,
-        content=content,
-        timestamp=datetime.utcnow() + timedelta(hours=8),  # 设置为北京时间
-    )
-    db.session.add(message)
+        # 获取房源详细信息
+        house_info = HouseInfoModel.query.get(house_id)
+        house_details = "房屋基本信息未详细提供，请在后续合同编辑页补充。"
+        if house_info:
+            house_details = (
+                f"房屋地址: {house_info.region or ''}{house_info.addr or '未提供'}, "
+                f"户型: {house_info.rooms or '未提供'}, "
+                f"装修: {house_info.situation or '未提供'}."
+            )
 
-    try:
+        # 创建合同详情记录
+        new_contract_info = ContractInfoModel(
+            rental_contract_id=new_rental_contract.id,
+            contract_document_id="GF—2025—2614",  # 默认合同编号
+            house_details_text_snapshot=house_details,
+            lease_purpose_text=lease_purpose_text,
+            rent_payment_frequency=rent_payment_frequency,
+            deposit_amount_numeric_snapshot=deposit_amount_decimal,
+            other_agreements_text=other_agreements_text if other_agreements_text else None,
+            info_created_at=bj_now,
+            info_updated_at=bj_now
+        )
+        db.session.add(new_contract_info)
+
+        # 修复字符串
+        contract_summary = "【租房合同已发送】房东已向您发送一份租房合同草案。\n"
+        contract_summary += f"月租金：¥{monthly_rent_decimal:.2f}，租期：{start_date_str} 至 {end_date_str}。\n"
+        contract_summary += f"押金：¥{deposit_amount_decimal:.2f}。\n"
+        contract_summary += "请前往\"查看交易历史\"页面查看详情并进行处理。"
+
+        message_to_tenant = MessageModel(
+            channel_id=channel.channel_id,
+            sender_username=sender_username,
+            receiver_username=receiver_username,
+            content=contract_summary,
+            timestamp=bj_now,
+            is_read=False
+        )
+        db.session.add(message_to_tenant)
         db.session.commit()
-        return jsonify({'success': True, 'msg': '合同已发送'})
+
+        # 返回成功响应和消息数据
+        message_data = {
+            'message_id': message_to_tenant.message_id,
+            'channel_id': message_to_tenant.channel_id,
+            'sender_username': message_to_tenant.sender_username,
+            'content': message_to_tenant.content,
+            'timestamp': message_to_tenant.timestamp.isoformat() + 'Z'
+        }
+
+        return jsonify({
+            'success': True,
+            'msg': '合同已成功发送给租客！已在聊天中发送通知。',
+            'new_message': message_data
+        })
+
+    except ValueError as ve:
+        db.session.rollback()
+        return jsonify({'success': False, 'msg': f'输入数据格式错误: {ve}'}), 400
+    except InvalidOperation as ioe:
+        db.session.rollback()
+        return jsonify({'success': False, 'msg': f'金额格式不正确: {ioe}'}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'msg': '发送失败: ' + str(e)})
+        import traceback
+        error_details = f"Error sending contract: {type(e).__name__} - {e}\n{traceback.format_exc()}"
+        print(error_details)
+        return jsonify({'success': False, 'msg': '发送合同失败，发生内部服务器错误。请联系管理员。'}), 500
+
 
 # 添加新的 API 端点用于获取聊天数据
 @feedback_bp.route('/get_chat_data/<int:channel_id>')
@@ -490,3 +600,21 @@ def get_chat_data(channel_id):
         'messages': messages_data,
         'house': house_data
     })
+
+@feedback_bp.route('/check_active_contracts/<int:channel_id>')
+@login_required
+def check_active_contracts(channel_id):
+    existing_contract = RentalContract.query.filter(
+        RentalContract.channel_id == channel_id,
+        RentalContract.status.in_([0, 1])
+    ).first()
+
+    if existing_contract:
+        status_text = "待处理" if existing_contract.status == 0 else "已生效"
+        return jsonify({
+            'has_active_contract': True,
+            'status_text': status_text,
+            'contract_id': existing_contract.id
+        })
+
+    return jsonify({'has_active_contract': False})

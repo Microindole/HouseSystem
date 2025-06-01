@@ -5,8 +5,7 @@
 {% block head %}
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/feedback/message.css') }}">
-    {# 如果 message-toast.js 的 CSS 不是全局加载，也需要在这里引入 #}
-    {# <link rel="stylesheet" href="{{ url_for('static', filename='js/common/message-toast.css') }}"> #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/feedback/landlord-contract.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -36,7 +35,7 @@
                             </div>
                             <p class="last-message">
                                 {% if item.last_message %}
-                                    {{ item.last_message.content | truncate(30) }} {# 示例：截断消息 #}
+                                    {{ item.last_message.content | truncate(30) }}
                                 {% else %}
                                     暂无消息
                                 {% endif %}
@@ -50,7 +49,7 @@
         {# 右侧聊天窗口 (结构不变) #}
         <div class="chat-main">
             <div class="chat-header" id="chat-header">
-                <h2>{% if channel %}{{ channel.tenant_username if g.username == channel.landlord_username else channel.landlord_username }} <span style="font-size: 12px; color: #666; font-weight: normal;">({{ '租客' if g.username == channel.landlord_username else '房东' }})</span> <span style="font-size: 13px; color: #888; margin-left: 16px;">房源：{{ house_name_for_header | default('未知房源') }}</span> {% if channel.house_status == 0 and g.username == channel.landlord_username %}<span style="color:green;margin-left:10px;margin-right:10px;">可出租</span><button id="send-contract-btn" class="send-button" style="margin-left:10px;display:inline-block;">发送合同</button>{% elif channel.house_status == 1 %}<span style="color:orange;margin-left:10px;">出租中</span>{% elif channel.house_status in [2,4,5] %}<span style="color:red;margin-left:10px;">未上架</span>{% endif %} {% else %}请选择一个聊天{% endif %}</h2>
+                <h2>{% if channel %}{{ channel.tenant_username if g.username == channel.landlord_username else channel.landlord_username }} <span style="font-size: 12px; color: #666; font-weight: normal;">({{ '租客' if g.username == channel.landlord_username else '房东' }})</span> <span style="font-size: 13px; color: #888; margin-left: 16px;">房源：{{ house.house_name if house else '未知房源' }}</span> {% if channel.house_status == 0 and g.user_type == 2 %}<span style="color:green;margin-left:10px;margin-right:10px;">可出租</span><button id="send-contract-btn" class="send-button" style="margin-left:10px;display:inline-block;">发送合同</button>{% elif channel.house_status == 1 %}<span style="color:orange;margin-left:10px;">出租中</span>{% elif channel.house_status in [2,4,5] %}<span style="color:red;margin-left:10px;">未上架/审核中</span>{% endif %} {% else %}请选择一个聊天{% endif %}</h2>
             </div>
             <div id="message-container" class="message-area">
                 <p class="no-messages-placeholder">请在左侧选择一个聊天开始对话</p>
@@ -64,27 +63,85 @@
         </div>
     </div>
 
-    {# 合同弹窗 (结构不变) #}
+    {# 美化后的合同弹窗 #}
     <div id="contract-modal" class="contract-modal" style="display:none;">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/order/order_submit.css') }}">
         <div class="contract-modal-content">
             <span class="close-btn" id="close-contract-modal-btn">&times;</span>
-            <h2>发送租房合同</h2>
-            <form id="contract-form">
-                <label>租客：<strong id="tenant-name-display"></strong></label><br>
-                <label>房源：<strong id="house-name-display"></strong></label><br><br>
-                <label for="start-date">开始日期：</label>
-                <input type="date" id="start-date" required><br><br>
-                <label for="months">出租月数：</label>
-                <input type="number" id="months" min="1" required><br><br>
-                <label>结束日期：</label>
-                <span id="calculated-end-date">--</span><br><br>
-                <label>总金额（元）：</label>
-                <span id="calculated-amount">--</span><br><br>
-                <input type="hidden" id="end-date">
-                <input type="hidden" id="amount">
-                <button type="submit" class="send-button">确认发送合同</button>
-            </form>
+            <h2>发送租房合同草案</h2>
+
+            <div class="contract-modal-scroll">
+                <form id="contract-form">
+                    <div class="form-row">
+                        <label>租客</label>
+                        <strong id="tenant-name-display">租客名加载中...</strong>
+                    </div>
+                    <div class="form-row">
+                        <label>房源</label>
+                        <strong id="house-name-display">房源名加载中...</strong>
+                    </div>
+
+                    <hr class="form-divider">
+                    <h4>核心租赁条款</h4>
+
+                    <div class="form-row">
+                        <label for="start-date">租赁开始日期</label>
+                        <input type="date" id="start-date" name="start_date" required>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="months">租赁月数</label>
+                        <input type="number" id="months" name="months" min="1" value="12" required>
+                    </div>
+
+                    <div class="form-row">
+                        <label>租赁结束日期</label>
+                        <span id="calculated-end-date">请先选择开始日期和租赁月数</span>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="contract-monthly-rent">月租金 (元)</label>
+                        <input type="number" id="contract-monthly-rent" name="monthly_rent" min="0.01" step="0.01" required placeholder="例如: 3000.00">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="contract-deposit">押金金额 (元)</label>
+                        <input type="number" id="contract-deposit" name="deposit_amount_numeric" min="0" step="0.01" required placeholder="例如: 6000.00 (无押金填0)">
+                    </div>
+
+                    <hr class="form-divider">
+                    <h4>详细合同条款</h4>
+
+                    <div class="form-row">
+                        <label for="lease-purpose">租赁用途</label>
+                        <input type="text" id="lease-purpose" name="lease_purpose_text" value="居住" placeholder="例如: 居住">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="payment-frequency">租金支付频率</label>
+                        <select id="payment-frequency" name="rent_payment_frequency">
+                            <option value="月付" selected>月付</option>
+                            <option value="季付">季付</option>
+                            <option value="半年付">半年付</option>
+                            <option value="年付">年付</option>
+                            <option value="一次性付清">一次性付清</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="other-agreements">其他约定事项</label>
+                        <textarea id="other-agreements" name="other_agreements_text" rows="3" placeholder="请输入其他重要约定条款..."></textarea>
+                    </div>
+
+                    {# JS填充数据的隐藏字段 #}
+                    <input type="hidden" id="end-date-hidden" name="end_date">
+
+                    <div class="form-actions">
+                        <button type="button" id="cancel-contract-btn" class="cancel-button">取消</button>
+                        <button type="submit" class="send-button">确认发送合同</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -92,13 +149,12 @@
     <script>
         window.chatConfig = {
             currentUsername: "{{ g.username | e }}",
-            initialChannelId: {% if channel %}"{{ channel.channel_id }}",{% else %}null{% endif %},
-            // 基本URL，如果JS中需要动态构建
-            baseUrl: "{{ request.script_root | e }}", // 例如 /your_app_prefix
-            feedbackBaseUrl: "{{ request.script_root }}/feedback" // 获取feedback蓝图的基础路径
+            currentUserType: {{ g.user_type | default(0) }},
+            initialChannelId: {% if channel %}"{{ channel.channel_id }}"{% else %}null{% endif %},
+            feedbackBaseUrl: "{{ request.script_root }}/feedback"
         };
     </script>
-    {# 确保 message-toast.js 在 message.js 之前加载 #}
+
     <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
     <script src="{{ url_for('static', filename='js/feedback/message.js') }}" defer></script>
 {% endblock %}

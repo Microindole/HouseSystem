@@ -1,0 +1,389 @@
+/* static/css/contract_history_styles.css */
+
+/* General Reset/Base (very minimal for demonstration) */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    color: #1f2937; /* Equivalent to text-gray-800 or darker */
+    line-height: 1.6;
+    background-color: #f9fafb; /* A light gray background often used with cards */
+}
+
+a {
+    text-decoration: none;
+    color: #2563eb; /* Tailwind blue-600 */
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* Utility for truncation */
+.ch-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Page Container */
+.ch-container {
+    max-width: 1100px; /* Example: typical container width */
+    margin-left: auto;
+    margin-right: auto;
+    padding: 24px 8px; /* py-6 px-2 */
+}
+
+/* Page Title */
+.ch-title {
+    font-size: 24px; /* text-2xl */
+    font-weight: 700; /* font-bold */
+    color: #1f2937; /* text-gray-800 */
+    margin-bottom: 24px; /* mb-6 */
+}
+
+/* Desktop Header Row */
+.ch-header-row {
+    display: none; /* Hidden by default */
+    background-color: #f3f4f6; /* bg-gray-100 */
+    color: #4b5563; /* text-gray-600 */
+    font-weight: 600; /* font-semibold */
+    font-size: 12px; /* text-xs */
+    padding: 12px; /* p-3 */
+    border-top-left-radius: 8px; /* rounded-t-lg */
+    border-top-right-radius: 8px;
+    align-items: center; /* Align items vertically */
+}
+
+.ch-header-row .ch-col {
+    padding: 0 4px; /* Minimal horizontal padding */
+}
+
+.ch-col-house-info-header { width: 40%; padding-left: 8px; }
+.ch-col-amount-header { width: 8.333%; text-align: right; padding-right: 8px; }
+.ch-col-parties-header { width: 16.666%; padding-left: 8px; }
+.ch-col-time-header { width: 16.666%; padding-left: 8px; }
+.ch-col-status-actions-header { width: 25%; text-align: right; padding-right: 8px; }
+
+
+/* Contract List (acts as a simple wrapper) */
+.ch-contract-list {
+    /* No specific styles needed if cards handle their own spacing/borders */
+}
+
+/* Contract Card */
+.ch-contract-card {
+    background-color: #ffffff; /* bg-white */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04); /* shadow-md */
+    transition: box-shadow 0.2s ease-in-out;
+    border-radius: 8px; /* rounded-lg */
+    padding: 12px; /* p-3 */
+    border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
+}
+/* MODIFIED: Removed margin-bottom for mobile view to eliminate gap */
+.ch-contract-card:not(:last-child) {
+    /* margin-bottom: 16px; */ /* Removed this line */
+}
+.ch-contract-card:last-child {
+    border-bottom: none; /* The very last card in the list should not have a bottom border */
+}
+.ch-contract-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-lg */
+}
+
+/* Inner layout of a card */
+.ch-card-inner-layout {
+    display: flex;
+    flex-direction: column; /* Mobile first: flex-col */
+    align-items: center;   /* Centering blocks for mobile, as per previous request */
+    gap: 12px; /* gap-3 */
+}
+
+/* Columns within a card - general styling */
+.ch-col {
+    min-width: 0; /* For proper shrinking/truncation in flex items */
+    width: 100%; /* Default for mobile stacked view */
+}
+
+/* House Info Section */
+.ch-col-house-info {
+    display: flex; /* For icon and text alignment if an icon was present */
+    align-items: center;
+    gap: 8px; /* gap-2 */
+}
+.ch-col-house-info .ch-text-details {
+    min-width: 0;
+    flex-grow: 1;
+}
+.ch-house-name {
+    font-size: 14px; /* text-sm */
+    font-weight: 600; /* font-semibold */
+    color: #111827; /* text-gray-900 */
+}
+.ch-house-addr {
+    font-size: 12px; /* text-xs */
+    color: #6b7280; /* text-gray-500 */
+}
+
+/* Amount Section */
+.ch-col-amount {
+    font-size: 12px; /* text-xs */
+    text-align: left; /* Default for mobile */
+}
+.ch-mobile-label {
+    font-weight: 500; /* font-medium */
+    color: #6b7280; /* text-gray-500 */
+    margin-right: 4px; /* mr-1 */
+    display: inline; /* Default, will be hidden on larger screens */
+}
+.ch-amount-value {
+    font-weight: 700; /* font-bold */
+    color: #111827; /* text-gray-900 */
+}
+
+/* Parties and Time Section */
+.ch-col-parties,
+.ch-col-time {
+    font-size: 12px; /* text-xs */
+    color: #374151; /* text-gray-700 */
+}
+.ch-col-parties .ch-field-label,
+.ch-col-time .ch-field-label {
+    font-weight: 500; /* font-medium */
+    color: #6b7280; /* text-gray-500 */
+}
+
+/* Status & Actions Section */
+.ch-col-status-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* items-start for mobile stack */
+    gap: 6px; /* gap-1.5 */
+}
+.ch-status-badge {
+    font-size: 12px; /* text-xs */
+    font-weight: 700; /* font-bold */
+    padding: 4px 10px; /* px-2.5 py-1 */
+    border-radius: 9999px; /* rounded-full */
+    display: inline-block;
+}
+/* Badge Colors */
+.ch-status-badge.status-0 { background-color: #f59e0b; color: #ffffff; } /* bg-yellow-500 */
+.ch-status-badge.status-1 { background-color: #10b981; color: #ffffff; } /* bg-green-500 */
+.ch-status-badge.status-2 { background-color: #9ca3af; color: #ffffff; } /* bg-gray-400 */
+.ch-status-badge.status-3 { background-color: #ef4444; color: #ffffff; } /* bg-red-500 */
+
+.ch-expire-tip {
+    color: #dc2626; /* text-red-600 */
+    font-weight: 600; /* font-semibold */
+    font-size: 12px; /* text-xs */
+    margin-top: 2px; /* mt-0.5 */
+}
+.ch-returned-tip {
+    color: #10b981; /* text-green-600 */
+    font-weight: 600;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.ch-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px; /* gap-1.5 */
+    margin-top: 4px; /* mt-1 */
+    justify-content: flex-start; /* Default for mobile */
+    width: 100%;
+}
+.ch-action-button {
+    font-size: 12px; /* text-xs */
+    color: #ffffff;
+    padding: 4px 10px; /* py-1 px-2.5 */
+    border-radius: 4px; /* rounded */
+    font-weight: 500; /* font-medium */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    line-height: 1.5; /* Ensure text is vertically centered nicely */
+    display: inline-block; /* For <a> tags styled as buttons */
+}
+.ch-button-red { background-color: #dc2626; } /* bg-red-600 */
+.ch-button-red:hover { background-color: #b91c1c; } /* hover:bg-red-700 */
+.ch-button-blue { background-color: #2563eb; } /* bg-blue-600 */
+.ch-button-blue:hover { background-color: #1d4ed8; } /* hover:bg-blue-700 */
+.ch-button-orange { background-color: #f97316; } /* bg-orange-500 */
+.ch-button-orange:hover { background-color: #ea580c; } /* hover:bg-orange-600 */
+.ch-button-teal { background-color: #0d9488; } /* bg-teal-500 */
+.ch-button-teal:hover { background-color: #0f766e; } /* hover:bg-teal-600 */
+
+.ch-form-inline {
+    display: inline-block;
+}
+
+
+/* "No Contracts" Message */
+.ch-no-contracts {
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.04); /* shadow-lg approx */
+    border-radius: 8px; /* rounded-lg */
+    padding: 24px; /* p-6 */
+    text-align: center; /* text-center */
+    color: #6b7280; /* text-gray-500 */
+    margin-top: 16px; /* mt-4 */
+}
+
+/* Pagination */
+.ch-pagination {
+    margin-top: 24px; /* mt-6 */
+    display: flex;
+    justify-content: center; /* justify-center */
+    align-items: center; /* items-center */
+    gap: 4px; /* space-x-1 */
+}
+.ch-page-item {
+    padding: 4px 10px; /* px-2.5 py-1 */
+    font-size: 12px; /* text-xs */
+    font-weight: 500; /* font-medium */
+    color: #4b5563; /* text-gray-600 */
+    background-color: #ffffff; /* bg-white */
+    border: 1px solid #d1d5db; /* border border-gray-300 */
+    border-radius: 6px; /* rounded-md */
+    transition: background-color 0.2s;
+    line-height: 1.5;
+}
+.ch-page-item:hover {
+    background-color: #f3f4f6; /* hover:bg-gray-100 */
+}
+.ch-page-item-active {
+    color: #ffffff;
+    background-color: #2563eb; /* bg-blue-600 */
+    border-color: #2563eb; /* border-blue-600 */
+}
+.ch-page-item-disabled {
+    color: #9ca3af; /* text-gray-400 */
+    background-color: #f3f4f6; /* bg-gray-100 */
+    cursor: not-allowed;
+}
+.ch-page-prevnext-text { display: none; } /* Hidden by default */
+
+
+/* Responsive Adjustments (sm: 640px) */
+@media (min-width: 640px) {
+    .ch-container {
+        padding: 32px 16px; /* sm:py-8 sm:px-4 */
+    }
+    .ch-title {
+        font-size: 30px; /* sm:text-3xl */
+        margin-bottom: 32px; /* sm:mb-8 */
+    }
+
+    .ch-header-row {
+        display: flex; /* sm:flex */
+        font-size: 14px; /* sm:text-sm */
+    }
+    .ch-header-row .ch-col {
+        padding-left: 8px; /* sm:pl-2 */
+    }
+    .ch-header-row .ch-col-amount-header,
+    .ch-header-row .ch-col-status-actions-header {
+        padding-right: 8px; /* sm:pr-2 */
+    }
+
+
+    .ch-contract-card {
+        padding: 16px; /* sm:p-4 */
+        border-bottom: none; /* sm:border-0 - Individual card's mobile border removed for desktop stacking */
+        border-radius: 0; /* Default to no radius for stacked items */
+    }
+    .ch-contract-card:hover {
+        /* Maintain hover shadow if desired, or adjust */
+    }
+
+    /* Handle the stacked appearance for desktop */
+    .ch-contract-list > .ch-contract-card:not(:last-child) {
+        border-bottom: 1px solid #e5e7eb; /* Add border back between stacked cards */
+    }
+    .ch-contract-list > .ch-contract-card.ch-card-first {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .ch-contract-list > .ch-contract-card.ch-card-last {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        border-bottom: none; /* The very last card in a stack doesn't need a bottom border */
+    }
+    /* If there's only one card, it should have full radius */
+    .ch-contract-list > .ch-contract-card.ch-card-first.ch-card-last {
+        border-radius: 8px !important; /* Override individual side removal */
+        border-bottom: none; /* Ensure no bottom border if it's the only one */
+    }
+
+
+    .ch-card-inner-layout {
+        flex-direction: row; /* sm:flex-row */
+        align-items: center; /* sm:items-center */
+        justify-content: space-between; /* sm:justify-between - for spreading items */
+        gap: 16px; /* sm:gap-4 */
+    }
+
+    /* Column widths for desktop */
+    .ch-col-house-info { width: 40%; } /* sm:w-2/5 */
+    .ch-col-amount { width: 8.333%; text-align: right; padding-right: 8px; } /* sm:w-1/12 sm:text-right sm:pr-2 */
+    .ch-col-parties { width: 16.666%; } /* sm:w-2/12 */
+    .ch-col-time { width: 16.666%; } /* sm:w-2/12 */
+    .ch-col-status-actions { width: 25%; align-items: flex-end; padding-right: 8px;} /* sm:w-3/12 sm:items-end sm:pr-2 */
+
+    .ch-col-house-info {
+        gap: 12px; /* sm:gap-3 */
+    }
+    .ch-house-name { font-size: 16px; } /* sm:text-base */
+    .ch-mobile-label { display: none; } /* sm:hidden */
+    .ch-col-amount { font-size: 14px; } /* sm:text-sm */
+
+    .ch-action-buttons {
+        justify-content: flex-end; /* sm:justify-end */
+    }
+
+    .ch-no-contracts {
+        margin-top: 0; /* sm:mt-0 */
+        /* Conditional rounding if it's the first/only item in place of cards */
+        border-radius: 8px; /* Ensure it's rounded like a standalone card block */
+    }
+    /* If no-contracts message appears after a header row (meaning contracts were expected) */
+    .ch-header-row + .ch-contract-list:empty + .ch-no-contracts {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+
+
+    .ch-pagination {
+        margin-top: 32px; /* sm:mt-8 */
+        gap: 8px; /* sm:space-x-2 */
+    }
+    .ch-page-item {
+        padding: 6px 12px; /* sm:px-3 sm:py-1.5 */
+        font-size: 14px; /* sm:text-sm */
+    }
+    .ch-page-prevnext-text { display: inline; } /* sm:inline */
+    .ch-page-number-desktop { display: inline-block; } /* sm:inline-block */
+}
+
+/* Responsive Adjustments (lg: 1024px) - for widths */
+@media (min-width: 1024px) {
+    .ch-col-house-info-header,
+    .ch-col-house-info { width: 25%; } /* lg:w-3/12 */
+
+    .ch-col-amount-header,
+    .ch-col-amount { width: 8.333%; } /* lg:w-1/12 - no change from sm, but good to be explicit if needed */
+
+    .ch-col-parties-header,
+    .ch-col-parties { width: 16.666%; } /* lg:w-2/12 - no change from sm */
+
+    .ch-col-time-header,
+    .ch-col-time { width: 25%; } /* lg:w-3/12 */
+
+    .ch-col-status-actions-header,
+    .ch-col-status-actions { width: 25%; } /* lg:w-3/12 - no change from sm */
+}
