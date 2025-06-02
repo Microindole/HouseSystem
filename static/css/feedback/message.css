@@ -17,7 +17,7 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* 左侧边栏 */
+/* 左侧边栏 (保持不变) */
 .chat-sidebar {
     width: var(--sidebar-width);
     background-color: #ffffff;
@@ -64,13 +64,9 @@
     border-left: 3px solid #409eff;
 }
 
-/* --- 移除 .chat-avatar --- */
-
 .chat-info {
     flex-grow: 1;
     overflow: hidden;
-    /* --- 如果移除了头像，可能需要调整这里的 margin --- */
-    /* margin-left: 10px; /* 移除或调整 */
 }
 
 .chat-info-header {
@@ -108,9 +104,10 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
 }
 
-/* 聊天头部 */
+/* 聊天头部 (保持不变) */
 .chat-header {
     height: var(--chat-header-height);
     display: flex;
@@ -127,14 +124,14 @@
     font-weight: 600;
 }
 
-/* 消息区域 */
+/* 消息区域 (保持不变) */
 .message-area {
     flex-grow: 1;
     overflow-y: auto;
     padding: 20px;
     background-color: var(--body-bg);
-    display: flex; /* 使用 flex 布局 */
-    flex-direction: column; /* 消息垂直排列 */
+    display: flex;
+    flex-direction: column;
     transition: opacity 0.3s ease;
 }
 
@@ -143,27 +140,16 @@
 }
 
 .message-item {
-    display: flex; /* 保持 flex 用于对齐 */
+    display: flex;
     margin-bottom: 15px;
     max-width: 70%;
     animation: fadeIn 0.3s ease;
     transform-origin: top;
 }
 
-/* --- 移除 .message-avatar --- */
-
 .message-content {
     display: flex;
     flex-direction: column;
-    /* --- 如果移除了头像，调整这里的 margin --- */
-    /* margin-left: 10px; /* 移除或调整 */
-    /* margin-right: 10px; /* 移除或调整 */
-}
-
-.message-sender { /* 这个类在 HTML 中被注释掉了，可以移除 */
-    /* font-size: 12px;
-    color: #888;
-    margin-bottom: 4px; */
 }
 
 .message-bubble {
@@ -175,224 +161,117 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* 接收到的消息 */
 .message-item.received {
-    align-self: flex-start; /* 左对齐 */
+    align-self: flex-start;
 }
-/* --- 移除接收消息头像相关的 margin --- */
-/* .message-item.received .message-sender { margin-left: 15px; } */
 .message-item.received .message-bubble {
     background-color: var(--received-bubble-bg);
     border: 1px solid var(--border-color);
     border-top-left-radius: 0;
 }
-/* 移除接收气泡的小三角 */
-/* .message-item.received .message-bubble::before { ... } */
 
-
-/* 发送的消息 */
 .message-item.sent {
-    margin-left: auto; /* 右对齐的关键 */
-    /* flex-direction: row-reverse; /* 不再需要反转，因为没有头像了 */
-    align-self: flex-end; /* 右对齐 */
+    margin-left: auto;
+    align-self: flex-end;
 }
-/* --- 移除发送消息头像相关的 margin --- */
-/* .message-item.sent .message-sender { text-align: right; margin-right: 15px; } */
 .message-item.sent .message-bubble {
     background-color: var(--sent-bubble-bg);
     color: #000;
     border-top-right-radius: 0;
 }
-/* 移除发送气泡的小三角 */
-/* .message-item.sent .message-bubble::before { ... } */
 
 .message-timestamp {
     font-size: 11px;
     color: #aaa;
     margin-top: 5px;
-    /* text-align: inherit; /* 不再需要，直接左右对齐 */
 }
 .message-item.sent .message-timestamp {
-    align-self: flex-end; /* 时间戳靠右 */
+    align-self: flex-end;
 }
 .message-item.received .message-timestamp {
-    align-self: flex-start; /* 时间戳靠左 */
+    align-self: flex-start;
 }
 
+/* 输入区域 (保持不变) */
+.input-area {height: var(--input-area-height); border-top: 1px solid var(--border-color); background-color: #ffffff; padding: 15px 20px; display: flex; align-items: center; flex-shrink: 0; transition: all 0.3s ease; max-height: 200px; overflow: hidden;}
+.input-area.hidden {max-height: 0; padding: 0; margin: 0;}
+.message-input {flex-grow: 1; height: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; resize: none; font-size: 14px; line-height: 1.4; margin-right: 10px; box-sizing: border-box; overflow-y: auto;}
+.message-input:focus {outline: none; border-color: #4a90e2; box-shadow: 0 0 0 1px rgba(74, 144, 226, 0.5);}
+.send-button {padding: 8px 20px; background-color: #4a90e2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease, transform 0.1s ease; height: 100%; box-sizing: border-box;}
+.send-button:hover {background-color: #66b1ff;}
+.send-button:active {transform: scale(0.95);}
 
-/* 输入区域 */
-.input-area {
-    height: var(--input-area-height);
-    border-top: 1px solid var(--border-color);
-    background-color: #ffffff;
-    padding: 15px 20px;
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-    max-height: 200px;
-    overflow: hidden;
+
+/* 滚动条样式 (保持不变) */
+.message-area::-webkit-scrollbar, .chat-list::-webkit-scrollbar {width: 6px;}
+.message-area::-webkit-scrollbar-track, .chat-list::-webkit-scrollbar-track {background: #f1f1f1;}
+.message-area::-webkit-scrollbar-thumb, .chat-list::-webkit-scrollbar-thumb {background: #ccc; border-radius: 3px;}
+.message-area::-webkit-scrollbar-thumb:hover, .chat-list::-webkit-scrollbar-thumb:hover {background: #aaa;}
+
+/* 响应式 (保持不变) */
+@media (max-width: 768px) {.chat-sidebar {display: none;}}
+
+/* 失败消息样式 (保持不变) */
+.message-item.failed .message-bubble {opacity: 0.7; border: 1px dashed red;}
+.message-item.failed .message-timestamp::after {content: " (发送失败)"; color: red; font-size: 10px; margin-left: 5px;}
+
+/* 占位符 (保持不变) */
+.no-messages-placeholder {text-align: center; color: #888; margin-top: 40px;}
+
+/* 加载动画 (保持不变) */
+.loading-spinner {display: flex; justify-content: center; align-items: center; height: 100px; width: 100%;}
+.spinner {width: 40px; height: 40px; border: 4px solid rgba(0, 0, 0, 0.1); border-radius: 50%; border-top-color: #409eff; animation: spin 1s ease-in-out infinite;}
+@keyframes spin {to { transform: rotate(360deg); }}
+@keyframes fadeIn {from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);}}
+
+/* 合同弹窗动画 (保持不变) */
+.contract-modal {transition: opacity 0.3s ease;}
+.contract-modal-content {animation: modalFadeIn 0.3s ease;}
+@keyframes modalFadeIn {from {opacity: 0; transform: translateY(-20px);} to {opacity: 1; transform: translateY(0);}}
+
+/* 关闭按钮 (保持不变) */
+.close-btn {cursor: pointer; transition: all 0.2s ease;}
+.close-btn:hover {color: #f56c6c; transform: scale(1.1);}
+
+/* 平滑滚动 (保持不变) */
+html {scroll-behavior: smooth;}
+
+
+/* --- 合同弹窗样式 (#contract-modal) --- */
+#contract-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    /* display: flex !important;  <- 移除此行，显示/隐藏由JS控制，激活时JS会设为 flex */
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    padding: 1rem !important;
+    z-index: 10000 !important;
+    /* HTML中初始为 style="display:none;"，JS 点击时会设置为 display:flex; */
 }
 
-.input-area.hidden {
-    max-height: 0;
-    padding: 0;
+/* 弹窗主面板 (即 #contract-modal 的直接子 div) */
+#contract-modal > .bg-white {
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+    background-color: #ffffff !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+    width: 100% !important;
+    max-width: 42rem !important;
+    max-height: 90vh !important;
+    display: flex !important; /* 保持 flex 以便内部结构正确 */
+    flex-direction: column !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    /* transform: none !important; /* 移除了这个，因为之前的 translate-y 是为了向下移动 */
+}
+
+/* 确保body和html是100%高度 */
+html, body {
+    height: 100%;
     margin: 0;
-}
-
-.message-input {
-    flex-grow: 1;
-    height: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    resize: none;
-    font-size: 14px;
-    line-height: 1.4;
-    margin-right: 10px;
-    box-sizing: border-box;
-    overflow-y: auto;
-}
-
-.message-input:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 1px rgba(74, 144, 226, 0.5);
-}
-
-.send-button {
-    padding: 8px 20px;
-    background-color: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    height: 100%;
-    box-sizing: border-box;
-}
-
-.send-button:hover {
-    background-color: #66b1ff;
-}
-
-.send-button:active {
-    transform: scale(0.95);
-}
-
-/* 滚动条样式 (可选) */
-.message-area::-webkit-scrollbar,
-.chat-list::-webkit-scrollbar {
-    width: 6px;
-}
-.message-area::-webkit-scrollbar-track,
-.chat-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-.message-area::-webkit-scrollbar-thumb,
-.chat-list::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-}
-.message-area::-webkit-scrollbar-thumb:hover,
-.chat-list::-webkit-scrollbar-thumb:hover {
-    background: #aaa;
-}
-
-/* 响应式：小屏幕隐藏侧边栏 */
-@media (max-width: 768px) {
-    .chat-sidebar {
-        display: none;
-    }
-    /* .chat-main 不需要改动，因为它已经是 flex-grow: 1 */
-}
-
-/* 用于标记发送失败的消息 */
-.message-item.failed .message-bubble {
-    opacity: 0.7;
-    border: 1px dashed red;
-}
-.message-item.failed .message-timestamp::after {
-    content: " (发送失败)";
-    color: red;
-    font-size: 10px;
-    margin-left: 5px;
-}
-
-/* "开始对话吧" 占位符 */
-.no-messages-placeholder {
-    text-align: center;
-    color: #888;
-    margin-top: 40px; /* 增加一点上边距 */
-}
-
-/* 消息加载动画 */
-.loading-spinner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100px;
-    width: 100%;
-}
-
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    border-top-color: #409eff;
-    animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* 消息项动画 */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* 合同弹窗动画 */
-.contract-modal {
-    transition: opacity 0.3s ease;
-}
-
-.contract-modal-content {
-    animation: modalFadeIn 0.3s ease;
-}
-
-@keyframes modalFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* 关闭按钮悬停效果 */
-.close-btn {
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.close-btn:hover {
-    color: #f56c6c;
-    transform: scale(1.1);
-}
-
-/* 平滑滚动设置 */
-html {
-    scroll-behavior: smooth;
 }

@@ -1,13 +1,13 @@
 import json
-from flask import render_template, request, flash, redirect, url_for, session, jsonify, current_app
+from flask import render_template, request, flash, redirect, url_for, session, jsonify, current_app, g
 from datetime import datetime
 from models import NewsModel, HouseStatusModel, db
 
 def add_news_logic():
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         flash('只有房东可以发布新闻', 'error')
         return redirect(url_for('account.landlord_home'))
-    landlord_name = session.get('username')
+    landlord_name = getattr(g, 'username', None)
     houses = HouseStatusModel.query.filter_by(landlord_name=landlord_name).all()
     if request.method == 'GET':
         return render_template('house/add_news.html', houses=houses)
@@ -42,18 +42,18 @@ def add_news_logic():
         return render_template('house/add_news.html', houses=houses)
 
 def manage_news_logic():
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         flash('只有房东可以管理新闻', 'error')
         return redirect(url_for('account.landlord_home'))
-    landlord_name = session.get('username')
+    landlord_name = getattr(g, 'username', None)
     news_list = NewsModel.query.filter_by(landlord_username=landlord_name)\
                                .order_by(NewsModel.time.desc()).all()
     return render_template('house/manage_news.html', news_list=news_list)
 
 def delete_news_logic(news_id):
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         return jsonify({'success': False, 'message': '只有房东可以删除新闻'}), 403
-    landlord_name = session.get('username')
+    landlord_name = getattr(g, 'username', None)
     news = NewsModel.query.filter_by(id=news_id, landlord_username=landlord_name).first()
     if not news:
         return jsonify({'success': False, 'message': '新闻不存在或您无权删除'}), 404
@@ -66,14 +66,14 @@ def delete_news_logic(news_id):
         return jsonify({'success': False, 'message': f'删除失败：{str(e)}'}), 500
 
 def batch_delete_news_logic():
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         return jsonify({'success': False, 'message': '只有房东可以批量删除新闻'}), 403
     try:
         data = request.get_json()
         news_ids = data.get('news_ids', [])
         if not news_ids:
             return jsonify({'success': False, 'message': '未选择任何新闻'}), 400
-        landlord_name = session.get('username')
+        landlord_name = getattr(g, 'username', None)
         deleted_count = 0
         for news_id in news_ids:
             news = NewsModel.query.filter_by(id=news_id, landlord_username=landlord_name).first()

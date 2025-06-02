@@ -13,7 +13,7 @@
                 <th>租客</th>
                 <th>预约时间</th>
                 <th>状态</th>
-                {% if session.get('user_type') == 2 %}
+                {% if g.user_type == 2 %}
                 <th>操作</th>
                 {% endif %}
             </tr>
@@ -25,7 +25,7 @@
                 <td>{{ appointment.tenant_name }}</td>
                 <td>{{ appointment.appointment_time }}</td>
                 <td>{{ appointment.status }}</td>
-                {% if session.get('user_type') == 2 %}
+                {% if g.user_type == 2 %}
                 <td>
                     <button class="btn btn-success btn-sm" onclick="updateStatus({{ appointment.appointment_id }}, '已同意')">同意</button>
                     <button class="btn btn-danger btn-sm" onclick="updateStatus({{ appointment.appointment_id }}, '已拒绝')">拒绝</button>

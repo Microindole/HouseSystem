@@ -355,7 +355,7 @@
     </div>
     {% endif %}
 </div>
-
+<script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 <script>
 let currentRequestId = null;
 let currentStatus = null;
@@ -406,15 +406,29 @@ function handleRequestWithNotes(requestId, status = null, notes = null) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            if (window.showMessage) {
+                window.showMessage(data.message, "error");
+            } else {
+                alert(data.message);
+            }
+// 后续代码会立即执行，不会等待提示消失
             location.reload();
         } else {
-            alert('处理失败：' + data.message);
+            var thisStr = '处理失败：' + data.message;
+            if (window.showMessage) {
+                window.showMessage(thisStr, "error");
+            } else {
+                alert(thisStr);
+            }
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('处理失败，请稍后重试');
+        if (window.showMessage) {
+            window.showMessage('处理失败，请稍后重试', "error");
+        } else {
+            alert('处理失败，请稍后重试');
+        }
     });
 }
 

@@ -3,166 +3,118 @@
 {% block title %}AI 聊天助手{% endblock %}
 
 {% block head %}
-    {{ super() }} <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.6/dist/purify.min.js"></script>
     <style>
+        /* 整体容器样式 */
         .chat-container {
-            max-width: 800px; /* 稍微加宽一点 */
-            margin: 20px auto;
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            max-width: 900px;
+            margin: 50px auto;
+            background: linear-gradient(135deg, #f3e5f5, #e1f5fe);
+            border-radius: 16px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
             display: flex;
             flex-direction: column;
-            /* 调整高度以适应 base.html 的布局, 假设 base.html 的 header/footer 大约 150px */
             height: calc(100vh - 180px);
-            min-height: 450px;
+            overflow: hidden;
+            border: 3px solid #8e24aa;
         }
+
+        /* 消息区域样式 */
         .chat-messages {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 20px;
-            border-bottom: 1px solid #eee;
+            padding: 24px;
             background-color: #f9f9f9;
+            border-bottom: 3px solid #8e24aa;
         }
         .message {
-            margin-bottom: 18px;
-            padding: 12px 18px;
-            border-radius: 18px;
-            line-height: 1.5;
-            max-width: 85%;
+            margin-bottom: 16px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            line-height: 1.6;
+            max-width: 75%;
             word-wrap: break-word;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
         .user-message {
-            background-color: #007bff;
-            color: white;
-            margin-left: auto; /* Aligns to the right */
-            border-bottom-right-radius: 5px;
+            background: linear-gradient(135deg, #8e24aa, #d81b60);
+            color: #fff;
+            margin-left: auto;
+            border-bottom-right-radius: 6px;
         }
         .assistant-message {
-            background-color: #e9ecef; /* 浅灰色背景 */
-            color: #212529; /* 深色文字 */
-            margin-right: auto; /* Aligns to the left */
-            border-bottom-left-radius: 5px;
-        }
-        /* 流式输出时的光标效果 */
-        .streaming-cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1.2em;
-            background-color: #007bff;
-            animation: blink 1s infinite;
-            vertical-align: text-bottom;
-        }
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-        /* Markdown 生成的 HTML 元素样式 */
-        .assistant-message ul, .assistant-message ol {
-            padding-left: 25px; /* 内边距 */
-            margin-top: 8px;
-            margin-bottom: 8px;
-        }
-        .assistant-message li {
-            margin-bottom: 5px;
-        }
-        .assistant-message p {
-            margin-bottom: 10px; /* 段落间距 */
-        }
-        .assistant-message p:last-child {
-            margin-bottom: 0; /* 移除最后一个段落的下边距 */
-        }
-        .assistant-message pre {
-            background-color: #2d2d2d; /* 深色代码块背景 */
-            color: #f8f8f2; /* 浅色代码文字 */
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-            font-size: 0.9em;
-            margin: 10px 0;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
-        }
-        .assistant-message code:not(pre code) { /* 行内代码 */
-            background-color: #f0f0f0;
-            color: #c7254e;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-            font-size: 0.9em;
-        }
-        .assistant-message blockquote {
-            border-left: 4px solid #007bff;
-            padding-left: 15px;
-            margin-left: 0;
-            color: #555;
-            font-style: italic;
-        }
-        .assistant-message h1, .assistant-message h2, .assistant-message h3 {
-            margin-top: 15px;
-            margin-bottom: 10px;
+            background: linear-gradient(135deg, #e1f5fe, #b3e5fc);
             color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 6px;
         }
-        .system-message {
-            background-color: #f0f8ff; /* 淡蓝色背景 */
-            color: #555;
-            font-style: italic;
-            text-align: center;
-            font-size: 0.9em;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px auto;
-            max-width: 90%;
-        }
+
+        /* 输入区域样式 */
         .chat-input-area {
             display: flex;
-            padding: 15px;
-            border-top: 1px solid #e0e0e0;
-            background-color: #ffffff;
+            padding: 20px;
+            background: linear-gradient(135deg, #f3e5f5, #e1f5fe);
+            border-top: 3px solid #8e24aa;
         }
         #chat-message-input {
             flex-grow: 1;
-            padding: 12px 18px;
-            border: 1px solid #ced4da;
-            border-radius: 22px; /* 更圆的输入框 */
-            margin-right: 10px;
-            font-size: 16px;
-            resize: none; /* 如果是 textarea，禁止调整大小 */
+            padding: 14px 18px;
+            border: 2px solid #8e24aa;
+            border-radius: 24px;
+            font-size: 1.1rem;
+            outline: none;
+            resize: none;
+            background-color: #ffffff;
         }
-        #chat-send-button, #chat-clear-button {
-            padding: 0 22px; /* 调整内边距使按钮更美观 */
-            background-color: #007bff;
-            color: white;
+        #chat-send-button {
+            margin-left: 16px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #8e24aa, #d81b60);
+            color: #fff;
             border: none;
-            border-radius: 22px; /* 匹配输入框的圆角 */
+            border-radius: 24px;
+            font-size: 1.1rem;
             cursor: pointer;
-            font-size: 16px;
-            margin-left: 8px;
             transition: background-color 0.2s ease;
-            height: 46px; /* 与输入框高度匹配 */
-            line-height: 46px; /* 垂直居中文本 */
-            text-align: center;
         }
         #chat-send-button:hover {
-            background-color: #0056b3;
+            background: linear-gradient(135deg, #6a1b9a, #ad1457);
         }
-        #chat-clear-button {
-            background-color: #6c757d;
-        }
-        #chat-clear-button:hover {
-            background-color: #545b62;
-        }
-        #chat-send-button:disabled, #chat-clear-button:disabled {
+        #chat-send-button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
+
+        /* AI 正在思考的提示 */
         .typing-indicator {
             font-style: italic;
-            color: #777;
-            padding: 8px 20px;
+            color: #555;
+            padding: 10px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #e1f5fe, #b3e5fc);
+            border-radius: 8px;
+            margin: 10px auto;
+        }
+
+        /* Markdown 样式 */
+        .assistant-message pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+        }
+        .assistant-message code {
+            background-color: #f0f0f0;
+            color: #d63384;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
         }
     </style>
 {% endblock %}
@@ -171,211 +123,56 @@
     <div class="chat-container">
         <div class="chat-messages" id="chatMessages">
             {% for message in chat_history %}
-                {% if message.role == 'user' %}
-                    <div class="message user-message">{{ message.content | e }}</div> {# 用户消息仍然进行HTML转义 #}
-                {% elif message.role == 'assistant' %}
-                    {# AI 助手的消息将通过JS用marked.js处理后插入，这里仅为初始加载 #}
-                    <div class="message assistant-message" data-raw-content="{{ message.content | e }}">
-                        {# JS will populate this with Markdown rendered HTML #}
-                    </div>
-                {% elif message.role == 'system' and loop.first %} {# 只显示第一个系统消息作为初始提示 #}
-                {% endif %}
+                <div class="message {{ 'user-message' if message.role == 'user' else 'assistant-message' }}">
+                    {{ message.content | e }}
+                </div>
             {% endfor %}
         </div>
         <div id="typingIndicatorContainer" class="typing-indicator" style="display: none;">AI 正在思考...</div>
         <div class="chat-input-area">
-            <textarea id="chat-message-input" placeholder="向AI助手提问... (Shift+Enter 换行)" rows="1"></textarea>
+            <textarea id="chat-message-input" placeholder="输入您的问题..." rows="1"></textarea>
             <button id="chat-send-button">发送</button>
-            <button id="chat-clear-button" title="清除本次对话记录">清除</button>
         </div>
     </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const messagesDiv = document.getElementById('chatMessages');
-            const messageInput = document.getElementById('chat-message-input'); // 改为 textarea
+            const messageInput = document.getElementById('chat-message-input');
             const sendButton = document.getElementById('chat-send-button');
-            const clearButton = document.getElementById('chat-clear-button');
             const typingIndicator = document.getElementById('typingIndicatorContainer');
 
-            // 自动调整 textarea 高度
+            // 自动调整输入框高度
             messageInput.addEventListener('input', function () {
                 this.style.height = 'auto';
                 this.style.height = (this.scrollHeight) + 'px';
             });
 
-            // 初始渲染从后端传递的AI消息 (Markdown)
-            document.querySelectorAll('.assistant-message[data-raw-content]').forEach(el => {
-                const rawContent = el.getAttribute('data-raw-content');
-                if (rawContent) {
-                    const unsafeHtml = marked.parse(rawContent);
-                    el.innerHTML = DOMPurify.sanitize(unsafeHtml);
-                }
+            // 模拟发送消息
+            sendButton.addEventListener('click', function () {
+                const userMessage = messageInput.value.trim();
+                if (userMessage === '') return;
+
+                // 添加用户消息
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'message user-message';
+                userMessageDiv.textContent = userMessage;
+                messagesDiv.appendChild(userMessageDiv);
+
+                // 清空输入框
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+
+                // 模拟 AI 回复
+                typingIndicator.style.display = 'block';
+                setTimeout(() => {
+                    typingIndicator.style.display = 'none';
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.className = 'message assistant-message';
+                    aiMessageDiv.textContent = '这是 AI 的回复内容。';
+                    messagesDiv.appendChild(aiMessageDiv);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }, 1000);
             });
-
-            // 页面加载时滚动到底部
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            function addMessageToChat(text, sender, isMarkdown = false) {
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('message', sender + '-message');
-
-                if (isMarkdown) { // 通常是 AI 的回复
-                    const unsafeHtml = marked.parse(text);
-                    messageElement.innerHTML = DOMPurify.sanitize(unsafeHtml);
-                } else { // 用户输入或简单的系统文本
-                    messageElement.textContent = text;
-                }
-
-                messagesDiv.appendChild(messageElement);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                return messageElement; // 返回创建的元素，用于流式更新
-            }
-
-            function createStreamingMessage() {
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('message', 'assistant-message');
-                messageElement.innerHTML = '<span class="streaming-cursor"></span>';
-                messagesDiv.appendChild(messageElement);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                return messageElement;
-            }
-
-            function updateStreamingMessage(messageElement, content, isComplete = false) {
-                // 更新消息内容，如果未完成则保留光标
-                if (isComplete) {
-                    // 完成时，渲染 Markdown 并移除光标
-                    const unsafeHtml = marked.parse(content);
-                    messageElement.innerHTML = DOMPurify.sanitize(unsafeHtml);
-                } else {
-                    // 流式更新时，保持纯文本显示并显示光标
-                    messageElement.innerHTML = content.replace(/\n/g, '<br>') + '<span class="streaming-cursor"></span>';
-                }
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }
-
-            function showTypingIndicator(show) {
-                typingIndicator.style.display = show ? 'block' : 'none';
-                if(show) messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }
-
-            async function sendMessage() {
-                const messageText = messageInput.value.trim();
-                if (messageText === '') return;
-
-                addMessageToChat(messageText, 'user', false); // 用户消息非Markdown
-                messageInput.value = ''; // 清空输入框
-                messageInput.style.height = 'auto'; // 重置输入框高度
-                messageInput.focus();
-
-                sendButton.disabled = true;
-                clearButton.disabled = true;
-
-                try {
-                    const response = await fetch("{{ url_for('ai_chat.send_message') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ message: messageText }),
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    // 创建流式消息容器
-                    const streamingMessageElement = createStreamingMessage();
-                    let accumulatedContent = '';
-
-                    // 读取流式响应
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-
-                        const chunk = decoder.decode(value);
-                        const lines = chunk.split('\n');
-
-                        for (const line of lines) {
-                            if (line.startsWith('data: ')) {
-                                try {
-                                    const data = JSON.parse(line.slice(6));
-
-                                    if (data.error) {
-                                        streamingMessageElement.innerHTML = `AI服务错误: ${data.error}`;
-                                        break;
-                                    }
-
-                                    if (data.content) {
-                                        accumulatedContent += data.content;
-                                        updateStreamingMessage(streamingMessageElement, accumulatedContent, false);
-                                    }
-
-                                    if (data.done) {
-                                        // 完成时渲染最终的 Markdown
-                                        updateStreamingMessage(streamingMessageElement, accumulatedContent, true);
-                                        break;
-                                    }
-                                } catch (e) {
-                                    console.error('解析流式数据出错:', e, line);
-                                }
-                            }
-                        }
-                    }
-
-                } catch (error) {
-                    console.error('发送消息时出错:', error);
-                    addMessageToChat('无法连接到 AI 服务，请检查网络或稍后再试。', 'system');
-                } finally {
-                    sendButton.disabled = false;
-                    clearButton.disabled = false;
-                }
-            }
-
-            async function clearChatHistory() {
-                if (!confirm("确定要清除当前对话的所有记录吗？系统提示将保留。")) {
-                    return;
-                }
-                showTypingIndicator(true);
-                sendButton.disabled = true;
-                clearButton.disabled = true;
-                try {
-                    const response = await fetch("{{ url_for('ai_chat.clear_history') }}", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-
-                    showTypingIndicator(false);
-                    sendButton.disabled = false;
-                    clearButton.disabled = false;
-
-                    if (response.ok) {
-                        messagesDiv.innerHTML = ''; // 清空前端显示
-                        addMessageToChat('聊天记录已清除。新的对话开始了。', 'system');
-                        // 可选：如果后端返回了初始系统消息，可以在这里重新加载或添加
-                    } else {
-                        addMessageToChat('清除记录失败。', 'system');
-                    }
-                } catch (error) {
-                    showTypingIndicator(false);
-                    sendButton.disabled = false;
-                    clearButton.disabled = false;
-                    console.error('清除记录时出错:', error);
-                    addMessageToChat('清除记录时发生网络错误。', 'system');
-                }
-            }
-
-            sendButton.addEventListener('click', sendMessage);
-            messageInput.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
-                    sendMessage();
-                }
-            });
-            clearButton.addEventListener('click', clearChatHistory);
         });
     </script>
 {% endblock %}

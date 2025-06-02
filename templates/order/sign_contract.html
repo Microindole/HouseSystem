@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+
+{% block title %}签署合同{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/order/history.css') }}">
+    
+{% endblock %}
+
+{% block body %}
+<style>
+        .sign-contract-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        
+        .sign-contract-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .contract-content {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        
+        .sign-form-container {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .sign-agreement {
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .signature-info {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f4f4f4;
+            border-left: 3px solid #4caf50;
+        }
+        
+        .buttons-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .btn-sign, .btn-cancel {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-sign {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-sign:hover {
+            background-color: #45a049;
+            text-decoration: none;
+        }
+        
+        .btn-sign:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .btn-cancel {
+            background-color: #f44336;
+            color: white;
+            text-decoration: none; /* 确保取消按钮是链接样式 */
+        }
+        
+        .btn-cancel:hover {
+            background-color: #d32f2f;
+            text-decoration: none;
+        }a {
+           text-decoration: none;
+        }      
+        a:hover {
+            text-decoration: none;
+        }
+    </style>
+    <div class="sign-contract-container">
+        <div class="sign-contract-header">
+            <h1>合同签署</h1>
+            <p>请认真阅读以下合同内容，确认无误后再签署</p>
+        </div>
+        
+        <div class="contract-content">
+            <!-- 包含合同模板 -->
+            {% include 'order/contract.html' with context %}
+            
+            <!-- 合同详细信息 -->
+            <div class="contract-details">
+                <h3>合同信息</h3>
+                <p><strong>房源地址:</strong> {{ house.addr if house else '未提供' }}</p>
+                <p><strong>租金:</strong> ¥{{ contract.total_amount|float|round(2) if contract.total_amount is not none else 0 }}</p>
+                <p><strong>租期:</strong> {{ contract.start_date.strftime('%Y年%m月%d日') if contract.start_date else '未设置' }} 至 {{ contract.end_date.strftime('%Y年%m月%d日') if contract.end_date else '未设置' }}</p>
+                {% if contract_info %}
+                    <p><strong>押金:</strong> ¥{{ contract_info.deposit_amount_numeric_snapshot|float|round(2) if contract_info.deposit_amount_numeric_snapshot is not none else 0 }}</p>
+                    <p><strong>支付频率:</strong> {{ contract_info.rent_payment_frequency or '未设置' }}</p>
+                    <p><strong>租赁用途:</strong> {{ contract_info.lease_purpose_text or '未设置' }}</p>
+                    {% if contract_info.other_agreements_text %}
+                        <p><strong>其他约定:</strong> {{ contract_info.other_agreements_text }}</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="sign-form-container">
+            <div class="sign-agreement">
+                <input type="checkbox" id="agree-terms" name="agree" value="yes" required>
+                <label for="agree-terms">我已认真阅读并同意上述合同条款</label>
+            </div>
+            
+            <div class="signature-info">
+                <p><strong>签署人:</strong> {{ g.username }} (租客)</p>
+                <p><strong>签署时间:</strong> <span id="current-time"></span></p>
+                <p><strong>注意:</strong> 签署后即表示您同意此合同的所有条款，这将具有法律效力。</p>
+            </div>
+            
+            <div class="buttons-container">
+                <a href="#" class="btn-cancel">取消</a>
+                <button type="button" class="btn-sign" id="sign-button" disabled>签署合同</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentTimeSpan = document.getElementById('current-time');
+            if (currentTimeSpan) {
+                const now = new Date();
+                const options = { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false 
+                };
+                currentTimeSpan.textContent = now.toLocaleDateString('zh-CN', options);
+            }
+
+            const agreeCheckbox = document.getElementById('agree-terms');
+            const signButton = document.getElementById('sign-button');
+
+            // 调试输出
+            console.log("Sign button element:", signButton);
+            console.log("Agree checkbox element:", agreeCheckbox);
+            
+            if (agreeCheckbox && signButton) {
+                agreeCheckbox.addEventListener('change', function() {
+                    signButton.disabled = !this.checked;
+                });
+            }
+
+            if (signButton && agreeCheckbox) {
+                console.log("Attaching click listener to sign button.");
+                signButton.addEventListener('click', function(e) {
+                    if (!agreeCheckbox.checked) {
+                        // 使用 message-toast.js 提供的 showMessage (如果可用)
+                        window.showMessage ? window.showMessage('请先同意合同条款', 'warning') : alert('请先同意合同条款');
+                        return;
+                    }
+
+                    console.log("Sign button clicked.");
+                    signButton.disabled = true;
+                    signButton.textContent = '签署中...';
+                    
+                    console.log("Attempting to fetch...");
+                    fetch('{{ url_for("contract.sign_contract", contract_id=contract.id) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // 'X-CSRFToken': '{{ csrf_token() if csrf_token else "" }}' 
+                        },
+                        body: JSON.stringify({
+                            agree: agreeCheckbox.checked
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 使用 message-toast.js 提供的 showMessage (如果可用)
+                            window.showMessage ? window.showMessage(data.message, 'success') : alert(data.message);
+                            setTimeout(() => {
+                                window.location.href = "{{ url_for('contract.view_contracts') }}";
+                            }, 1500);
+                        } else {
+                            // 使用 message-toast.js 提供的 showMessage (如果可用)
+                            window.showMessage ? window.showMessage(data.message || '合同签署失败，请重试', 'error') : alert(data.message || '合同签署失败，请重试');
+                            signButton.disabled = false;
+                            signButton.textContent = '签署合同';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('签署合同Fetch Error:', error);
+                        // 使用 message-toast.js 提供的 showMessage (如果可用)
+                        window.showMessage ? window.showMessage('签署过程中发生网络或服务器错误', 'error') : alert('签署过程中发生网络或服务器错误');
+                        signButton.disabled = false;
+                        signButton.textContent = '签署合同';
+                    });
+                });
+            } else {
+                console.error("Could not attach click listener: Sign button or agree checkbox is null.");
+            }
+            
+            const cancelButton = document.querySelector('.btn-cancel');
+            if (cancelButton) {
+                cancelButton.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    
+                    // window.showConfirm 的使用是正确的，因为 message-toast.js 提供了它
+                    const confirmed = window.showConfirm 
+                        ? await window.showConfirm('您确定要取消签署合同吗？这将终止当前合同流程，房东可能会发起新的合同。', {
+                            title: '确认取消',
+                            confirmText: '确认取消',
+                            cancelText: '继续签署',
+                            type: 'warning'
+                          })
+                        : confirm('确认取消\n\n您确定要取消签署合同吗？这将终止当前合同流程，房东可能会发起新的合同。');
+                    
+                    if (confirmed) {
+                        fetch('{{ url_for("contract.cancel_signing", contract_id=contract.id) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // 使用 message-toast.js 提供的 showMessage (如果可用)
+                                window.showMessage ? window.showMessage(data.message, 'info') : alert(data.message);
+                                setTimeout(() => {
+                                    window.location.href = "{{ url_for('contract.view_contracts') }}";
+                                }, 1500);
+                            } else {
+                                // 使用 message-toast.js 提供的 showMessage (如果可用)
+                                window.showMessage ? window.showMessage(data.message || '取消操作失败', 'error') : alert(data.message || '取消操作失败');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('取消签署Fetch Error:', error);
+                            // 使用 message-toast.js 提供的 showMessage (如果可用)
+                            window.showMessage ? window.showMessage('取消过程中发生网络或服务器错误', 'error') : alert('取消过程中发生网络或服务器错误');
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

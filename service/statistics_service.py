@@ -1,14 +1,13 @@
 import os
-
-from flask import render_template, request, jsonify, session, redirect, url_for, flash
+from flask import render_template, request, jsonify, session, redirect, url_for, flash, g
 from datetime import datetime
 from models import HouseStatusModel, RepairRequestModel, AppointmentModel, HouseInfoModel, HouseListingAuditModel, db
 
 def house_statistics_logic():
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         flash('无权访问', 'error')
         return redirect(url_for('account.landlord_home'))
-    landlord_name = session.get('username')
+    landlord_name = getattr(g, 'username', None)
     total_houses = HouseStatusModel.query.filter_by(landlord_name=landlord_name).count()
     available_houses = HouseStatusModel.query.filter_by(landlord_name=landlord_name, status=0).count()
     rented_houses = HouseStatusModel.query.filter_by(landlord_name=landlord_name, status=1).count()
@@ -35,7 +34,7 @@ def house_statistics_logic():
     return render_template('house/statictis.html', stats=stats)
 
 def batch_house_action_logic():
-    if session.get('user_type') != 2:
+    if getattr(g, 'user_type', None) != 2:
         return jsonify({'success': False, 'message': '只有房东可以进行批量操作'}), 403
     try:
         data = request.get_json()
@@ -43,7 +42,7 @@ def batch_house_action_logic():
         action = data.get('action')
         if not house_ids or not action:
             return jsonify({'success': False, 'message': '参数不完整'}), 400
-        landlord_name = session.get('username')
+        landlord_name = getattr(g, 'username', None)
         success_count = 0
         for house_id in house_ids:
             house_status = HouseStatusModel.query.filter_by(

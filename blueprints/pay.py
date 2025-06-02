@@ -4,7 +4,7 @@ from alipay import AliPay, DCAliPay, ISVAliPay
 import config
 
 ALIPAY_SETTING = {
-    'ALIPAY_APP_ID': "",  # 去沙箱找应用ID
+    'ALIPAY_APP_ID': "2021000148677978",  # 去沙箱找应用ID
     'ALIPAY_DEBUG': False,
     'APIPAY_GATEWAY': "https://openapi-sandbox.dl.alipaydev.com/gateway.do",  # 沙盒环境的网关
     'ALIPAY_RETURN_URL': f"{config.APP_DOMAIN}/alipay/success_result/",  # 同步回调网址--用于前端,支付成功之后回调

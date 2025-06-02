@@ -1,335 +1,399 @@
 {% extends 'base.html' %}
 {% block title %}管理新闻{% endblock %}
 {% block head %}
-<style>
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-}
+    <style>
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-.header-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
 
-.header-section h1 {
-    color: #333;
-    margin: 0;
-}
+        .header-section h1 {
+            color: #333;
+            margin: 0;
+        }
 
-.btn {
-    background: #28a745;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    margin: 0 5px;
-}
+        .btn {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 0 5px;
+        }
 
-.btn:hover {
-    opacity: 0.9;
-    text-decoration: none;
-    color: white;
-}
+        .btn:hover {
+            opacity: 0.9;
+            text-decoration: none;
+            color: white;
+        }
 
-.btn-secondary {
-    background: #6c757d;
-}
+        .btn-secondary {
+            background: #6c757d;
+        }
 
-.btn-danger {
-    background: #dc3545;
-}
+        .btn-danger {
+            background: #dc3545;
+        }
 
-.news-list {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+        .news-list {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-.news-item {
-    border-bottom: 1px solid #eee;
-    padding: 20px;
-    transition: background-color 0.3s;
-}
+        .news-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+            transition: background-color 0.3s;
+        }
 
-.news-item:last-child {
-    border-bottom: none;
-}
+        .news-item:last-child {
+            border-bottom: none;
+        }
 
-.news-item:hover {
-    background-color: #f8f9fa;
-}
+        .news-item:hover {
+            background-color: #f8f9fa;
+        }
 
-.news-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-}
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
 
-.news-title {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    margin: 0;
-    flex: 1;
-}
+        .news-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+            flex: 1;
+        }
 
-.news-actions {
-    display: flex;
-    gap: 10px;
-}
+        .news-actions {
+            display: flex;
+            gap: 10px;
+        }
 
-.news-meta {
-    display: flex;
-    gap: 15px;
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 10px;
-}
+        .news-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
 
-.news-content {
-    color: #555;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
+        .news-content {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
 
-.house-info {
-    background: #f8f9fa;
-    padding: 10px;
-    border-radius: 4px;
-    font-size: 14px;
-    color: #666;
-    border-left: 3px solid #007bff;
-}
+        .house-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+            border-left: 3px solid #007bff;
+        }
 
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #666;
-}
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
 
-.empty-state h3 {
-    margin-bottom: 15px;
-    color: #999;
-}
+        .empty-state h3 {
+            margin-bottom: 15px;
+            color: #999;
+        }
 
-.empty-state .icon {
-    font-size: 48px;
-    margin-bottom: 20px;
-}
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
 
-.stats-bar {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 25px;
-    display: flex;
-    justify-content: space-around;
-    text-align: center;
-}
+        .stats-bar {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
 
-.stat-item {
-    flex: 1;
-}
+        .stat-item {
+            flex: 1;
+        }
 
-.stat-number {
-    font-size: 24px;
-    font-weight: bold;
-    color: #007bff;
-}
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
 
-.stat-label {
-    font-size: 14px;
-    color: #666;
-    margin-top: 5px;
-}
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
 
-@media (max-width: 768px) {
-    .header-section {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-    }
-    
-    .news-header {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .news-actions {
-        align-self: flex-start;
-    }
-    
-    .stats-bar {
-        flex-direction: column;
-        gap: 15px;
-    }
-}
-</style>
+        @media (max-width: 768px) {
+            .header-section {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .news-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .news-actions {
+                align-self: flex-start;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
 {% endblock %}
 {% block body %}
-<div class="container">
-    <div class="header-section">
-        <h1>管理新闻</h1>
-        <div>
-            <a href="{{ url_for('house.add_news') }}" class="btn">发布新闻</a>
-            <a href="{{ url_for('account.landlord_home') }}" class="btn btn-secondary">返回首页</a>
-        </div>
-    </div>
-    
-    {% if news_list %}
-    <!-- 统计信息 -->
-    <div class="stats-bar">
-        <div class="stat-item">
-            <div class="stat-number">{{ news_list|length }}</div>
-            <div class="stat-label">总新闻数</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">{{ news_list|selectattr('time')|list|length }}</div>
-            <div class="stat-label">已发布</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number">
-                {% set recent_news = news_list|selectattr('time')|list %}
-                {% set week_ago = moment().subtract(7, 'days') if moment is defined else none %}
-                {{ recent_news|length }}
+    <div class="container">
+        <div class="header-section">
+            <h1>管理新闻</h1>
+            <div>
+                <a href="{{ url_for('house.add_news') }}" class="btn">发布新闻</a>
+                <a href="{{ url_for('account.landlord_home') }}" class="btn btn-secondary">返回首页</a>
             </div>
-            <div class="stat-label">本周发布</div>
         </div>
-    </div>
-    
-    <div class="news-list">
-        {% for news in news_list %}
-        <div class="news-item">
-            <div class="news-header">
-                <h3 class="news-title">{{ news.title }}</h3>
-                <div class="news-actions">
-                    <button class="btn btn-danger" onclick="deleteNews({{ news.id }})">删除</button>
+
+        {% if news_list %}
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number">{{ news_list|length }}</div>
+                    <div class="stat-label">总新闻数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ news_list|selectattr('time')|list|length }}</div>
+                    <div class="stat-label">已发布</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">
+                        {% set recent_news = news_list|selectattr('time')|list %}
+                        {% set week_ago = moment().subtract(7, 'days') if moment is defined else none %}
+                        {{ recent_news|length }}
+                    </div>
+                    <div class="stat-label">本周发布</div>
                 </div>
             </div>
-            
-            <div class="news-meta">
-                <span>发布时间：{{ news.time.strftime('%Y-%m-%d %H:%M') if news.time else '未知' }}</span>
-                <span>房源ID：{{ news.house_id }}</span>
+
+            <div class="news-list">
+                {% for news in news_list %}
+                    <div class="news-item">
+                        <div class="news-header">
+                            <h3 class="news-title">{{ news.title }}</h3>
+                            <div class="news-actions">
+                                <button class="btn btn-danger" onclick="deleteNews({{ news.id }})">删除</button>
+                            </div>
+                        </div>
+
+                        <div class="news-meta">
+                            <span>发布时间：{{ news.time.strftime('%Y-%m-%d %H:%M') if news.time else '未知' }}</span>
+                            <span>房源ID：{{ news.house_id }}</span>
+                        </div>
+
+                        {% if news.desc %}
+                            <div class="news-content">
+                                {{ news.desc }}
+                            </div>
+                        {% endif %}
+
+                        <div class="house-info">
+                            <strong>关联房源：</strong>
+                            {% if news.house_info %}
+                                {{ news.house_info.house_name }} - {{ news.house_info.region }}
+                                <a href="{{ url_for('house.house_detail', house_id=news.house_id) }}"
+                                   style="margin-left: 10px; color: #007bff;">查看房源</a>
+                            {% else %}
+                                房源信息不可用（房源ID: {{ news.house_id }}）
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-            
-            {% if news.desc %}
-            <div class="news-content">
-                {{ news.desc }}
+        {% else %}
+            <div class="empty-state">
+                <div class="icon">📰</div>
+                <h3>暂无新闻</h3>
+                <p>您还没有发布任何新闻</p>
+                <a href="{{ url_for('house.add_news') }}" class="btn">发布第一条新闻</a>
             </div>
-            {% endif %}
-            
-            <div class="house-info">
-                <strong>关联房源：</strong>
-                {% if news.house_info %}
-                    {{ news.house_info.house_name }} - {{ news.house_info.region }}
-                    <a href="{{ url_for('house.house_detail', house_id=news.house_id) }}" 
-                       style="margin-left: 10px; color: #007bff;">查看房源</a>
-                {% else %}
-                    房源信息不可用（房源ID: {{ news.house_id }}）
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
+        {% endif %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <div class="icon">📰</div>
-        <h3>暂无新闻</h3>
-        <p>您还没有发布任何新闻</p>
-        <a href="{{ url_for('house.add_news') }}" class="btn">发布第一条新闻</a>
-    </div>
-    {% endif %}
-</div>
-
-<script>
-function deleteNews(newsId) {
-    if (confirm('确定要删除这条新闻吗？此操作不可恢复。')) {
-        fetch(`/house/news/delete/${newsId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message || '新闻删除成功');
-                location.reload();
+    <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
+    <script>
+        async function deleteNews(newsId) { // MODIFIED: Made function async
+            let confirmed = false;
+            // MODIFIED: Using window.showConfirm
+            if (window.showConfirm) {
+                confirmed = await window.showConfirm('确定要删除这条新闻吗？此操作不可恢复。', {
+                    title: '删除确认',
+                    type: 'warning',
+                    confirmText: '确定删除',
+                    cancelText: '取消'
+                });
             } else {
-                alert('删除失败：' + (data.message || '未知错误'));
+                confirmed = confirm('确定要删除这条新闻吗？此操作不可恢复。'); // Fallback
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('删除失败，请稍后重试');
-        });
-    }
-}
 
-// 批量操作（可选功能）
-function selectAllNews() {
-    const checkboxes = document.querySelectorAll('.news-checkbox');
-    const selectAllBox = document.getElementById('select-all');
-    
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAllBox.checked;
-    });
-    
-    updateBatchActions();
-}
+            if (confirmed) {
+                fetch(`/house/news/delete/${newsId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // MODIFIED: Using window.showMessage for success
+                            if (window.showMessage) {
+                                window.showMessage(data.message || '新闻删除成功', 'success');
+                            } else {
+                                alert(data.message || '新闻删除成功');
+                            }
+                            location.reload(); // Keeping original behavior
+                        } else {
+                            // MODIFIED: Using window.showMessage for error
+                            if (window.showMessage) {
+                                window.showMessage('删除失败：' + (data.message || '未知错误'), 'error');
+                            } else {
+                                alert('删除失败：' + (data.message || '未知错误'));
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // MODIFIED: Using window.showMessage for network/fetch error
+                        if (window.showMessage) {
+                            window.showMessage('删除失败，请稍后重试', 'error');
+                        } else {
+                            alert('删除失败，请稍后重试');
+                        }
+                    });
+            }
+        }
 
-function updateBatchActions() {
-    const checkedBoxes = document.querySelectorAll('.news-checkbox:checked');
-    const batchActions = document.getElementById('batch-actions');
-    
-    if (checkedBoxes.length > 0) {
-        batchActions.style.display = 'block';
-    } else {
-        batchActions.style.display = 'none';
-    }
-}
+        // 批量操作（可选功能）
+        function selectAllNews() {
+            const checkboxes = document.querySelectorAll('.news-checkbox');
+            const selectAllBox = document.getElementById('select-all');
 
-function batchDelete() {
-    const checkedBoxes = document.querySelectorAll('.news-checkbox:checked');
-    const newsIds = Array.from(checkedBoxes).map(cb => cb.value);
-    
-    if (newsIds.length === 0) {
-        alert('请先选择要删除的新闻');
-        return;
-    }
-    
-    if (confirm(`确定要删除选中的 ${newsIds.length} 条新闻吗？此操作不可恢复。`)) {
-        fetch('/house/news/batch-delete', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ news_ids: newsIds })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message || '批量删除成功');
-                location.reload();
+            if (!selectAllBox || !checkboxes) return; // Added guard for missing elements
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllBox.checked;
+            });
+
+            updateBatchActions();
+        }
+
+        function updateBatchActions() {
+            const checkedBoxes = document.querySelectorAll('.news-checkbox:checked');
+            const batchActions = document.getElementById('batch-actions');
+
+            if (!batchActions) return; // Added guard
+
+            if (checkedBoxes.length > 0) {
+                batchActions.style.display = 'block';
             } else {
-                alert('批量删除失败：' + (data.message || '未知错误'));
+                batchActions.style.display = 'none';
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('批量删除失败，请稍后重试');
-        });
-    }
-}
-</script>
+        }
+
+        async function batchDelete() { // MODIFIED: Made function async
+            const checkedBoxes = document.querySelectorAll('.news-checkbox:checked');
+            const newsIds = Array.from(checkedBoxes).map(cb => cb.value);
+
+            if (newsIds.length === 0) {
+                // MODIFIED: Using window.showMessage
+                if (window.showMessage) {
+                    window.showMessage('请先选择要删除的新闻', 'warning');
+                } else {
+                    alert('请先选择要删除的新闻');
+                }
+                return;
+            }
+
+            let confirmed = false;
+            // MODIFIED: Using window.showConfirm
+            if (window.showConfirm) {
+                confirmed = await window.showConfirm(`确定要删除选中的 ${newsIds.length} 条新闻吗？此操作不可恢复。`, {
+                    title: '批量删除确认',
+                    type: 'warning',
+                    confirmText: '确定删除',
+                    cancelText: '取消'
+                });
+            } else {
+                confirmed = confirm(`确定要删除选中的 ${newsIds.length} 条新闻吗？此操作不可恢复。`); // Fallback
+            }
+
+            if (confirmed) {
+                fetch('/house/news/batch-delete', { // Assuming this is the correct endpoint
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ news_ids: newsIds })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // MODIFIED: Using window.showMessage
+                            if (window.showMessage) {
+                                window.showMessage(data.message || '批量删除成功', 'success');
+                            } else {
+                                alert(data.message || '批量删除成功');
+                            }
+                            location.reload(); // Keeping original behavior
+                        } else {
+                            // MODIFIED: Using window.showMessage
+                            if (window.showMessage) {
+                                window.showMessage('批量删除失败：' + (data.message || '未知错误'), 'error');
+                            } else {
+                                alert('批量删除失败：' + (data.message || '未知错误'));
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // MODIFIED: Using window.showMessage
+                        if (window.showMessage) {
+                            window.showMessage('批量删除失败，请稍后重试', 'error');
+                        } else {
+                            alert('批量删除失败，请稍后重试');
+                        }
+                    });
+            }
+        }
+    </script>
 {% endblock %}
