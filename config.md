@@ -47,6 +47,8 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+> 地图API内联写入了house_detail.html中
+
 
 > 阿里云 OSS 配置
 
