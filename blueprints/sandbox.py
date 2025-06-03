@@ -5,6 +5,8 @@ from models import RentalContract, PrivateChannelModel, HouseInfoModel # 新增�
 import time
 import random
 
+from service.logging import log_operation
+
 pay_bp = Blueprint('pay', __name__)
 
 @pay_bp.route('/good_list', methods=['GET', 'POST'])
@@ -95,6 +97,7 @@ def alipay_success_result():
                         house_status.status = 1  # 1为出租中
                 try:
                     db.session.commit()
+                    log_operation(g.username, g.user_type, "租客支付成功")
                 except Exception as e:
                     db.session.rollback()
                     flash(f"更新合同状态时发生错误: {str(e)}", "error")

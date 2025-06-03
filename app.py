@@ -8,6 +8,7 @@ from flask_apscheduler import APScheduler
 from flask import Flask, render_template, g, session, request
 import config
 from blueprints.contract import contract_bp
+from blueprints.logging import logging_bp
 from exts import db, mail
 from flask_migrate import Migrate
 from blueprints.account import account_bp
@@ -33,6 +34,8 @@ app.register_blueprint(account_bp, url_prefix='/account')
 app.register_blueprint(house_bp, url_prefix='/house')
 app.register_blueprint(feedback_bp, url_prefix='/feedback')
 app.register_blueprint(contract_bp, url_prefix='/contract')
+
+app.register_blueprint(logging_bp, url_prefix='/logging')
 app.register_blueprint(pay_bp, url_prefix='/') # 注册 pay_bp
 app.register_blueprint(ai_chat_bp)
 
@@ -143,6 +146,7 @@ def scheduled_task():
 def test_save():
     store_daily_visit_stats()
     return "测试写入成功"
+
 
 
 if __name__ == '__main__':

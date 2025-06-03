@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import or_
 from models import (HouseInfoModel, HouseStatusModel, CommentModel, NewsModel,
                    TenantModel, LandlordModel, AppointmentModel, RepairRequestModel, db, HouseListingAuditModel)
+from service.logging import log_operation
 # 新增导入 OSS 服务
 from service.oss_service import get_oss_client, delete_oss_object
 import alibabacloud_oss_v2 as oss_sdk
@@ -317,6 +318,7 @@ def add_house_logic():
         )
         db.session.add(house_status)
         db.session.commit()
+        log_operation(g.username, g.user_type, f"发布房源：{house_name}（位于 {region}）")
         flash('房源发布成功！您可以申请上架供租客查看。', 'success')
         return redirect(url_for('account.landlord_home'))
     except Exception as e:
@@ -395,6 +397,7 @@ def edit_house_logic(house_id):
         house_status.phone = phone
         house_status.update_time = datetime.now()
         db.session.commit()
+        log_operation(g.username, g.user_type, f"修改房源信息：{house_name}（ID: {house_id}，位于 {region}）")
         flash('房源信息更新成功！', 'success')
         return redirect(url_for('account.landlord_home'))
     except Exception as e:
@@ -431,6 +434,7 @@ def delete_house_logic(house_id):
         if house_info:
             db.session.delete(house_info)
         db.session.commit()
+        log_operation(g.username, g.user_type, f"删除房源：ID {house_id}（房东：{landlord_name}）")
         return jsonify({'success': True, 'message': '房源删除成功'})
     except Exception as e:
         db.session.rollback()

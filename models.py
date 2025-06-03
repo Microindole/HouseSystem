@@ -276,3 +276,13 @@ class RepairRequestModel(db.Model):
 
     def __repr__(self):
         return f'<RepairRequestModel {self.id} by {self.tenant_username} for house {self.house_id}>'
+
+
+class OperationLog(db.Model):
+    __tablename__ = 'operation_log'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), nullable=False)
+    user_type = db.Column(db.Integer, nullable=False)  # 0 管理员, 1 会员, 2 房东
+    message = db.Column(db.Text, nullable=False)
+    ip_address = db.Column(db.String(45))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
