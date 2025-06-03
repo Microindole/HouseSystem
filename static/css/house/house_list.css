@@ -9,7 +9,7 @@ body{background-color:#f4f4f9;font-family:'Arial',sans-serif;margin:0;padding:0}
 .news-container{overflow:hidden;border-radius:8px}
 .news-carousel{display:flex;transition:transform 0.5s ease;gap:0}
 .news-item{min-width:calc(33.333% - 0px);padding:20px;background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);border-right:1px solid #dee2e6;transition:transform 0.3s ease,box-shadow 0.3s ease}
-.news-item:hover{transform:translateY(-5px);box-shadow:0 8px 25px rgba(0,0,0,0.15);background:linear-gradient(135deg,#ffffff 0%,#f8f9fa 100%)}
+.news-item:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(0,0,0,0.15);background:linear-gradient(135deg,#ffffff 0%,#f8f9fa 100%)}
 .news-item:last-child{border-right:none}
 .news-content{height:100%;display:flex;flex-direction:column}
 .news-title{font-size:16px;font-weight:600;color:#333;margin:0 0 10px 0;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -82,4 +82,7 @@ body{background-color:#f4f4f9;font-family:'Arial',sans-serif;margin:0;padding:0}
 .pagination-list a:hover{background:#f1f5f9;border-color:#3b82f6;color:#3b82f6}
 .pagination-list .active span{background:#3b82f6;color:white;border-color:#3b82f6}
 @media (max-width:768px){.container{padding:24px 16px;margin:16px}.house-card{grid-template-columns:1fr;text-align:center}.house-image{width:100%;max-width:320px;margin:0 auto}.house-price-section{text-align:center}.filter-form{grid-template-columns:1fr;padding:20px}.news-carousel{flex-direction:column}.news-item{flex:none;margin-right:0;margin-bottom:15px}.house-details{grid-template-columns:1fr}.news-header{flex-direction:column;align-items:flex-start;gap:16px;padding:20px 20px 0 20px}.news-carousel-container{padding:0 20px}.news-card{flex:0 0 100%}.news-carousel{flex-direction:column;gap:12px}.news-indicators{padding:0 20px 16px 20px}.news-footer-section{padding:16px 20px 20px 20px;flex-direction:column;gap:12px;align-items:stretch;text-align:center}.news-title-area h2{font-size:22px}.nav-btn{width:40px;height:40px;font-size:16px}}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;}to{opacity:1;transform:translateY(0)}}
+.read-more {color: #1a202c;text-decoration: none;font-size: 0.9rem;font-weight: 500;padding: 4px 12px;border: 1px solid #e2e8f0;border-radius: 6px;background-color: white;transition: all 0.3s ease;display: inline-block;}
+.read-more:hover {background-color: #1a202c;color: white;border-color: #1a202c;box-shadow: 0 2px 8px rgba(26, 32, 44, 0.2);}
+.read-more:active {transform: translateY(0);}

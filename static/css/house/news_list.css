@@ -1,96 +1,55 @@
-/* 新建文件：static/css/house/news_list.css */
-.news-list-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.page-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-
-.page-header h1 {
-    font-size: 2.5rem;
-    color: #1a202c;
-    margin-bottom: 10px;
-}
-
-.page-header p {
-    color: #64748b;
-    font-size: 1.1rem;
-}
-
-.news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 30px;
-    margin-bottom: 40px;
-}
-
-.news-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.news-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
-
-.news-card-content {
-    padding: 25px;
-}
-
-.news-card-title a {
-    color: #1a202c;
-    text-decoration: none;
-    font-size: 1.3rem;
-    font-weight: 600;
-    line-height: 1.4;
-    display: block;
-    margin-bottom: 15px;
-}
-
-.news-card-title a:hover {
-    color: #667eea;
-}
-
-.news-card-excerpt {
-    color: #64748b;
-    line-height: 1.6;
-    margin-bottom: 20px;
-}
-
-.news-card-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #9ca3af;
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-}
-
-.news-card-actions {
-    padding: 0 25px 25px;
-}
-
-.no-news {
-    text-align: center;
-    padding: 60px 20px;
-    color: #64748b;
-}
-
-.no-news-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-}
-
-.no-news h3 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    color: #374151;
-}
+.news-list-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.page-header { text-align: center; margin-bottom: 40px; }
+.page-header h1 { font-size: 2.5rem; color: #1a202c; margin-bottom: 10px; }
+.page-header p { color: #64748b; font-size: 1.1rem; }
+.news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-bottom: 40px; }
+.news-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.3s ease; }
+.news-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+.news-card-content { padding: 25px; }
+.news-card-title a { color: #1a202c; text-decoration: none; font-size: 1.3rem; font-weight: 600; line-height: 1.4; display: block; margin-bottom: 15px; }
+.news-card-title a:hover { color: #64748b; }
+.news-card-excerpt { color: #64748b; line-height: 1.6; margin-bottom: 20px; }
+.news-card-meta { display: flex; justify-content: space-between; align-items: center; color: #9ca3af; font-size: 0.9rem; margin-bottom: 20px; }
+.news-card-meta span { display: flex; align-items: center; gap: 6px; }
+.news-card-actions { padding: 0 25px 25px; }
+/* 分页样式 */
+.pagination { display: flex; justify-content: center; align-items: center; margin: 40px 0; padding: 20px 0; }
+.pagination-list { display: flex; list-style: none; margin: 0; padding: 0; gap: 8px; align-items: center; }
+.pagination-list li { margin: 0; }
+.pagination-list li a, .pagination-list li span { 
+    display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; 
+    padding: 8px 12px; text-decoration: none; border: 1px solid #e2e8f0; border-radius: 8px; 
+    color: #64748b; font-weight: 500; transition: all 0.3s ease; background-color: white; font-size: 0.9rem; }
+.pagination-list li a:hover { background-color: #f8fafc; color: #1a202c; border-color: #cbd5e1; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.pagination-list li.active span { background-color: #1a202c; color: white; border-color: #1a202c; cursor: default; box-shadow: 0 2px 8px rgba(26, 32, 44, 0.2); }
+.pagination-list li:first-child a, .pagination-list li:last-child a { font-weight: 600; background-color: #f1f5f9; color: #475569; }
+.pagination-list li:first-child a:hover, .pagination-list li:last-child a:hover { background-color: #e2e8f0; color: #1a202c; }
+.pagination-list li:nth-child(2) a, .pagination-list li:nth-last-child(2) a { font-weight: 600; background-color: #f8fafc; color: #475569; }
+.pagination-list li:nth-child(2) a:hover, .pagination-list li:nth-last-child(2) a:hover { background-color: #f1f5f9; color: #1a202c; }
+.pagination-list li a.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.pagination-list li .dots { background: none; border: none; color: #9ca3af; cursor: default; }
+/* 按钮样式 */
+.news-card-actions .btn, .no-news .btn { 
+    background-color: #1a202c; color: white; padding: 10px 20px; border-radius: 8px; 
+    text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-block; font-size: 0.9rem; }
+.news-card-actions .btn:hover, .no-news .btn:hover { background-color: #374151; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26, 32, 44, 0.2); }
+/* 无新闻样式 */
+.no-news { 
+    text-align: center; padding: 80px 20px; color: #64748b; background-color: #f8fafc; 
+    border: 1px solid #e2e8f0; border-radius: 12px; margin: 40px 0; }
+.no-news-icon { font-size: 5rem; margin-bottom: 20px; opacity: 0.6; }
+.no-news h3 { font-size: 1.8rem; margin-bottom: 15px; color: #374151; font-weight: 600; }
+.no-news p { font-size: 1.1rem; margin-bottom: 30px; line-height: 1.5; }
+/* 响应式 */
+@media (max-width: 768px) {
+    .pagination-list { gap: 4px; }
+    .pagination-list li a, .pagination-list li span { min-width: 35px; height: 35px; padding: 6px 8px; font-size: 0.8rem; }
+    .pagination-list li:not(.active):not(:first-child):not(:last-child):not(:nth-child(2)):not(:nth-last-child(2)) { display: none; }
+    .news-grid { grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px; }
+    .page-header { margin-bottom: 30px; padding: 30px 20px; }
+    .page-header h1 { font-size: 2.2rem; }
+    .page-header p { font-size: 1rem; }}
+@media (max-width: 480px) {
+    .pagination { margin: 20px 0; padding: 10px 0; }
+    .pagination-list { gap: 2px; }
+    .pagination-list li a, .pagination-list li span { min-width: 32px; height: 32px; padding: 4px 6px; font-size: 0.8rem; }}
