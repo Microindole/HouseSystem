@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 
@@ -49,9 +48,9 @@
     </div>
     <div style="display: flex; align-items: center; gap: 20px;">
         {% if g.username %}
-            <button id="user-menu-button" class="username-button" style="padding: 8px 16px; background-color: #007bff; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem;">{{ g.username }}</button>
+            <button id="user-menu-button" class="username-button">{{ g.username }}</button>
         {% else %}
-            <a href="{{ url_for('account.login') }}" class="login-button" style="padding: 8px 16px; background-color: #dc3545; color: #fff; border-radius: 6px; text-decoration: none; font-size: 1rem;">登录</a>
+            <a href="{{ url_for('account.login') }}" class="login-button">登录</a>
         {% endif %}
     </div>
 </div>

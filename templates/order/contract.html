@@ -255,8 +255,33 @@
 </div>
 
 <style>
-body{font-family:"SimSun","宋体",serif;line-height:1.8;margin:20px;padding:20px;background-color:#f8f9fa}
-.contract-document-container{max-width:900px;margin:0 auto;background-color:#fff;padding:30px;border:1px solid #dee2e6;box-shadow:0 0 10px rgba(0,0,0,0.1)}
+body{
+    font-family:"SimSun","宋体",serif;
+    line-height:1.8;
+    margin:0; /* 顶栏顶格显示，去除默认margin */
+    padding:0; /* 顶栏顶格显示，去除默认padding */
+    background-color:#f8f9fa
+}
+/* 让navbar顶格显示并左右撑满 */
+.navbar {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    width: 100vw !important;
+    left: 0;
+    right: 0;
+    top: 0;
+    position: relative;
+    box-sizing: border-box;
+}
+/* 保证主内容区有留白 */
+.contract-document-container{
+    max-width:900px;
+    margin:40px auto 0 auto; /* 顶部空出40px，左右居中 */
+    background-color:#fff;
+    padding:30px;
+    border:1px solid #dee2e6;
+    box-shadow:0 0 10px rgba(0,0,0,0.1)
+}
 h1,h2,h3,h4{text-align:center;color:#333}
 h1{font-size:1.8em;margin-bottom:5px}
 h2{font-size:1.5em;margin-bottom:15px}
