@@ -1,59 +1,9 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>房屋租赁合同</title>
-    <style>
-        body { font-family: "SimSun", "宋体", serif; line-height: 1.8; margin: 20px; padding: 20px; background-color: #f8f9fa; }
-        .container { max-width: 900px; margin: 0 auto; background-color: #fff; padding: 30px; border: 1px solid #dee2e6; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1, h2, h3, h4 { text-align: center; color: #333; }
-        h1 { font-size: 1.8em; margin-bottom: 5px; }
-        h2 { font-size: 1.5em; margin-bottom: 15px; }
-        h3 { font-size: 1.3em; text-align: left; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;}
-        h4 { font-size: 1.1em; text-align: left; margin-top: 20px; margin-bottom:10px; color: #555; }
-        .issued-by { text-align: center; margin-bottom: 10px; }
-        .date-issued { text-align: center; margin-bottom: 30px; }
-        .instructions, .special-tips { border: 1px solid #e0e0e0; background-color: #f9f9f9; padding: 15px; margin-bottom: 20px; font-size: 0.9em; border-radius: 4px;}
-        .instructions h4, .special-tips h4 { margin-top: 0; color: #007bff; text-align: left; border-bottom: none;}
-        .instructions ul, .special-tips ul { padding-left: 20px; }
-        .form-section { margin-bottom: 20px; padding: 15px; border: 1px solid #f0f0f0; border-radius: 4px; background-color: #fff;}
-        .form-section h3 { border-bottom: 1px solid #007bff; color: #007bff; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input[type="text"], input[type="date"], input[type="number"], textarea {
-            width: calc(100% - 18px); padding: 8px; margin-top: 3px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
-        }
-        textarea {
-            min-height: 60px;
-            resize: none; /* 禁止用户调整文本区域大小 */
-        }
-        input.inline-fill { width: auto; display: inline-block; border: none; border-bottom: 1px solid #555; padding: 2px 5px; margin: 0 5px; box-shadow: none; border-radius: 0;}
-        span.inline-fill-placeholder { border-bottom: 1px solid #555; padding: 0 5px; display: inline-block; min-width: 80px; text-align: center; background-color: #f0f0f0; color: #777; font-style: italic; }
-        .signature-area { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; }
-        .signature-section { display: flex; justify-content: space-between; flex-wrap: wrap;}
-        .signature-block { width: 48%; margin-bottom: 20px;}
-        .signature-block p { margin-bottom: 8px;} /* Reduced margin for signature block paragraphs */
-        .appendix { margin-top: 30px; padding-top:20px; border-top: 2px solid #007bff; }
-        .appendix h3 { color: #007bff; }
-        p { margin: 0 0 10px 0; }
-        .fixed-clause { color: #444; font-size: 0.95em; }
-        .signature-value { /* Style for displaying actual signature data if pre-filled */
-            font-style: italic;
-            color: #333;
-            border-bottom: 1px solid #888;
-            padding: 2px 5px;
-            min-width: 150px;
-            display: inline-block;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
+<div class="contract-document-container">
     <div class="form-group">
         <label for="contract_document_id_display">合同示范文本编号：</label>
         <input type="text" id="contract_document_id" name="contract_document_id" value="{{ contract_info.contract_document_id }}" readonly>
     </div>
+    
     <h1>房屋租赁合同</h1>
     <h2 class="text-center">（示范文本）</h2>
     <div class="issued-by">国家市场监督管理总局 制定</div>
@@ -99,7 +49,7 @@
                 <label for="house_details_text">（一）该房屋坐落、权属、面积、户型、装修及车位等基本情况描述：</label>
                 <textarea id="house_details_text" name="house_details_text" class="no-resize" {% if not edit_mode %}readonly{% endif %}>{{ contract_info.house_details_text_snapshot }}</textarea>
                 <p class="fixed-clause">房屋抵押情况：【请在上方描述中说明，若有抵押，不影响本合同在抵押权实现前的效力】。</p>
-                <p class="fixed-clause">该房屋的附属设施、设备、家具、电器、装修等状况（下文简称“附属设施、物品”），详见附件《房屋交割单》。</p>
+                <p class="fixed-clause">该房屋的附属设施、设备、家具、电器、装修等状况（下文简称"附属设施、物品"），详见附件《房屋交割单》。</p>
             </div>
         </div>
 
@@ -140,7 +90,7 @@
                 <input type="date" id="start_date" name="start_date" class="inline-fill" value="{{ contract.start_date.strftime('%Y-%m-%d') }}" {% if not edit_mode %}readonly{% endif %}> 年 月 日起至
                 <input type="date" id="end_date" name="end_date" class="inline-fill" value="{{ contract.end_date.strftime('%Y-%m-%d') }}" {% if not edit_mode %}readonly{% endif %}> 年 月 日止。
             </div>
-            <p class="fixed-clause">（二）免租期：【双方可在此处或“其他约定事项”中约定，若无则本条款不适用】。</p>
+            <p class="fixed-clause">（二）免租期：【双方可在此处或"其他约定事项"中约定，若无则本条款不适用】。</p>
             <p class="fixed-clause">（三）租赁期间届满，甲方有权收回该房屋，乙方应当及时返还。乙方如需续租，应在租赁期满前 30 日内向甲方提出，双方另行协商签订新合同，同等条件下乙方有优先承租权。</p>
         </div>
 
@@ -154,13 +104,13 @@
             <p class="fixed-clause">（二）税费：本合同履行过程中产生的税费，依照国家法律法规规定各自承担。</p>
             <div class="form-group">
                 （三）该房屋租金按
-                <input type="text" id="rent_payment_frequency" name="rent_payment_frequency" class="inline-fill" value="{{ contract_info.rent_payment_frequency }}" placeholder="例如：月/季度/年" {% if not edit_mode %}readonly{% endif %}> 方式支付，具体支付方式及期限：【双方可在此处或“其他约定事项”中约定，通常为每期开始前X日内支付】。
+                <input type="text" id="rent_payment_frequency" name="rent_payment_frequency" class="inline-fill" value="{{ contract_info.rent_payment_frequency }}" placeholder="例如：月/季度/年" {% if not edit_mode %}readonly{% endif %}> 方式支付，具体支付方式及期限：【双方可在此处或"其他约定事项"中约定，通常为每期开始前X日内支付】。
             </div>
             <div class="form-group">
                 <label for="landlord_bank_account_info">（四）甲方收取租金账户信息（户名、银行账号、开户行）：</label>
                 <textarea id="landlord_bank_account_info" name="landlord_bank_account_info" class="no-resize" {% if not edit_mode %}readonly{% endif %}>{{ contract_info.landlord_bank_account_info or '' }}</textarea>
             </div>
-            <p class="fixed-clause">（五）车库/车位租金：【若适用，请在“其他约定事项”中明确】。</p>
+            <p class="fixed-clause">（五）车库/车位租金：【若适用，请在"其他约定事项"中明确】。</p>
             <p class="fixed-clause">（六）乙方逾期支付租金超过 15 天的，甲方有权解除本合同并收回该房屋，乙方应按实际使用时间支付租金并承担相应违约责任。</p>
         </div>
 
@@ -177,7 +127,7 @@
 
         <div class="form-section">
             <h3>第七条 其他相关费用</h3>
-            <p class="fixed-clause">租赁期内，（一）甲方承担：【房屋主体结构的自然损坏维修费】。（二）乙方承担：【水费、电费、燃气费、网络费、电视费、物业管理费、垃圾处理费等实际使用费用】。具体承担范围和支付方式可在“其他约定事项”中补充。</p>
+            <p class="fixed-clause">租赁期内，（一）甲方承担：【房屋主体结构的自然损坏维修费】。（二）乙方承担：【水费、电费、燃气费、网络费、电视费、物业管理费、垃圾处理费等实际使用费用】。具体承担范围和支付方式可在"其他约定事项"中补充。</p>
         </div>
 
         <div class="form-section">
@@ -206,7 +156,7 @@
         <div class="form-section">
             <h3>第十五条 违约责任</h3>
             <p class="fixed-clause">（一）任何一方违反本合同约定，应向守约方支付相当于【例如：一个月租金】的违约金。若违约金不足以弥补守约方损失的，违约方还应赔偿损失与违约金的差额部分。</p>
-            <p class="fixed-clause">（二）具体违约情形（如甲方提前收房、乙方提前退租、逾期支付租金、逾期交房/返房等）的违约责任标准，除本合同其他条款已有约定外，按前款执行或在“其他约定事项”中明确。</p>
+            <p class="fixed-clause">（二）具体违约情形（如甲方提前收房、乙方提前退租、逾期支付租金、逾期交房/返房等）的违约责任标准，除本合同其他条款已有约定外，按前款执行或在"其他约定事项"中明确。</p>
         </div>
 
         <div class="form-section">
@@ -232,7 +182,6 @@
         <div class="signature-area">
             <h3>合同签署</h3>
             <div class="signature-section">
-                <!-- 甲方签名区块 -->
                 <div class="signature-block">
                     <h4>甲方（出租人）</h4>
                     <p>签名/盖章：
@@ -248,7 +197,6 @@
                     </p>
                 </div>
 
-                <!-- 乙方签名区块 -->
                 <div class="signature-block">
                     <h4>乙方（承租人）</h4>
                     <p>签名/盖章：
@@ -266,7 +214,6 @@
             </div>
         </div>
 
-        <!-- 附件部分，作为独立区块 -->
         <div class="appendix">
             <h3>附件：房屋交割单</h3>
             <p class="fixed-clause">甲乙双方共同确认，本附件所约定房屋的附属设施、设备、家具、电器、装饰装修、相关物品等随同该房屋交付。</p>
@@ -304,7 +251,37 @@
                 </div>
             </div>
         </div>
-
+    </form>
 </div>
-</body>
-</html>
+
+<style>
+body{font-family:"SimSun","宋体",serif;line-height:1.8;margin:20px;padding:20px;background-color:#f8f9fa}
+.contract-document-container{max-width:900px;margin:0 auto;background-color:#fff;padding:30px;border:1px solid #dee2e6;box-shadow:0 0 10px rgba(0,0,0,0.1)}
+h1,h2,h3,h4{text-align:center;color:#333}
+h1{font-size:1.8em;margin-bottom:5px}
+h2{font-size:1.5em;margin-bottom:15px}
+h3{font-size:1.3em;text-align:left;margin-top:25px;margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:5px}
+h4{font-size:1.1em;text-align:left;margin-top:20px;margin-bottom:10px;color:#555}
+.issued-by{text-align:center;margin-bottom:10px}
+.date-issued{text-align:center;margin-bottom:30px}
+.instructions,.special-tips{border:1px solid #e0e0e0;background-color:#f9f9f9;padding:15px;margin-bottom:20px;font-size:0.9em;border-radius:4px}
+.instructions h4,.special-tips h4{margin-top:0;color:#007bff;text-align:left;border-bottom:none}
+.instructions ul,.special-tips ul{padding-left:20px}
+.form-section{margin-bottom:20px;padding:15px;border:1px solid #f0f0f0;border-radius:4px;background-color:#fff}
+.form-section h3{border-bottom:1px solid #007bff;color:#007bff}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-weight:bold;margin-bottom:5px;color:#555}
+input[type="text"],input[type="date"],input[type="number"],textarea{width:calc(100% - 18px);padding:8px;margin-top:3px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box}
+textarea{min-height:60px;resize:none}
+input.inline-fill{width:auto;display:inline-block;border:none;border-bottom:1px solid #555;padding:2px 5px;margin:0 5px;box-shadow:none;border-radius:0}
+span.inline-fill-placeholder{border-bottom:1px solid #555;padding:0 5px;display:inline-block;min-width:80px;text-align:center;background-color:#f0f0f0;color:#777;font-style:italic}
+.signature-area{margin-top:40px;padding-top:20px;border-top:1px solid #ccc}
+.signature-section{display:flex;justify-content:space-between;flex-wrap:wrap}
+.signature-block{width:48%;margin-bottom:20px}
+.signature-block p{margin-bottom:8px}
+.appendix{margin-top:30px;padding-top:20px;border-top:2px solid #007bff}
+.appendix h3{color:#007bff}
+p{margin:0 0 10px 0}
+.fixed-clause{color:#444;font-size:0.95em}
+.signature-value{font-style:italic;color:#333;border-bottom:1px solid #888;padding:2px 5px;min-width:150px;display:inline-block}
+</style>
