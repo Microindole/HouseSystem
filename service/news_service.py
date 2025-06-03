@@ -1,7 +1,7 @@
 import json
 from flask import render_template, request, flash, redirect, url_for, session, jsonify, current_app, g
 from datetime import datetime
-from models import NewsModel, HouseStatusModel, db
+from models import NewsModel, HouseStatusModel, HouseInfoModel, db
 
 def add_news_logic():
     if getattr(g, 'user_type', None) != 2:
@@ -105,4 +105,55 @@ def load_more_news_logic():
         for n in news
     ]
     return jsonify({'news': news_data, 'has_more': has_more})
+
+# 在 news_service.py 中添加新闻详情逻辑
+def news_detail_logic(news_id):
+    """新闻详情逻辑"""
+    try:
+        # 获取新闻详情
+        news = NewsModel.query.filter_by(id=news_id).first()
+        if not news:
+            flash('新闻不存在', 'error')
+            return redirect(url_for('house.house_list'))
+        
+        # 获取相关房源信息
+        house_info = None
+        if news.house_id:
+            house_info = HouseInfoModel.query.get(news.house_id)
+        
+        # 获取相关的其他新闻（推荐阅读）
+        related_news = NewsModel.query.filter(
+            NewsModel.id != news_id
+        ).order_by(NewsModel.time.desc()).limit(5).all()
+        
+        return render_template('house/news_detail.html', 
+                             news=news, 
+                             house_info=house_info,
+                             related_news=related_news)
+    except Exception as e:
+        current_app.logger.error(f"获取新闻详情失败: {e}")
+        flash('获取新闻详情失败', 'error')
+        return redirect(url_for('house.house_list'))
+
+def news_list_logic():
+    """新闻列表逻辑"""
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
+        
+        # 获取新闻列表
+        news_pagination = NewsModel.query.order_by(
+            NewsModel.time.desc()
+        ).paginate(
+            page=page, 
+            per_page=per_page, 
+            error_out=False
+        )
+        
+        return render_template('house/news_list.html', 
+                             news_pagination=news_pagination)
+    except Exception as e:
+        current_app.logger.error(f"获取新闻列表失败: {e}")
+        flash('获取新闻列表失败', 'error')
+        return redirect(url_for('house.house_list'))
 

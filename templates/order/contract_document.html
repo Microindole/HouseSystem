@@ -4,54 +4,28 @@
 
 {% block head %}
     <style>
-        .contract-document-container {
-            max-width: 900px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 30px;
-            border: 1px solid #dee2e6;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        
-        .contract-actions {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .btn-action {
-            padding: 10px 20px;
-            margin: 0 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            border: none;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
+        .contract-document-container{max-width:900px;margin:20px auto;background-color:#fff;padding:30px;border:1px solid #dee2e6;box-shadow:0 0 10px rgba(0,0,0,0.1)}
+        .contract-document-container .contract-document-container{background:none;box-shadow:none;border:none;padding:0;margin:0}
+        .contract-actions{margin-top:20px;text-align:center}
+        .btn-action{padding:10px 20px;margin:0 10px;border-radius:4px;cursor:pointer;border:none;text-decoration:none;display:inline-block}
+        .btn-primary{background-color:#007bff;color:white}
+        .btn-secondary{background-color:#6c757d;color:white}
+        .btn-action:hover{text-decoration:none;opacity:0.9}
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="contract-document-container">
-        <h1 class="text-center">房屋租赁合同</h1>
+    <!-- <div class="contract-document-container">
+        <h1 class="text-center">房屋租赁合同</h1> -->
         
         {% include 'order/contract.html' %}
         
-        <div class="contract-actions">
+        
             {% if g.username == contract.tenant_username and not contract_info.tenant_signature_identifier %}
                 <a href="{{ url_for('contract.sign_contract_page', contract_id=contract.id) }}" class="btn-action btn-primary">签署合同</a>
             {% endif %}
-            
+        <div class="contract-actions">
             <a href="{{ url_for('contract.view_contracts') }}" class="btn-action btn-secondary">返回列表</a>
         </div>
-    </div>
+    <!-- </div> -->
 {% endblock %}

@@ -27,7 +27,9 @@ from service.news_service import (
     manage_news_logic,
     delete_news_logic,
     batch_delete_news_logic,
-    load_more_news_logic
+    load_more_news_logic,
+    news_detail_logic,  # 新增
+    news_list_logic     # 新增
 )
 from service.repair_service import (
     create_repair_request_logic,
@@ -154,3 +156,13 @@ def export_houses():
 @house_bp.route('/load_more_news', methods=['GET'])
 def load_more_news():
     return load_more_news_logic()
+
+# 新增新闻详情路由
+@house_bp.route('/news/<int:news_id>')
+def news_detail(news_id):
+    return news_detail_logic(news_id)
+
+# 新增新闻列表路由
+@house_bp.route('/news')
+def news_list():
+    return news_list_logic()

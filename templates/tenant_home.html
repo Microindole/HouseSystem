@@ -10,10 +10,10 @@
         }
 
         .welcome-section {
-            background: linear-gradient(135deg, #4F6BFB 0%, #3B8BEB 100%);
+            background: #2c3e50;
             color: white;
             padding: 40px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin-bottom: 30px;
             text-align: center;
         }
@@ -21,15 +21,23 @@
         .welcome-section h1 {
             margin: 0 0 10px 0;
             font-size: 28px;
+            font-weight: 600;
         }
 
         .welcome-section p {
             margin: 0;
             opacity: 0.9;
+            font-size: 16px;
         }
 
         .quick-actions {
             margin-bottom: 40px;
+        }
+
+        .quick-actions h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
 
         .actions-grid {
@@ -40,76 +48,112 @@
         }
 
         .action-card {
-            background: white;
+            background: #f8f9fa;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
             text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease;
         }
 
         .action-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: #dee2e6;
         }
 
         .action-icon {
             width: 60px;
             height: 60px;
-            background: #4F6BFB;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 15px;
+            margin: 0 auto 20px;
             font-size: 24px;
             color: white;
         }
 
-        .action-card.orders .action-icon {
-            background: #6c757d;
+        /* 房源查询 - 蓝色 */
+        .action-card:nth-child(1) .action-icon {
+            background: #3498db;
+        }
+        .action-card:nth-child(1) .btn {
+            background: #3498db;
+        }
+        .action-card:nth-child(1) .btn:hover {
+            background: #2980b9;
+            box-shadow: 0 4px 12px rgba(52,152,219,0.3);
+        }
+
+        /* 历史记录 - 绿色 */
+        .action-card:nth-child(2) .action-icon {
+            background: #27ae60;
+        }
+        .action-card:nth-child(2) .btn {
+            background: #27ae60;
+        }
+        .action-card:nth-child(2) .btn:hover {
+            background: #229954;
+            box-shadow: 0 4px 12px rgba(39,174,96,0.3);
+        }
+
+        /* 消息管理 - 橙色 */
+        .action-card:nth-child(3) .action-icon {
+            background: #e67e22;
+        }
+        .action-card:nth-child(3) .btn {
+            background: #e67e22;
+        }
+        .action-card:nth-child(3) .btn:hover {
+            background: #d35400;
+            box-shadow: 0 4px 12px rgba(230,126,34,0.3);
+        }
+
+        /* 预约管理 - 紫色 */
+        .action-card:nth-child(4) .action-icon {
+            background: #9b59b6;
+        }
+        .action-card:nth-child(4) .btn {
+            background: #9b59b6;
+        }
+        .action-card:nth-child(4) .btn:hover {
+            background: #8e44ad;
+            box-shadow: 0 4px 12px rgba(155,89,182,0.3);
         }
 
         .action-card h3 {
-            margin: 0 0 10px 0;
-            color: #333;
+            margin: 0 0 12px 0;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 18px;
         }
 
         .action-card p {
-            color: #666;
+            color: #6c757d;
             font-size: 14px;
             margin-bottom: 20px;
+            line-height: 1.5;
         }
 
         .btn {
-            background: #4F6BFB;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
             font-size: 14px;
+            font-weight: 500;
             margin: 5px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         .btn:hover {
-            background: #3B5BDB;
             color: white;
             text-decoration: none;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79,107,251,0.3);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            box-shadow: 0 4px 12px rgba(108,117,125,0.3);
         }
 
         @media (max-width: 768px) {
@@ -117,8 +161,20 @@
                 padding: 15px;
             }
 
+            .welcome-section {
+                padding: 30px 20px;
+            }
+
+            .welcome-section h1 {
+                font-size: 24px;
+            }
+
             .actions-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .action-card {
+                padding: 25px 20px;
             }
         }
     </style>

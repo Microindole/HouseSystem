@@ -29,16 +29,20 @@
         {% if news_list %}
         <div class="news-container">
             <div class="news-carousel" id="news-carousel">
+                <!-- 修改新闻项，添加点击跳转链接 -->
                 {% for news in news_list %}
                 <div class="news-item" data-index="{{ loop.index0 }}">
                     <div class="news-content">
-                        <h3 class="news-title">{{ news.title }}</h3>
+                        <h3 class="news-title">
+                            <a href="{{ url_for('house.news_detail', news_id=news.id) }}">{{ news.title }}</a>
+                        </h3>
                         <p class="news-desc">{{ news.desc[:100] if news.desc else '暂无详细描述' }}{% if news.desc and news.desc|length > 100 %}...{% endif %}</p>
                         <div class="news-footer">
                             <span class="news-date">{{ news.time.strftime('%m月%d日') if news.time else '未知时间' }}</span>
                             {% if news.house_info %}
                             <span class="news-house">{{ news.house_info.house_name }}</span>
                             {% endif %}
+                            <a href="{{ url_for('house.news_detail', news_id=news.id) }}" class="read-more">阅读全文</a>
                         </div>
                     </div>
                 </div>
@@ -52,8 +56,9 @@
             {% endfor %}
         </div>
 
+        <!-- 修改查看更多新闻按钮 -->
         <div class="news-footer-section">
-            <button id="load-more-news" class="btn btn-primary">查看更多新闻</button>
+            <a href="{{ url_for('house.news_list') }}" class="btn btn-primary" id="view-more-news">查看更多新闻</a>
             <span class="news-stats">共 <span id="total-news">{{ news_list|length }}</span> 条资讯</span>
         </div>
         {% else %}

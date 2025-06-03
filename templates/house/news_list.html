@@ -1,0 +1,79 @@
+<!-- 新建文件：templates/house/news_list.html -->
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/house/news_list.css') }}">
+{% endblock %}
+
+{% block title %}新闻资讯{% endblock %}
+
+{% block body %}
+<div class="news-list-container">
+    <header class="page-header">
+        <h1>新闻资讯</h1>
+        <p>了解最新的房屋租赁信息和行业动态</p>
+    </header>
+
+    {% if news_pagination.items %}
+    <div class="news-grid">
+        {% for news in news_pagination.items %}
+        <article class="news-card">
+            <div class="news-card-content">
+                <h2 class="news-card-title">
+                    <a href="{{ url_for('house.news_detail', news_id=news.id) }}">{{ news.title }}</a>
+                </h2>
+                <p class="news-card-excerpt">
+                    {{ news.desc[:120] if news.desc else '暂无详细描述' }}{% if news.desc and news.desc|length > 120 %}...{% endif %}
+                </p>
+                <div class="news-card-meta">
+                    <span class="news-date">
+                        <i class="fas fa-calendar"></i> 
+                        {{ news.time.strftime('%Y年%m月%d日') if news.time else '未知时间' }}
+                    </span>
+                    {% if news.house_info %}
+                    <span class="news-house">
+                        <i class="fas fa-home"></i> 
+                        {{ news.house_info.house_name }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="news-card-actions">
+                <a href="{{ url_for('house.news_detail', news_id=news.id) }}" class="btn btn-primary">阅读全文</a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    <!-- 分页控制 -->
+    {% if news_pagination.pages > 1 %}
+    <div class="pagination">
+        <ul class="pagination-list">
+            {% if news_pagination.has_prev %}
+                <li><a href="{{ url_for('house.news_list', page=1) }}">首页</a></li>
+                <li><a href="{{ url_for('house.news_list', page=news_pagination.prev_num) }}">上一页</a></li>
+            {% endif %}
+            {% for p in range(1, news_pagination.pages + 1) %}
+                {% if p == news_pagination.page %}
+                    <li class="active"><span>{{ p }}</span></li>
+                {% else %}
+                    <li><a href="{{ url_for('house.news_list', page=p) }}">{{ p }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if news_pagination.has_next %}
+                <li><a href="{{ url_for('house.news_list', page=news_pagination.next_num) }}">下一页</a></li>
+                <li><a href="{{ url_for('house.news_list', page=news_pagination.pages) }}">末页</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="no-news">
+        <div class="no-news-icon">📰</div>
+        <h3>暂无新闻资讯</h3>
+        <p>目前还没有发布任何新闻，请稍后再来查看。</p>
+        <a href="{{ url_for('house.house_list') }}" class="btn btn-primary">返回房源列表</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
