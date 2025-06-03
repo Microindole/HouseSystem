@@ -1,0 +1,92 @@
+<!-- 新建文件：templates/house/news_detail.html -->
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/house/news_detail.css') }}">
+{% endblock %}
+
+{% block title %}{{ news.title }} - 新闻详情{% endblock %}
+
+{% block body %}
+<div class="news-detail-container">
+    <!-- 返回按钮 -->
+    <div class="back-nav">
+        <a href="{{ url_for('house.news_list') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> 返回新闻列表
+        </a>
+    </div>
+
+    <!-- 新闻主体 -->
+    <article class="news-article">
+        <header class="news-header">
+            <h1 class="news-title">{{ news.title }}</h1>
+            <div class="news-meta">
+                <span class="news-date">
+                    <i class="fas fa-calendar"></i> 
+                    {{ news.time.strftime('%Y年%m月%d日 %H:%M') if news.time else '未知时间' }}
+                </span>
+                {% if news.landlord_username %}
+                <span class="news-author">
+                    <i class="fas fa-user"></i> 
+                    {{ news.landlord_username }}
+                </span>
+                {% endif %}
+            </div>
+        </header>
+
+        <div class="news-content">
+            {% if news.desc %}
+                <div class="news-description">
+                    {{ news.desc|replace('\n', '<br>')|safe }}
+                </div>
+            {% else %}
+                <div class="no-content">
+                    <p>暂无详细内容</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 相关房源信息 -->
+        {% if house_info %}
+        <div class="related-house">
+            <h3>相关房源</h3>
+            <div class="house-card">
+                {% if house_info.image %}
+                    <img src="{{ house_info.image }}" class="house-image" alt="房屋图片">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default_house_thumbnail.png') }}" class="house-image" alt="暂无图片">
+                {% endif %}
+                
+                <div class="house-info">
+                    <h4 class="house-title">{{ house_info.house_name }}</h4>
+                    <div class="house-details">
+                        <span><strong>户型：</strong>{{ house_info.rooms }}</span>
+                        <span><strong>地区：</strong>{{ house_info.region }}</span>
+                        <span><strong>价格：</strong>{{ house_info.price }} 元/月</span>
+                    </div>
+                    <a href="{{ url_for('house.house_detail', house_id=house_info.house_id) }}" class="btn btn-primary">查看房源详情</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </article>
+
+    <!-- 推荐阅读 -->
+    {% if related_news %}
+    <aside class="related-news">
+        <h3>推荐阅读</h3>
+        <div class="related-news-list">
+            {% for related in related_news %}
+            <div class="related-news-item">
+                <a href="{{ url_for('house.news_detail', news_id=related.id) }}" class="related-news-link">
+                    <h4>{{ related.title }}</h4>
+                    <p>{{ related.desc[:80] if related.desc else '暂无描述' }}{% if related.desc and related.desc|length > 80 %}...{% endif %}</p>
+                    <span class="related-news-date">{{ related.time.strftime('%m月%d日') if related.time else '未知时间' }}</span>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+    {% endif %}
+</div>
+{% endblock %}

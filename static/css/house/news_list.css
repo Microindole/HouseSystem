@@ -1,0 +1,96 @@
+/* 新建文件：static/css/house/news_list.css */
+.news-list-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    color: #1a202c;
+    margin-bottom: 10px;
+}
+
+.page-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.news-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.news-card-content {
+    padding: 25px;
+}
+
+.news-card-title a {
+    color: #1a202c;
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.4;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.news-card-title a:hover {
+    color: #667eea;
+}
+
+.news-card-excerpt {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.news-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.news-card-actions {
+    padding: 0 25px 25px;
+}
+
+.no-news {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+}
+
+.no-news-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.no-news h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #374151;
+}
