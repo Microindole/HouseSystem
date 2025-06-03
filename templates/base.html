@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -22,23 +23,23 @@
 <div class="navbar animated-navbar" style="background-image: url('{{ url_for('static', filename='images/background-pattern.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center; background-color: #222; padding: 35px 40px; color: #fff; display: flex; align-items: center; justify-content: space-between; border-radius: 2px;">
     <div style="display: flex; align-items: center; gap: 20px;">
 
-    <a href="{{ url_for('house.house_list') }}" class="house-link">乐居阁</a>
-    <form style="display: flex; gap: 12px; align-items: center;">
-        <select name="region" id="provinceSelect" onchange="updateCities();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background-color: rgba(255, 255, 255, 0.8); color: #333; outline: none; font-size: 1rem;">
-            <option value="">选择省份</option>
-            {% for province in cities_data.keys() %}
-                <option value="{{ province }}" {% if province == selected_region %}selected{% endif %}>{{ province }}</option>
-            {% endfor %}
-        </select>
-        <select name="city" id="citySelect" onchange="this.form.submit();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background-color: rgba(255, 255, 255, 0.8); color: #333; outline: none; font-size: 1rem;">
-            <option value="">选择城市</option>
-            {% if selected_region %}
-                {% for city in cities_data[selected_region] %}
-                    <option value="{{ city }}" {% if city == selected_city %}selected="selected"{% endif %}>{{ city }}</option>
+        <a href="{{ url_for('house.house_list') }}" class="house-link">乐居阁</a>
+        <form style="display: flex; gap: 12px; align-items: center;">
+            <select name="region" id="provinceSelect" onchange="updateCities();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background-color: rgba(255, 255, 255, 0.8); color: #333; outline: none; font-size: 1rem;">
+                <option value="">选择省份</option>
+                {% for province in cities_data.keys() %}
+                    <option value="{{ province }}" {% if province == selected_region %}selected{% endif %}>{{ province }}</option>
                 {% endfor %}
-            {% endif %}
-        </select>
-    </form>
+            </select>
+            <select name="city" id="citySelect" onchange="this.form.submit();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background-color: rgba(255, 255, 255, 0.8); color: #333; outline: none; font-size: 1rem;">
+                <option value="">选择城市</option>
+                {% if selected_region %}
+                    {% for city in cities_data[selected_region] %}
+                        <option value="{{ city }}" {% if city == selected_city %}selected="selected"{% endif %}>{{ city }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </form>
     </div>
     <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
         <form method="get" action="{{ url_for('house.house_list') }}" style="display: flex; align-items: center; gap: 10px; width: 100%; max-width: 600px;">
@@ -54,21 +55,23 @@
         {% endif %}
     </div>
 </div>
-
 <div id="user-sidebar" class="user-sidebar hidden">
     <div class="user-sidebar-header">
         <h2>{{ g.username }}</h2>
         <button id="close-sidebar" class="close-button">&times;</button>
     </div>
     <ul class="user-sidebar-menu">
+        <!-- ...existing menu code... -->
+        <!-- 公共菜单项 -->
         <li>
             <a href="{% if g.user_type == 1 %}{{ url_for('account.tenant_home') }}{% elif g.user_type == 2 %}{{ url_for('account.landlord_home') }}{% else %}{{ url_for('account.admin_dashboard') }}{% endif %}">
-                我的主页
+                🏠 我的主页
             </a>
         </li>
+        <li><a href="{{ url_for('account.profile') }}">👤 个人信息</a></li>
         <li>
             <a href="{{ url_for('feedback.messages') }}">
-                我的消息
+                💬 我的消息
                 {% if unread_total and unread_total > 0 %}
                     <span class="unread-badge" style="background:#f56c6c;color:#fff;border-radius:10px;padding:2px 6px;font-size:12px;margin-left:6px;">
                     {{ unread_total }}
@@ -76,17 +79,31 @@
                 {% endif %}
             </a>
         </li>
-        <li><a href="{{ url_for('account.profile') }}">查看个人信息</a></li>
-        <li><a href="{{ url_for('contract.view_contracts') }}">查看交易历史</a></li>
-        <li><a href="{{ url_for('house.view_appointments') }}">查看预约</a></li>
         {% if g.user_type == 1 %}
-            <li><a href="{{ url_for('house.manage_repair_requests') }}">我的维修请求</a></li>
+            <!-- 租客专用菜单 -->
+            <li><a href="{{ url_for('house.house_list') }}">🔍 浏览房源</a></li>
+            <li><a href="{{ url_for('contract.view_contracts') }}">📄 租赁合同</a></li>
+            <li><a href="{{ url_for('house.view_appointments') }}">📅 我的预约</a></li>
+            <li><a href="{{ url_for('house.manage_repair_requests') }}">🔧 维修请求</a></li>
         {% elif g.user_type == 2 %}
-            <li><a href="{{ url_for('house.manage_repair_requests') }}">维修请求管理</a></li>
+            <!-- 房东专用菜单 -->
+            <li><a href="{{ url_for('house.add_house') }}">➕ 发布房源</a></li>
+            <li><a href="{{ url_for('house.add_news') }}">📰 发布新闻</a></li>
+            <li><a href="{{ url_for('house.manage_news') }}">📝 管理新闻</a></li>
+            <li><a href="{{ url_for('contract.view_contracts') }}">📄 租赁合同</a></li>
+            <li><a href="{{ url_for('house.view_appointments') }}">📅 预约管理</a></li>
+            <li><a href="{{ url_for('house.manage_repair_requests') }}">🔧 维修管理</a></li>
+        {% elif g.user_type == 0 %}
+            <!-- 管理员专用菜单 -->
+            <li><a href="{{ url_for('account.manage_users') }}">👥 用户管理</a></li>
+            <li><a href="{{ url_for('account.audit_list') }}">✅ 房源审核</a></li>
+            <li><a href="/account/admin/system_setting">⚙️ 系统设置</a></li>
+            <li><a href="{{ url_for('feedback.manage_complaints') }}">⚖️ 投诉管理</a></li>
         {% endif %}
+        <!-- 公共底部菜单 -->
         <li>
             <a href="{{ url_for('feedback.complaint') }}">
-                投诉&反馈
+                📢 投诉反馈
                 {% if unread_complaint_updates and unread_complaint_updates > 0 %}
                     <span class="unread-badge" style="background:#ff9800;color:#fff;border-radius:10px;padding:2px 6px;font-size:12px;margin-left:6px;">
                     {{ unread_complaint_updates }}
@@ -94,10 +111,7 @@
                 {% endif %}
             </a>
         </li>
-        {% if g.user_type == 0 %}
-            <li><a href="{{ url_for('feedback.manage_complaints') }}">管理投诉</a></li>
-        {% endif %}
-        <li><a href="{{ url_for('account.logout') }}">退出登录</a></li>
+        <li><a href="{{ url_for('account.logout') }}">🚪 退出登录</a></li>
     </ul>
 </div>
 
@@ -147,46 +161,47 @@
     <script src="{{ url_for('static', filename='js/ai.js') }}" defer></script>
 {% endif %}
 <script>
-        // 省份选择变化时，动态更新城市选择框
-        function updateCities() {
-            var provinceSelect = document.getElementById('provinceSelect');
-            if (!provinceSelect) return; // Guard clause
-            var province = provinceSelect.value;
-            var cities_data_json = JSON.parse('{{ cities_data | tojson | safe }}'); // Use safe filter
-            var citySelect = document.getElementById('citySelect');
-            var selectedCityFromServer = "{{ selected_city }}";
+    // 省份选择变化时，动态更新城市选择框
+    function updateCities() {
+        var provinceSelect = document.getElementById('provinceSelect');
+        if (!provinceSelect) return; // Guard clause
+        var province = provinceSelect.value;
+        var cities_data_json = JSON.parse('{{ cities_data | tojson | safe }}'); // Use safe filter
+        var citySelect = document.getElementById('citySelect');
+        var selectedCityFromServer = "{{ selected_city }}";
 
-            citySelect.innerHTML = '<option value="">选择城市</option>';
+        citySelect.innerHTML = '<option value="">选择城市</option>';
 
-            if (province && cities_data_json[province]) {
-                cities_data_json[province].forEach(function(city) {
-                    var option = document.createElement('option');
-                    option.value = city;
-                    option.textContent = city;
-                    if (city === selectedCityFromServer) {
-                        option.selected = true;
-                    }
-                    citySelect.appendChild(option);
-                });
-            }
+        if (province && cities_data_json[province]) {
+            cities_data_json[province].forEach(function(city) {
+                var option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                if (city === selectedCityFromServer) {
+                    option.selected = true;
+                }
+                citySelect.appendChild(option);
+            });
         }
+    }
 
-        // 初始加载时，更新城市下拉框
-        window.addEventListener('load', function() {
-            updateCities();
-            // Ensure region-button related script is also robust
-            const regionButton = document.getElementById('region-button');
-            if (regionButton) {
-                regionButton.addEventListener('click', function() {
-                    const dropdown = document.getElementById('region-dropdown');
-                    if (dropdown) {
-                        dropdown.classList.toggle('hidden');
-                    }
-                });
-            }
-        });
-    </script>
+    // 初始加载时，更新城市下拉框
+    window.addEventListener('load', function() {
+        updateCities();
+        // Ensure region-button related script is also robust
+        const regionButton = document.getElementById('region-button');
+        if (regionButton) {
+            regionButton.addEventListener('click', function() {
+                const dropdown = document.getElementById('region-dropdown');
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                }
+            });
+        }
+    });
+</script>
 </body>
 
 </html>
+
 
