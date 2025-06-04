@@ -1,5 +1,5 @@
 from flask import render_template, request, jsonify, session, flash, redirect, url_for, current_app, g
-from datetime import datetime
+from datetime import datetime, timedelta
 from models import RepairRequestModel, HouseStatusModel, db
 
 def create_repair_request_logic():
@@ -17,7 +17,8 @@ def create_repair_request_logic():
             house_id=house_id,
             tenant_username=getattr(g, 'username', None),
             landlord_username=house_status.landlord_name,
-            content=content
+            content=content,
+            request_time = datetime.utcnow() + timedelta(hours=8),
         )
         db.session.add(repair_request)
         db.session.commit()
