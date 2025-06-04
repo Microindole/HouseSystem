@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error sending message:', error);
             finalizeAssistantMessage();
             if(currentAssistantMessageElement) currentAssistantMessageElement.remove();
-            addMessageToUI('发送消息时出错，请检查网络连接或联系管理员。', 'system');
+            addMessageToUI('发送消息时若出错，请检查网络连接或联系管理员。', 'system');
         } finally {
             if (aiChatTypingIndicator) aiChatTypingIndicator.style.display = 'none';
             chatInput.disabled = false;

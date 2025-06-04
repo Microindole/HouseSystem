@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}发布房源{% endblock %}
 {% block head %}
-    {# 确保 message-toast.js 先加载 #}
-    <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
+    {# 和base.html重复了所以注释 #}
+{#    <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>#}
     <style>
         .form-container {
             max-width: 800px;
@@ -146,40 +146,7 @@
         </form>
     </div>
 
-    {# 引入共享JS文件 #}
-    <script src="{{ url_for('static', filename='js/house/house_form_common.js') }}"></script>
-    <script>
-        // 将后端传递的JSON数据转换为JavaScript对象
-        const pcaData = {{ pca_data | tojson | safe }};
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('addHouseForm');
-            const provinceSelect = document.getElementById('province');
-            const citySelect = document.getElementById('city');
-            const districtSelect = document.getElementById('district');
-
-            if (provinceSelect) {
-                provinceSelect.addEventListener('change', function() {
-                    // 调用共享函数
-                    updateCities(pcaData, provinceSelect, citySelect, districtSelect);
-                });
-            }
-
-            if (citySelect) {
-                citySelect.addEventListener('change', function() {
-                    // 调用共享函数
-                    updateDistricts(pcaData, provinceSelect, citySelect, districtSelect);
-                });
-            }
-
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    // 调用共享验证函数
-                    if (!validateHouseForm(this)) { // 'this' is the form element
-                        e.preventDefault();
-                    }
-                });
-            }
-        });
-    </script>
+<script>window.pcaDataFromServer = {{ pca_data | tojson | safe }};</script>
+<script src="{{ url_for('static', filename='js/house/custom_region_linkage.js') }}"></script>
 {% endblock %}

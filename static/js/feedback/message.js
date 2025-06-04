@@ -38,18 +38,35 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeTenantUsername = null; // 将在 loadChat 中被设置
     let activeLandlordUsername = null; // 将在 loadChat 中被设置
     let activeHouseInfo = null;
+function formatTimestamp(timestamp) {
+    if (!timestamp) return '时间未知';
+    try {
+        let date;
 
-    function formatTimestamp(isoTimestamp) {
-        if (!isoTimestamp) return '时间未知';
-        try {
-            const date = new Date(isoTimestamp);
-            if (isNaN(date.getTime())) return '无效时间';
-            return date.toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-        } catch (e) {
-            console.error("Error formatting timestamp:", e);
-            return '时间错误';
+        // 如果是 ISO 且末尾是 Z，表示 UTC，需手动偏移
+        if (timestamp.includes('T') && timestamp.endsWith('Z')) {
+            date = new Date(timestamp);
+            // 手动加8小时（东八区）
+            date = new Date(date.getTime() - 8 * 60 * 60 * 1000);
+        } else {
+            // 本地格式，直接解析
+            date = new Date(timestamp.replace(/-/g, '/'));
         }
+
+        if (isNaN(date.getTime())) return '无效时间';
+
+        return date.toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (e) {
+        return '时间错误';
     }
+}
+
 
     function scrollToBottom(container) {
         if (container) {
