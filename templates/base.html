@@ -84,23 +84,7 @@
             <li><a href="{{ url_for('contract.view_contracts') }}">📄 租赁合同</a></li>
             <li><a href="{{ url_for('house.view_appointments') }}">📅 我的预约</a></li>
             <li><a href="{{ url_for('house.manage_repair_requests') }}">🔧 维修请求</a></li>
-        {% elif g.user_type == 2 %}
-            <!-- 房东专用菜单 -->
-            <li><a href="{{ url_for('house.add_house') }}">➕ 发布房源</a></li>
-            <li><a href="{{ url_for('house.add_news') }}">📰 发布新闻</a></li>
-            <li><a href="{{ url_for('house.manage_news') }}">📝 管理新闻</a></li>
-            <li><a href="{{ url_for('contract.view_contracts') }}">📄 租赁合同</a></li>
-            <li><a href="{{ url_for('house.view_appointments') }}">📅 预约管理</a></li>
-            <li><a href="{{ url_for('house.manage_repair_requests') }}">🔧 维修管理</a></li>
-        {% elif g.user_type == 0 %}
-            <!-- 管理员专用菜单 -->
-            <li><a href="{{ url_for('account.manage_users') }}">👥 用户管理</a></li>
-            <li><a href="{{ url_for('account.audit_list') }}">✅ 房源审核</a></li>
-            <li><a href="/account/admin/system_setting">⚙️ 系统设置</a></li>
-            <li><a href="{{ url_for('feedback.manage_complaints') }}">⚖️ 投诉管理</a></li>
-        {% endif %}
-        <!-- 公共底部菜单 -->
-        <li>
+            <li>
             <a href="{{ url_for('feedback.complaint') }}">
                 📢 投诉反馈
                 {% if unread_complaint_updates and unread_complaint_updates > 0 %}
@@ -110,6 +94,33 @@
                 {% endif %}
             </a>
         </li>
+        {% elif g.user_type == 2 %}
+            <!-- 房东专用菜单 -->
+            <li><a href="{{ url_for('house.add_house') }}">➕ 发布房源</a></li>
+            <li><a href="{{ url_for('house.add_news') }}">📰 发布新闻</a></li>
+            <li><a href="{{ url_for('house.manage_news') }}">📝 管理新闻</a></li>
+            <li><a href="{{ url_for('contract.view_contracts') }}">📄 租赁合同</a></li>
+            <li><a href="{{ url_for('house.view_appointments') }}">📅 预约管理</a></li>
+            <li><a href="{{ url_for('house.manage_repair_requests') }}">🔧 维修管理</a></li>
+            <li>
+            <a href="{{ url_for('feedback.complaint') }}">
+                📢 投诉反馈
+                {% if unread_complaint_updates and unread_complaint_updates > 0 %}
+                    <span class="unread-badge" style="background:#ff9800;color:#fff;border-radius:10px;padding:2px 6px;font-size:12px;margin-left:6px;">
+                    {{ unread_complaint_updates }}
+                </span>
+                {% endif %}
+            </a>
+        </li>
+        {% elif g.user_type == 0 %}
+            <!-- 管理员专用菜单 -->
+            <li><a href="{{ url_for('account.manage_users') }}">👥 用户管理</a></li>
+            <li><a href="{{ url_for('account.audit_list') }}">✅ 房源审核</a></li>
+            <li><a href="/account/admin/system_setting">⚙️ 系统设置</a></li>
+            <li><a href="{{ url_for('feedback.manage_complaints') }}">⚖️ 投诉管理</a></li>
+        {% endif %}
+        <!-- 公共底部菜单 -->
+
         <li><a href="{{ url_for('account.logout') }}">🚪 退出登录</a></li>
     </ul>
 </div>
