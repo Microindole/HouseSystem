@@ -31,6 +31,8 @@ def login_required(f):
 
 
 #展示交易历史（房东、租客都能看）
+
+
 @contract_bp.route('/history')
 @login_required
 def view_contracts():
@@ -64,17 +66,22 @@ def view_contracts():
         if contract_info and contract_info.tenant_signature_identifier:
             contract_agreed = True
 
+        def add_8_hours(dt):
+            if dt:
+                return dt + timedelta(hours=8)
+            return None
+
         contract_list.append({
             'house_name': house.house_name if house else '未知',
             'addr': house.addr if house else '未知',
             'landlord': contract.landlord_username,
             'tenant': contract.tenant_username,
             'amount': float(contract.total_amount),
-            'start_time': contract.start_date,
-            'end_time': contract.end_date,
+             'start_time': add_8_hours(contract.start_date),
+            'end_time': add_8_hours(contract.end_date),
             'status': contract.status,
             'contract_id': contract.id,
-            'created_at': contract.created_at,
+            'created_at': add_8_hours(contract.created_at),
             'house_id': channel.house_id if channel else None,
             'house_status': house_status_obj.status if house_status_obj else None,
             'contract_agreed': contract_agreed,  # 是否已同意合同
