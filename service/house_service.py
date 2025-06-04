@@ -8,7 +8,7 @@ from flask import Response, g
 from models import HouseStatusModel, db
 from flask import render_template, request, jsonify, redirect, url_for, abort, flash, current_app, Response, g
 from werkzeug.utils import secure_filename
-from sqlalchemy import or_, text
+from sqlalchemy import or_, text, and_
 from models import (HouseInfoModel, HouseStatusModel, CommentModel, NewsModel,
                    TenantModel, LandlordModel, AppointmentModel, RepairRequestModel)
 from service.logging import log_operation
@@ -23,6 +23,7 @@ def get_cities_data():
     with open('static/json/cities.json', 'r', encoding='utf-8') as f:
         return json.load(f)
 
+
 def get_house_list():
     try:
         region = request.args.get('region', '').strip()
@@ -34,10 +35,12 @@ def get_house_list():
         max_price = request.args.get('max_price', None, type=float)
         selected_region = region or ''
         selected_city = city or ''
+
         query = db.session.query(HouseInfoModel).join(
             HouseStatusModel,
             HouseInfoModel.house_id == HouseStatusModel.house_id
         ).filter(HouseStatusModel.status == 0)
+
         if address:
             query = query.filter(
                 or_(
@@ -45,10 +48,14 @@ def get_house_list():
                     HouseInfoModel.region.like(f"%{address}%")
                 )
             )
-        if selected_region:
-            query = query.filter(HouseInfoModel.region.like(f"%{selected_region}%"))
-        if selected_city:
-            query = query.filter(HouseInfoModel.region.like(f"%{selected_city}%"))
+
+        if region:
+            # 用 region 开头匹配，确保只包含该地区
+            query = query.filter(HouseInfoModel.region.like(f"{region}%"))
+        elif city:
+            query = query.filter(HouseInfoModel.region.like(f"{city}%"))
+
+        # 关键词过滤，不再重复地区条件
         if keyword:
             query = query.filter(
                 or_(
@@ -57,6 +64,7 @@ def get_house_list():
                     HouseInfoModel.highlight.like(f"%{keyword}%")
                 )
             )
+
         if rooms == '4室及以上':
             query = query.filter(
                 or_(
@@ -71,20 +79,28 @@ def get_house_list():
             )
         elif rooms:
             query = query.filter(HouseInfoModel.rooms.like(f"%{rooms}%"))
+
         if min_price is not None:
             query = query.filter(HouseInfoModel.price >= min_price)
         if max_price is not None:
             query = query.filter(HouseInfoModel.price <= max_price)
+
         query = query.order_by(HouseStatusModel.update_time.desc())
+
         page = request.args.get('page', 1, type=int)
         per_page = 9
+
         pagination = query.paginate(
             page=page,
             per_page=per_page,
             error_out=False
         )
+
         houses = pagination.items
+        total_count = pagination.total  # 查询到的房屋总数
+
         news_list = NewsModel.query.order_by(NewsModel.time.desc()).limit(10).all()
+
         filters = {
             'region': selected_region,
             'city': selected_city,
@@ -94,7 +110,9 @@ def get_house_list():
             'max_price': max_price,
             'address': address or ''
         }
+
         cities_data = get_cities_data()
+
         return render_template(
             'house/house_list.html',
             houses=houses,
@@ -103,13 +121,17 @@ def get_house_list():
             selected_region=selected_region,
             selected_city=selected_city,
             pagination=pagination,
-            filters=filters
+            filters=filters,
+            total_count=total_count  # 新增传递
         )
+
     except Exception as e:
         current_app.logger.error(f"房源列表页面错误: {str(e)}")
         import traceback
         traceback.print_exc()
+
         cities_data = get_cities_data()
+
         return render_template(
             'house/house_list.html',
             houses=[],
@@ -126,8 +148,10 @@ def get_house_list():
                 'min_price': None,
                 'max_price': None,
                 'address': ''
-            }
+            },
+            total_count=0  # 异常时显示为0
         )
+
 
 def get_house_detail(house_id):
     """获取房源详情并记录租客浏览历史"""

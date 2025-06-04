@@ -106,7 +106,9 @@
 
     <!-- 房源列表 -->
     <div class="house-list-section">
+    <div class="house-list-header">
         <h2>房源列表</h2>
+     <span class="total-count">共搜索到 {{ total_count }} 套房源</span></div>
         {% if houses %}
             {% for house in houses %}
             <div class="house-card">
