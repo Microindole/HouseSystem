@@ -5,9 +5,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/order/history.css') }}">
     <style>
         .navbar {
-            height: 130px !important; /* 设置高度并使用 !important 确保样式生效 */
+            height: 130px !important;
         }
-        a,a:hover,.ch-action-button,.ch-action-button:hover{text-decoration:none}.ch-col-house-info-header,.ch-col-house-info{flex-basis:25%}.ch-col-amount-header,.ch-col-amount{flex-basis:10%}.ch-col-parties-header,.ch-col-parties{flex-basis:18%}.ch-col-contract-header,.ch-col-contract{flex-basis:15%;text-align:center}.ch-col-time-header,.ch-col-time{flex-basis:17%}.ch-col-status-actions-header,.ch-col-status-actions{flex-basis:15%;text-align:center}.ch-status-badge{display:inline-block;padding:6px 12px;border-radius:20px;font-size:.85em;font-weight:600;text-align:center;min-width:80px;margin-bottom:8px;box-shadow:0 2px 4px rgba(0,0,0,.1);transition:all .3s ease}.status-0{background:linear-gradient(135deg,#4A90E2,#357ABD);color:white;border:1px solid #357ABD}.status-1{background:linear-gradient(135deg,#FF9500,#E6850E);color:white;border:1px solid #E6850E;animation:pulse-orange 2s infinite}@keyframes pulse-orange{0%{box-shadow:0 2px 4px rgba(0,0,0,.1),0 0 0 0 rgba(255,149,0,.7)}70%{box-shadow:0 2px 4px rgba(0,0,0,.1),0 0 0 10px rgba(255,149,0,0)}100%{box-shadow:0 2px 4px rgba(0,0,0,.1),0 0 0 0 rgba(255,149,0,0)}}.status-2{background:linear-gradient(135deg,#95A5A6,#7F8C8D);color:white;border:1px solid #7F8C8D}.status-3{background:linear-gradient(135deg,#E74C3C,#C0392B);color:white;border:1px solid #C0392B}.status-4{background:linear-gradient(135deg,#27AE60,#219A52);color:white;border:1px solid #219A52;position:relative;overflow:hidden;padding-left:24px}.status-4::before{content:'✓';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-weight:bold;font-size:1em}.status-5{background:linear-gradient(135deg,#D35400,#BA4A00);color:white;border:1px solid #BA4A00}.status-6{background:linear-gradient(135deg,#8E44AD,#7D3C98);color:white;border:1px solid #7D3C98}.ch-status-badge:hover{transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,.15)}.ch-action-button{display:inline-block;padding:8px 16px;margin:3px 2px;border-radius:6px;cursor:pointer;font-weight:500;font-size:.9em;text-align:center;border:none;transition:all .3s ease;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,.1)}.ch-button-green{background:linear-gradient(135deg,#28a745,#20812C);color:white;border:1px solid #20812C}.ch-button-green:hover{background:linear-gradient(135deg,#20812C,#1e7e34);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(40,167,69,.3)}.ch-button-blue{background:linear-gradient(135deg,#007bff,#0056b3);color:white;border:1px solid #0056b3}.ch-button-blue:hover{background:linear-gradient(135deg,#0056b3,#004085);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,123,255,.3)}.ch-button-purple{background:linear-gradient(135deg,#6f42c1,#5a3096);color:white;border:1px solid #5a3096;border-radius:6px}.ch-button-purple:hover{background:linear-gradient(135deg,#5a3096,#4e277c);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(111,66,193,.3)}.ch-button-orange{background:linear-gradient(135deg,#fd7e14,#dc6502);color:white;border:1px solid #dc6502}.ch-button-orange:hover{background:linear-gradient(135deg,#dc6502,#c65d00);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(253,126,20,.3)}.ch-button-red{background:linear-gradient(135deg,#dc3545,#bd2130);color:white;border:1px solid #bd2130}.ch-button-red:hover{background:linear-gradient(135deg,#bd2130,#a71e2a);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(220,53,69,.3)}.ch-button-teal{background:linear-gradient(135deg,#20c997,#17a2b8);color:white;border:1px solid #17a2b8}.ch-button-teal:hover{background:linear-gradient(135deg,#17a2b8,#138496);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(32,201,151,.3)}.ch-col-contract .ch-action-button{margin-bottom:5px;width:60%;max-width:120px}.ch-no-contract-text{color:#888;font-size:.9em}.ch-pay-button-disabled-tooltip{cursor:not-allowed;position:relative;opacity:.6}.ch-pay-button-disabled-tooltip::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background-color:#333;color:white;padding:8px 12px;border-radius:6px;font-size:.8em;white-space:nowrap;opacity:0;visibility:hidden;transition:all .3s ease;margin-bottom:8px;box-shadow:0 4px 8px rgba(0,0,0,.2)}.ch-pay-button-disabled-tooltip:hover::after{opacity:1;visibility:visible}@media (max-width:768px){.ch-status-badge{font-size:.8em;padding:4px 8px;min-width:70px}.ch-action-button{padding:6px 12px;font-size:.85em}}
+        a,a:hover,.ch-action-button,.ch-action-button:hover{text-decoration:none}.ch-col-house-info-header,.ch-col-house-info{flex-basis:25%}.ch-col-amount-header,.ch-col-amount{flex-basis:10%}.ch-col-parties-header,.ch-col-parties{flex-basis:18%}.ch-col-contract-header,.ch-col-contract{flex-basis:15%;text-align:center}.ch-col-time-header,.ch-col-time{flex-basis:17%}.ch-col-status-actions-header,.ch-col-status-actions{flex-basis:15%;text-align:center}.ch-status-badge{display:inline-block;padding:6px 12px;border-radius:20px;font-size:.85em;font-weight:600;text-align:center;min-width:80px;margin-bottom:8px;box-shadow:0 2px 4px rgba(0,0,0,.1);transition:all .3s ease}.status-0{background:linear-gradient(135deg,#4A90E2,#357ABD);color:white;border:1px solid #357ABD}.status-1{background:linear-gradient(135deg,#FF9500,#E6850E);color:white;border:1px solid #E6850E;animation:pulse-orange 2s infinite}@keyframes pulse-orange{0%{box-shadow:0 2px 4px rgba(0,0,0,.1),0 0 0 0 rgba(255,149,0,.7)}70%{box-shadow:0 2px 4px rgba(0,0,0,.1),0 0 0 10px rgba(255,149,0,0)}100%{box-shadow:0 2px 4px rgba(0,0,0,.1),0 0 0 0 rgba(255,149,0,0)}}.status-2{background:linear-gradient(135deg,#95A5A6,#7F8C8D);color:white;border:1px solid #7F8C8D}.status-3{background:linear-gradient(135deg,#E74C3C,#C0392B);color:white;border:1px solid #C0392B}.status-4{background:linear-gradient(135deg,#27AE60,#219A52);color:white;border:1px solid #219A52;position:relative;overflow:hidden;padding-left:24px}.status-4::before{content:'✓';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-weight:bold;font-size:1em}.status-5{background:linear-gradient(135deg,#D35400,#BA4A00);color:white;border:1px solid #BA4A00}.status-6{background:linear-gradient(135deg,#8E44AD,#7D3C98);color:white;border:1px solid #7D3C98}.ch-status-badge:hover{transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,.15)}.ch-action-button{display:inline-block;padding:8px 16px;margin:3px 2px;border-radius:6px;cursor:pointer;font-weight:500;font-size:.9em;text-align:center;border:none;transition:all .3s ease;white-space:nowrap;box-shadow:0 2px 4px rgba(0,0,0,.1)}.ch-button-green{background:linear-gradient(135deg,#28a745,#20812C);color:white;border:1px solid #20812C}.ch-button-green:hover{background:linear-gradient(135deg,#20812C,#1e7e34);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(40,167,69,.3)}.ch-button-blue{background:linear-gradient(135deg,#007bff,#0056b3);color:white;border:1px solid #0056b3}.ch-button-blue:hover{background:linear-gradient(135deg,#0056b3,#004085);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,123,255,.3)}.ch-button-purple{background:linear-gradient(135deg,#6f42c1,#5a3096);color:white;border:1px solid #5a3096;border-radius:6px}.ch-button-purple:hover{background:linear-gradient(135deg,#5a3096,#4e277c);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(111,66,193,.3)}.ch-button-orange{background:linear-gradient(135deg,#fd7e14,#dc6502);color:white;border:1px solid #dc6502}.ch-button-orange:hover{background:linear-gradient(135deg,#dc6502,#c65d00);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(253,126,20,.3)}.ch-button-red{background:linear-gradient(135deg,#dc3545,#bd2130);color:white;border:1px solid #bd2130}.ch-button-red:hover{background:linear-gradient(135deg,#bd2130,#a71e2a);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(220,53,69,.3)}.ch-button-teal{background:linear-gradient(135deg,#20c997,#17a2b8);color:white;border:1px solid #17a2b8}.ch-button-teal:hover{background:linear-gradient(135deg,#17a2b8,#138496);color:white;transform:translateY(-1px);box-shadow:0 4px 8px rgba(32,201,151,.3)}.ch-col-contract .ch-action-button{margin-bottom:5px;width:60%;max-width:120px}.ch-no-contract-text{color:#888;font-size:.9em}.ch-pay-button-disabled-tooltip{cursor:not-allowed;position:relative;opacity:.6}.ch-pay-button-disabled-tooltip::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background-color:#333;color:white;padding:8px 12px;border-radius:6px;font-size:.8em;white-space:nowrap;opacity:0;visibility:hidden;transition:all .3s ease;margin-bottom:8px;box-shadow:0 4px 8px rgba(0,0,0,.2)}.ch-pay-button-disabled-tooltip:hover::after{opacity:1;visibility:visible}
+        /* 房屋名称链接样式 */
+        .ch-house-link{color:#007bff;text-decoration:none;transition:all .3s ease;border-radius:4px;padding:2px 4px;display:inline-block}.ch-house-link:hover{color:#0056b3;text-decoration:underline;background-color:rgba(0,123,255,.1);transform:translateX(2px)}
+        @media (max-width:768px){.ch-status-badge{font-size:.8em;padding:4px 8px;min-width:70px}.ch-action-button{padding:6px 12px;font-size:.85em}}
     </style>
 
 {% endblock %}
@@ -15,7 +18,6 @@
 {% block body %}
     <div class="ch-container">
         <h2 class="ch-title">交易历史</h2>
-
         <div class="ch-header-row">
             <div class="ch-col ch-col-house-info-header">房屋信息</div>
             <div class="ch-col ch-col-amount-header">金额</div>
@@ -24,32 +26,30 @@
             <div class="ch-col ch-col-time-header">时间</div>
             <div class="ch-col ch-col-status-actions-header">状态与操作</div>
         </div>
-
         <div class="ch-contract-list">
             {% for c in contracts %}
                 <div class="ch-contract-card {% if loop.first %}ch-card-first{% elif loop.last %}ch-card-last{% endif %}"
                      data-end-time="{{ c.end_time.strftime('%Y-%m-%d %H:%M:%S') if c.end_time else '' }}"
                      data-contract-agreed="{{ c.contract_agreed | default('false') | lower }}">
-
                     <div class="ch-card-inner-layout">
-
                         <div class="ch-col ch-col-house-info">
                             <div class="ch-text-details">
-                                <p class="ch-house-name ch-truncate" title="{{ c.house_name }}">{{ c.house_name }}</p>
+                                <p class="ch-house-name ch-truncate">
+                                    <a href="{{ url_for('house.house_detail', house_id=c.house_id) }}" 
+                                       class="ch-house-link" 
+                                       title="点击查看房屋详情: {{ c.house_name }}">{{ c.house_name }}</a>
+                                </p>
                                 <p class="ch-house-addr ch-truncate" title="{{ c.addr }}">{{ c.addr }}</p>
                             </div>
                         </div>
-
                         <div class="ch-col ch-col-amount">
                             <span class="ch-mobile-label">金额:</span>
                             <span class="ch-amount-value">¥ {{ c.amount }}</span>
                         </div>
-
                         <div class="ch-col ch-col-parties">
                             <p class="ch-truncate" title="{{ c.landlord }}"><span class="ch-field-label">房东:</span> {{ c.landlord }}</p>
                             <p class="ch-truncate" title="{{ c.tenant }}"><span class="ch-field-label">租客:</span> {{ c.tenant }}</p>
                         </div>
-
                         <div class="ch-col ch-col-contract">
                             {% if c.contract_document_url %}
                                 {% if current_user == c.landlord %}
@@ -73,22 +73,18 @@
                                 {% endif %}
                             {% endif %}
                         </div>
-
                         <div class="ch-col ch-col-time">
                             <p class="ch-truncate"><span class="ch-field-label">创建:</span> {{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
                             {% if c.end_time %}
                                 <p class="ch-truncate"><span class="ch-field-label">到期:</span> {{ c.end_time.strftime('%Y-%m-%d') }}</p>
                             {% endif %}
                         </div>
-
                         <div class="ch-col ch-col-status-actions">
                             <span class="ch-status-badge status-{{c.status}}">
                                 {% if c.status == 0 %}进行中{% elif c.status == 1 %}已签署{% elif c.status == 2 %}已取消{% elif c.status == 3 %}已撤销{% elif c.status == 4 %}合同生效{% elif c.status == 5 %}已到期{% elif c.status == 6 %}已终止{% else %}未知状态{% endif %}
                             </span>
-
                             <span class="ch-expire-tip" data-house-status="{{ c.house_status }}" style="display:none;">该合同已到期！</span>
                             <span class="ch-returned-tip" data-house-status="{{ c.house_status }}" style="display:none;">该合同已归还</span>
-
                             <div class="ch-action-buttons">
                                 {% if current_user == c.landlord and c.status == 0 %}
                                     <form method="POST" action="{{ url_for('contract.cancel_contract', contract_id=c.contract_id) }}" id="cancel-form-{{ c.contract_id }}">
@@ -130,7 +126,6 @@
                 </div>
             {% endfor %}
         </div>
-
         {% if total_pages > 1 %}
             <div class="ch-pagination">
                 {% if page > 1 %}
@@ -142,21 +137,17 @@
                         &laquo; <span class="ch-page-prevnext-text">上一页</span>
                     </span>
                 {% endif %}
-
                 {% set page_window_sm = 2 %}
                 {% set page_window_xs = 1 %}
                 {% set effective_page_window = page_window_sm %}
-
                 {% set start_page = page - effective_page_window if (page - effective_page_window) > 0 else 1 %}
                 {% set end_page = page + effective_page_window if (page + effective_page_window) < total_pages else total_pages %}
-
                 {% if start_page > 1 %}
                     <a href="{{ url_for('contract.view_contracts', page=1) }}" class="ch-page-item ch-page-number-desktop">1</a>
                     {% if start_page > 2 %}
                         <span class="ch-page-item ch-page-item-disabled ch-page-number-desktop">...</span>
                     {% endif %}
                 {% endif %}
-
                 {% for p in range(start_page, end_page + 1) %}
                     {% if p == page %}
                         <span class="ch-page-item ch-page-item-active">{{ p }}</span>
@@ -164,14 +155,12 @@
                         <a href="{{ url_for('contract.view_contracts', page=p) }}" class="ch-page-item">{{ p }}</a>
                     {% endif %}
                 {% endfor %}
-
                 {% if end_page < total_pages %}
                     {% if end_page < total_pages - 1 %}
                         <span class="ch-page-item ch-page-item-disabled ch-page-number-desktop">...</span>
                     {% endif %}
                     <a href="{{ url_for('contract.view_contracts', page=total_pages) }}" class="ch-page-item ch-page-number-desktop">{{ total_pages }}</a>
                 {% endif %}
-
                 {% if page < total_pages %}
                     <a href="{{ url_for('contract.view_contracts', page=page+1) }}" class="ch-page-item ch-page-prevnext">
                         <span class="ch-page-prevnext-text">下一页</span> &raquo;
@@ -184,20 +173,26 @@
             </div>
         {% endif %}
     </div>
-
     <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 为房屋链接添加点击提示
+            document.querySelectorAll('.ch-house-link').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    if (window.messageToast) {
+                        window.messageToast.info('正在跳转到房屋详情...', 1500);
+                    }
+                });
+            });
+            
             document.querySelectorAll('.ch-contract-card').forEach(function(card) {
                 var endTimeStr = card.getAttribute('data-end-time');
                 var expireTipElement = card.querySelector('.ch-expire-tip');
                 var houseStatus = expireTipElement ? expireTipElement.getAttribute('data-house-status') : null;
-
                 if (endTimeStr && houseStatus) {
                     var endDate = new Date(endTimeStr.split(' ')[0]);
                     endDate.setDate(endDate.getDate() + 1);
                     var now = new Date();
-
                     if (now >= endDate) {
                         if (houseStatus == "1") {
                             if (expireTipElement) expireTipElement.style.display = 'inline';
@@ -211,10 +206,8 @@
                         }
                     }
                 }
-
                 var contractAgreed = card.getAttribute('data-contract-agreed') === 'true';
                 var payButton = card.querySelector('.pay-button');
-
                 if (payButton) {
                     if (!contractAgreed) {
                         payButton.disabled = true;
@@ -223,23 +216,19 @@
                     }
                 }
             });
-
             const confirmButtons = document.querySelectorAll('.needs-custom-confirm');
             confirmButtons.forEach(function(button) {
                 button.addEventListener('click', function() {
                     if (this.disabled) return;
-
                     const formId = this.dataset.formId;
                     let message = this.dataset.message;
                     const confirmType = this.dataset.confirmType || 'warning';
                     const confirmTitle = this.dataset.confirmTitle || '请确认';
                     const form = document.getElementById(formId);
-
                     // 将HTML实体转换为换行符
                     if (message) {
                         message = message.replace(/&#10;/g, '\n');
                     }
-
                     if (form && typeof window.showConfirm === 'function') {
                         window.showConfirm(message, { type: confirmType, title: confirmTitle })
                             .then(function(confirmed) {
