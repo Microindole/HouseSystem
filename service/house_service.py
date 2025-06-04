@@ -1,17 +1,16 @@
 import csv
+import json  # 添加这个导入
+import os    # 也需要添加这个导入
+import uuid  # 添加这个导入
 from io import StringIO
 from datetime import datetime
 from flask import Response, g
-from models import HouseStatusModel
-
-import os
-import json
-import uuid
+from models import HouseStatusModel, db
 from flask import render_template, request, jsonify, redirect, url_for, abort, flash, current_app, Response, g
 from werkzeug.utils import secure_filename
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from models import (HouseInfoModel, HouseStatusModel, CommentModel, NewsModel,
-                   TenantModel, LandlordModel, AppointmentModel, RepairRequestModel, db, HouseListingAuditModel)
+                   TenantModel, LandlordModel, AppointmentModel, RepairRequestModel)
 from service.logging import log_operation
 # 新增导入 OSS 服务
 from service.oss_service import get_oss_client, delete_oss_object
@@ -131,6 +130,7 @@ def get_house_list():
         )
 
 def get_house_detail(house_id):
+    """获取房源详情并记录租客浏览历史"""
     house = HouseInfoModel.query.get(house_id)
     if not house:
         flash('房源不存在', 'error')
@@ -176,6 +176,20 @@ def get_house_detail(house_id):
                 comment_data['at_username'] = at_comment.username
                 comment_data['at_desc'] = at_comment.desc
         enriched_comments.append(comment_data)
+    
+    # 记录租客浏览行为
+    user_type = getattr(g, 'user_type', None)
+    username = getattr(g, 'username', None)
+    
+    if user_type == 1 and username:  # 只记录租客浏览
+        try:
+            db.session.execute(text("CALL RecordTenantBrowse(:username, :house_id)"), 
+                             {'username': username, 'house_id': house_id})
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(f"记录浏览历史失败: {str(e)}")
+            db.session.rollback()
+    
     current_app.logger.info(f"房源详情: house_id={house_id}, house_name={house.house_name}, status={status.status}")
     return render_template(
         'house/house_detail.html',
@@ -526,4 +540,30 @@ def api_house_search_logic():
             'success': False,
             'message': f'搜索失败：{str(e)}'
         }), 500
+
+def get_tenant_browse_history(username, limit=20):
+    """获取租客浏览历史"""
+    try:
+        result = db.session.execute(
+            text("CALL GetTenantBrowseHistory(:username, :limit)"),
+            {'username': username, 'limit': limit}
+        )
+        browse_list = result.fetchall()
+        return browse_list
+    except Exception as e:
+        current_app.logger.error(f"获取浏览历史失败: {str(e)}")
+        return []
+
+def get_popular_houses_data(limit=10):
+    """获取热门房源数据"""
+    try:
+        result = db.session.execute(
+            text("CALL GetPopularHouses(:limit)"),
+            {'limit': limit}
+        )
+        popular_houses = result.fetchall()
+        return popular_houses
+    except Exception as e:
+        current_app.logger.error(f"获取热门房源失败: {str(e)}")
+        return []
 

@@ -81,6 +81,8 @@
         {% if g.user_type == 1 %}
             <!-- 租客专用菜单 -->
             <li><a href="{{ url_for('house.house_list') }}">🔍 浏览房源</a></li>
+            <li><a href="{{ url_for('house.browse_history') }}">📖 浏览历史</a></li>
+            <li><a href="{{ url_for('house.popular_houses') }}">🔥 热门房源</a></li>
             <li><a href="{{ url_for('contract.view_contracts') }}">📄 租赁合同</a></li>
             <li><a href="{{ url_for('house.view_appointments') }}">📅 我的预约</a></li>
             <li><a href="{{ url_for('house.manage_repair_requests') }}">🔧 维修请求</a></li>
@@ -125,7 +127,7 @@
     </ul>
 </div>
 
-<!-- 主要内容区域 - 子模板内容会渲染到这里 -->
+<!-- 主要内容区域 -  子模板内容会渲染到这里 -->
 <div class="container">
     {% block body %}{% endblock %}
 </div>
@@ -165,7 +167,7 @@
 <div class="footer animated-footer">
     <p>© 2025 智能房屋租赁系统. 本项目仅用于学习与演示目的.</p>
 </div>
-
+<script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
 <!-- 只有登录用户才加载AI聊天相关的JavaScript -->
 {% if g.username %}
     <script src="{{ url_for('static', filename='js/ai.js') }}" defer></script>

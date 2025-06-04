@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}热门房源{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+.popular-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.popular-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 30px 0;
+}
+
+.popular-header h2 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.popular-header p {
+    color: #666;
+    font-size: 16px;
+}
+
+.popular-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.popular-card {
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+    position: relative;
+}
+
+.popular-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.popular-rank {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #ff6b6b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.popular-content {
+    padding: 20px;
+}
+
+.popular-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+.popular-location {
+    color: #666;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.popular-price {
+    color: #e74c3c;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 12px 0;
+}
+
+.popular-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat-item {
+    text-align: center;
+    flex: 1;
+}
+
+.stat-number {
+    font-weight: bold;
+    color: #3498db;
+    font-size: 16px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.popular-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.view-btn {
+    flex: 1;
+    padding: 10px;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.view-btn:hover {
+    transform: scale(1.02);
+    color: white;
+}
+
+.back-btn {
+    background: #95a5a6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-bottom: 20px;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.back-btn:hover {
+    background: #7f8c8d;
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 80px;
+    color: #ddd;
+    margin-bottom: 30px;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .popular-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .popular-header h2 {
+        font-size: 24px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="popular-container">
+    <a href="{{ url_for('house.browse_history') }}" class="back-btn">← 返回浏览历史</a>
+    
+    <div class="popular-header">
+        <h2>🔥 热门房源</h2>
+        <p>最受租客欢迎的房源推荐</p>
+    </div>
+    
+    {% if popular_list %}
+        <div class="popular-grid">
+            {% for house in popular_list %}
+            <div class="popular-card">
+                <div class="popular-rank">NO.{{ loop.index }}</div>
+                <img src="{{ house.image }}" alt="{{ house.house_name }}" class="popular-image"
+                     onerror="this.src='{{ url_for('static', filename='images/default-house.jpg') }}'">
+                <div class="popular-content">
+                    <div class="popular-title">{{ house.house_name }}</div>
+                    <div class="popular-location">
+                        <i>📍</i>
+                        <span>{{ house.region }}</span>
+                    </div>
+                    <div class="popular-location">
+                        <i>🏘️</i>
+                        <span>{{ house.addr }}</span>
+                    </div>
+                    <div class="popular-location">
+                        <i>🏠</i>
+                        <span>{{ house.rooms }}</span>
+                    </div>
+                    <div class="popular-price">¥{{ "%.0f"|format(house.price) }}/月</div>
+                    
+                    <div class="popular-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ house.total_views or 0 }}</div>
+                            <div class="stat-label">总浏览量</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ house.unique_visitors or 0 }}</div>
+                            <div class="stat-label">独立访客</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ house.status == 0 and '可租' or '已租' }}</div>
+                            <div class="stat-label">状态</div>
+                        </div>
+                    </div>
+                    
+                    <div class="popular-actions">
+                        <a href="{{ url_for('house.house_detail', house_id=house.house_id) }}" class="view-btn">
+                            查看详情
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i>🏠</i>
+            <h3>暂无热门房源数据</h3>
+            <p>还没有足够的浏览数据来生成热门房源排行</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
