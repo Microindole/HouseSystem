@@ -166,3 +166,54 @@ def news_detail(news_id):
 @house_bp.route('/news')
 def news_list():
     return news_list_logic()
+
+@house_bp.route('/browse-history')
+@login_required
+def browse_history():
+    """租客浏览历史页面"""
+    if g.user_type != 1:
+        flash('只有租客可以查看浏览记录', 'error')
+        return redirect(url_for('house.house_list'))
+    
+    try:
+        from service.house_service import get_tenant_browse_history
+        browse_list = get_tenant_browse_history(g.username, 20)
+        
+        return render_template('house/browse_history.html', 
+                             browse_list=browse_list)
+    except Exception as e:
+        flash(f'获取浏览记录失败：{str(e)}', 'error')
+        return redirect(url_for('house.house_list'))
+
+@house_bp.route('/popular')
+def popular_houses():
+    """热门房源页面"""
+    try:
+        from service.house_service import get_popular_houses_data
+        popular_list = get_popular_houses_data(15)
+        
+        return render_template('house/popular_houses.html', 
+                             popular_list=popular_list)
+    except Exception as e:
+        flash(f'获取热门房源失败：{str(e)}', 'error')
+        return redirect(url_for('house.house_list'))
+
+@house_bp.route('/clear-browse-history', methods=['POST'])
+@login_required
+def clear_browse_history():
+    """清空租客浏览历史"""
+    if g.user_type != 1:
+        return jsonify({'success': False, 'message': '只有租客可以执行此操作'})
+    
+    try:
+        from sqlalchemy import text
+        db.session.execute(
+            text("DELETE FROM browse_history WHERE tenant_username = :username"),
+            {'username': g.username}
+        )
+        db.session.commit()
+        return jsonify({'success': True, 'message': '浏览记录已清空'})
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"清空浏览历史失败: {str(e)}")
+        return jsonify({'success': False, 'message': '清空失败，请重试'})

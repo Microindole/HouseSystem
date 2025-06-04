@@ -55,7 +55,7 @@ body{background-color:#f4f4f9;font-family:'Arial',sans-serif;margin:0;padding:0}
 .filter-form input:focus,.filter-form select:focus{border-color:#3b82f6;background:white;box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
 .filter-form button{background:#10b981;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:all 0.2s;height:fit-content}
 .filter-form button:hover{background:#059669;transform:translateY(0px)}
-.house-list-section{margin-bottom:8px}
+.house-list-section{margin-bottom:8px};
 .house-list-section h2{font-size:28px;font-weight:700;color:#1e293b;margin-bottom:24px;display:flex;align-items:center;gap:12px}
 .house-list-section h2::before{content:"🏘️"}
 .house-card{background:white;padding:24px;border:1px solid #e2e8f0;transition:all 0.3s;animation:slideUp 0.6s ease-out;display:grid;grid-template-columns:280px 1fr auto;gap:24px;align-items:center}
@@ -86,3 +86,13 @@ body{background-color:#f4f4f9;font-family:'Arial',sans-serif;margin:0;padding:0}
 .read-more {color: #1a202c;text-decoration: none;font-size: 0.9rem;font-weight: 500;padding: 4px 12px;border: 1px solid #e2e8f0;border-radius: 6px;background-color: white;transition: all 0.3s ease;display: inline-block;}
 .read-more:hover {background-color: #1a202c;color: white;border-color: #1a202c;box-shadow: 0 2px 8px rgba(26, 32, 44, 0.2);}
 .read-more:active {transform: translateY(0);}
+.house-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.total-count {
+  font-size: 14px;
+  color: #666;
+}

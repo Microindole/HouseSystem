@@ -6,6 +6,7 @@
   grid-template-areas:
     "rent income"
     ". visit";
+     ". log";
   padding: 40px;
   background: #f9f9f9;
 }
@@ -87,3 +88,19 @@
   height: 300px;
   margin: 0 auto;
 }
+
+.log-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.log-item {
+  padding: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 14px;
+  color: #333;
+}
+

@@ -368,6 +368,7 @@ function formatCommentTimes() {
 function initMap(houseData) {
     const mapContainer = document.getElementById('map-container');
     if (!mapContainer || typeof BMapGL === 'undefined') return;
+    
     const map = new BMapGL.Map('map-container', {
         enableMapClick: true,
         displayOptions: {
@@ -376,9 +377,11 @@ function initMap(houseData) {
             indoor: false
         }
     });
+    
     map.setMapStyleV2({
-        styleId: '01e6259d6df0835e035b80a7ee838682' // 你的百度地图个性化样式ID
+        styleId: '01e6259d6df0835e035b80a7ee838682'
     });
+    
     map.addControl(new BMapGL.ScaleControl());
     map.addControl(new BMapGL.ZoomControl());
     map.enableScrollWheelZoom(true);
@@ -389,47 +392,33 @@ function initMap(houseData) {
     myGeo.getPoint(fullAddress, function(point) {
         if (point) {
             map.centerAndZoom(point, 17);
-
+            
             const marker = new BMapGL.Marker(point);
             map.addOverlay(marker);
-
-            const content = `
-                <div style="padding:12px;max-width:300px;">
-                    <h4 style="margin:0 0 8px 0;color:#1296db;font-size:16px;">${houseData.house_name}</h4>
-                    ${houseData.image ? `<img src="${houseData.image}" style="width:100%;max-height:120px;object-fit:cover;border-radius:4px;margin-bottom:8px;">` : ''}
-                    <p style="margin:0;font-size:14px;line-height:1.5;"><strong>地址：</strong>${houseData.addr}</p>
-                    <p style="margin:5px 0 0;color:#666;font-size:13px;line-height:1.5;"><strong>所在区域：</strong>${houseData.region}</p>
-                    <p style="margin:5px 0 0;color:#666;font-size:13px;line-height:1.5;"><strong>价格：</strong>${houseData.price}元/月</p>
-                    <div style="margin-top:10px;text-align:right;">
-                        <a href="https://map.baidu.com/search/${encodeURIComponent(houseData.region + ' ' + houseData.addr)}/?querytype=s&wd=${encodeURIComponent(houseData.region + ' ' + houseData.addr)}" 
-                        target="_blank" style="color:#1296db;text-decoration:none;font-size:13px;">在百度地图查看 &raquo;</a>
-                    </div>
-                </div>
-            `;
-
-            const infoWindow = new BMapGL.InfoWindow(content, {
-                title: "房源信息",
-                enableMessage: false
-            });
-
-            marker.openInfoWindow(infoWindow);
-            marker.addEventListener('click', function() {
-                this.openInfoWindow(infoWindow);
-            });
+            
+            // 初始化地图详情组件
+            if (typeof initMapDetailComponent === 'function') {
+                initMapDetailComponent(map, houseData, marker);
+            }
+            
         } else {
             handleMapError(map, houseData.region);
         }
     }, "全国");
 }
-// 处理地图错误
+
+// 修改 handleMapError 函数，同样移除信息窗口
 function handleMapError(map, region) {
     const myGeo = new BMapGL.Geocoder();
     myGeo.getPoint(region, function(regionPoint) {
         if (regionPoint) {
             map.centerAndZoom(regionPoint, 14);
+            
+            // 只添加标记点
             const regionMarker = new BMapGL.Marker(regionPoint);
             map.addOverlay(regionMarker);
 
+            // 显示错误提示（保留这个提示）
             document.getElementById('map-container').insertAdjacentHTML(
                 'beforeend',
                 '<div style="position:absolute;bottom:10px;left:10px;right:10px;background:rgba(255,255,255,0.9);padding:10px;border-radius:4px;text-align:center;color:#f56c6c;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,0.2);">无法精确定位房源地址，已显示所在地区</div>'

@@ -46,9 +46,23 @@
     <button class="btn-query" onclick="onVisitQueryClick()">查询</button>
   </div>
   <div id="visitChart" class="stat-chart"></div>
-
     </div>
+
+      <div id="tab-log" class="tab-content stat-block stat-log">
+  <h3>操作日志</h3>
+  <div class="stat-toolbar">
+    <input type="text" id="logSearchInput" placeholder="搜索用户名/操作内容" />
+    <button class="btn-query" onclick="searchLogs()">搜索</button>
+    <button class="btn-action" onclick="loadAllLogs()">加载全部</button>
+  </div>
+  <div id="logList" class="log-list">
+    <!-- 最近日志项将在这里动态加载 -->
+  </div>
 </div>
+
+</div>
+
+
 </div>
 
 
@@ -278,6 +292,45 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(error => console.error('获取收入统计数据失败', error));
   }
 });
+</script>
+
+    <script>
+function loadRecentLogs() {
+  fetch('/logging/api/logs?limit=5')
+    .then(res => res.json())
+    .then(data => renderLogs(data.logs));
+}
+
+function loadAllLogs() {
+  fetch('/logging/api/logs')
+    .then(res => res.json())
+    .then(data => renderLogs(data.logs));
+}
+
+function searchLogs() {
+  const keyword = document.getElementById('logSearchInput').value.trim();
+  fetch('/logging/api/logs?search=' + encodeURIComponent(keyword))
+    .then(res => res.json())
+    .then(data => renderLogs(data.logs));
+}
+
+function renderLogs(logs) {
+  const container = document.getElementById('logList');
+  container.innerHTML = '';
+  if (logs.length === 0) {
+    container.innerHTML = '<div class="log-item">暂无日志记录</div>';
+    return;
+  }
+  logs.forEach(log => {
+    const item = document.createElement('div');
+    item.className = 'log-item';
+    item.textContent = `[${log.timestamp}] ${log.username} (${log.user_type}) - ${log.message}`;
+    container.appendChild(item);
+  });
+}
+
+// 页面加载时加载最近日志
+document.addEventListener('DOMContentLoaded', loadRecentLogs);
 </script>
 
 {% endblock %}

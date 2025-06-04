@@ -1,17 +1,17 @@
 import csv
+import json  # 添加这个导入
+import os    # 也需要添加这个导入
+import uuid  # 添加这个导入
 from io import StringIO
 from datetime import datetime
 from flask import Response, g
-from models import HouseStatusModel
-
-import os
-import json
-import uuid
+from models import HouseStatusModel, db
 from flask import render_template, request, jsonify, redirect, url_for, abort, flash, current_app, Response, g
 from werkzeug.utils import secure_filename
-from sqlalchemy import or_
+from sqlalchemy import or_, text, and_
 from models import (HouseInfoModel, HouseStatusModel, CommentModel, NewsModel,
-                   TenantModel, LandlordModel, AppointmentModel, RepairRequestModel, db, HouseListingAuditModel)
+                   TenantModel, LandlordModel, AppointmentModel, RepairRequestModel)
+from service.logging import log_operation
 # 新增导入 OSS 服务
 from service.oss_service import get_oss_client, delete_oss_object
 import alibabacloud_oss_v2 as oss_sdk
@@ -22,6 +22,7 @@ def allowed_file(filename):
 def get_cities_data():
     with open('static/json/cities.json', 'r', encoding='utf-8') as f:
         return json.load(f)
+
 
 def get_house_list():
     try:
@@ -34,10 +35,12 @@ def get_house_list():
         max_price = request.args.get('max_price', None, type=float)
         selected_region = region or ''
         selected_city = city or ''
+
         query = db.session.query(HouseInfoModel).join(
             HouseStatusModel,
             HouseInfoModel.house_id == HouseStatusModel.house_id
         ).filter(HouseStatusModel.status == 0)
+
         if address:
             query = query.filter(
                 or_(
@@ -45,10 +48,14 @@ def get_house_list():
                     HouseInfoModel.region.like(f"%{address}%")
                 )
             )
-        if selected_region:
-            query = query.filter(HouseInfoModel.region.like(f"%{selected_region}%"))
-        if selected_city:
-            query = query.filter(HouseInfoModel.region.like(f"%{selected_city}%"))
+
+        if region:
+            # 用 region 开头匹配，确保只包含该地区
+            query = query.filter(HouseInfoModel.region.like(f"{region}%"))
+        elif city:
+            query = query.filter(HouseInfoModel.region.like(f"{city}%"))
+
+        # 关键词过滤，不再重复地区条件
         if keyword:
             query = query.filter(
                 or_(
@@ -57,6 +64,7 @@ def get_house_list():
                     HouseInfoModel.highlight.like(f"%{keyword}%")
                 )
             )
+
         if rooms == '4室及以上':
             query = query.filter(
                 or_(
@@ -71,20 +79,28 @@ def get_house_list():
             )
         elif rooms:
             query = query.filter(HouseInfoModel.rooms.like(f"%{rooms}%"))
+
         if min_price is not None:
             query = query.filter(HouseInfoModel.price >= min_price)
         if max_price is not None:
             query = query.filter(HouseInfoModel.price <= max_price)
+
         query = query.order_by(HouseStatusModel.update_time.desc())
+
         page = request.args.get('page', 1, type=int)
         per_page = 9
+
         pagination = query.paginate(
             page=page,
             per_page=per_page,
             error_out=False
         )
+
         houses = pagination.items
+        total_count = pagination.total  # 查询到的房屋总数
+
         news_list = NewsModel.query.order_by(NewsModel.time.desc()).limit(10).all()
+
         filters = {
             'region': selected_region,
             'city': selected_city,
@@ -94,7 +110,9 @@ def get_house_list():
             'max_price': max_price,
             'address': address or ''
         }
+
         cities_data = get_cities_data()
+
         return render_template(
             'house/house_list.html',
             houses=houses,
@@ -103,13 +121,17 @@ def get_house_list():
             selected_region=selected_region,
             selected_city=selected_city,
             pagination=pagination,
-            filters=filters
+            filters=filters,
+            total_count=total_count  # 新增传递
         )
+
     except Exception as e:
         current_app.logger.error(f"房源列表页面错误: {str(e)}")
         import traceback
         traceback.print_exc()
+
         cities_data = get_cities_data()
+
         return render_template(
             'house/house_list.html',
             houses=[],
@@ -126,10 +148,13 @@ def get_house_list():
                 'min_price': None,
                 'max_price': None,
                 'address': ''
-            }
+            },
+            total_count=0  # 异常时显示为0
         )
 
+
 def get_house_detail(house_id):
+    """获取房源详情并记录租客浏览历史"""
     house = HouseInfoModel.query.get(house_id)
     if not house:
         flash('房源不存在', 'error')
@@ -175,6 +200,20 @@ def get_house_detail(house_id):
                 comment_data['at_username'] = at_comment.username
                 comment_data['at_desc'] = at_comment.desc
         enriched_comments.append(comment_data)
+    
+    # 记录租客浏览行为
+    user_type = getattr(g, 'user_type', None)
+    username = getattr(g, 'username', None)
+    
+    if user_type == 1 and username:  # 只记录租客浏览
+        try:
+            db.session.execute(text("CALL RecordTenantBrowse(:username, :house_id)"), 
+                             {'username': username, 'house_id': house_id})
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(f"记录浏览历史失败: {str(e)}")
+            db.session.rollback()
+    
     current_app.logger.info(f"房源详情: house_id={house_id}, house_name={house.house_name}, status={status.status}")
     return render_template(
         'house/house_detail.html',
@@ -317,6 +356,7 @@ def add_house_logic():
         )
         db.session.add(house_status)
         db.session.commit()
+        log_operation(g.username, g.user_type, f"发布房源：{house_name}（位于 {region}）")
         flash('房源发布成功！您可以申请上架供租客查看。', 'success')
         return redirect(url_for('account.landlord_home'))
     except Exception as e:
@@ -395,6 +435,7 @@ def edit_house_logic(house_id):
         house_status.phone = phone
         house_status.update_time = datetime.now()
         db.session.commit()
+        log_operation(g.username, g.user_type, f"修改房源信息：{house_name}（ID: {house_id}，位于 {region}）")
         flash('房源信息更新成功！', 'success')
         return redirect(url_for('account.landlord_home'))
     except Exception as e:
@@ -431,6 +472,7 @@ def delete_house_logic(house_id):
         if house_info:
             db.session.delete(house_info)
         db.session.commit()
+        log_operation(g.username, g.user_type, f"删除房源：ID {house_id}（房东：{landlord_name}）")
         return jsonify({'success': True, 'message': '房源删除成功'})
     except Exception as e:
         db.session.rollback()
@@ -522,4 +564,30 @@ def api_house_search_logic():
             'success': False,
             'message': f'搜索失败：{str(e)}'
         }), 500
+
+def get_tenant_browse_history(username, limit=20):
+    """获取租客浏览历史"""
+    try:
+        result = db.session.execute(
+            text("CALL GetTenantBrowseHistory(:username, :limit)"),
+            {'username': username, 'limit': limit}
+        )
+        browse_list = result.fetchall()
+        return browse_list
+    except Exception as e:
+        current_app.logger.error(f"获取浏览历史失败: {str(e)}")
+        return []
+
+def get_popular_houses_data(limit=10):
+    """获取热门房源数据"""
+    try:
+        result = db.session.execute(
+            text("CALL GetPopularHouses(:limit)"),
+            {'limit': limit}
+        )
+        popular_houses = result.fetchall()
+        return popular_houses
+    except Exception as e:
+        current_app.logger.error(f"获取热门房源失败: {str(e)}")
+        return []
 

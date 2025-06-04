@@ -16,6 +16,8 @@ import string
 import random
 import time
 
+from service.logging import log_login, log_operation
+
 SECRET_KEY = 'your_secret_key'  # 请替换为安全的密钥
 
 ph = PasswordHasher()
@@ -99,6 +101,8 @@ def login():
                 flash("角色与用户名不匹配，请重新输入。", "error")
                 return render_template("account/login.html", form=form)
 
+            log_login(username, user_login.type, "登录系统")
+
             token = generate_token(username, user_login.type)
             resp = make_response(redirect(redirect_url))
             resp.set_cookie('access_token', token, httponly=True, max_age=86400)
@@ -131,6 +135,8 @@ def admin_login():
             except argon2_exceptions.VerifyMismatchError:
                 flash('管理员用户名或密码错误，或非管理员账户。', 'error')
                 return render_template('account/admin_login.html', form=form)
+
+            log_login(username,0 , "登录管理系统")
 
             token = generate_token(admin_user.username, admin_user.type)
             resp = make_response(redirect(url_for('account.admin_dashboard')))
@@ -418,6 +424,7 @@ def reset_password():
 @account_bp.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
+    log_operation(g.username, g.user_type, "登出系统")
     resp = make_response(redirect(url_for('account.login')))
     resp.delete_cookie('access_token')
     flash("您已成功登出。", "info")

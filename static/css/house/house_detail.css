@@ -460,6 +460,234 @@
     min-width: 80px;
 }
 
+/* 地图详情组件样式 */
+.map-detail-trigger {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: linear-gradient(45deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.map-detail-trigger:hover {
+    background: linear-gradient(45deg, #2980b9, #1f4e79);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+.map-detail-trigger .map-icon {
+    font-size: 14px;
+}
+
+.map-detail-trigger .map-text {
+    font-size: 11px;
+}
+
+/* 模态框样式 */
+.map-detail-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+}
+
+.map-detail-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.map-detail-content {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.map-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(45deg, #f8fafc, #e2e8f0);
+}
+
+.map-detail-header h3 {
+    margin: 0;
+    color: #1a202c;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: #f1f5f9;
+    color: #1a202c;
+}
+
+.map-detail-body {
+    padding: 25px;
+}
+
+.map-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.tool-section {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.tool-section h4 {
+    margin: 0 0 15px 0;
+    color: #1a202c;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tool-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.tool-btn {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #475569;
+    min-height: 60px;
+    justify-content: center;
+}
+
+.tool-btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tool-btn.active {
+    background: #3498db;
+    color: white;
+    border-color: #2980b9;
+}
+
+.tool-btn .icon {
+    font-size: 18px;
+}
+
+.tool-btn span:last-child {
+    font-weight: 500;
+}
+
+/* 路线规划表单 */
+.route-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.route-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.route-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.route-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+/* 地图信息 */
+.map-info {
+    margin-bottom: 15px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 13px;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item .label {
+    color: #64748b;
+    font-weight: 500;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .house-details {
@@ -487,6 +715,63 @@
     .modal-content { width: 95%; padding: 20px; }
     .pagination { gap: 2px; }
     .page-link { padding: 6px 10px; font-size: 13px; }
+    
+    .map-detail-overlay {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+    
+    .map-detail-content {
+        max-height: 95vh;
+        width: 100%;
+    }
+    
+    .map-detail-header {
+        padding: 15px 20px;
+    }
+    
+    .map-detail-body {
+        padding: 20px;
+    }
+    
+    .map-tools-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .tool-buttons {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 8px;
+    }
+    
+    .tool-btn {
+        min-height: 50px;
+        padding: 8px 6px;
+        font-size: 10px;
+    }
+    
+    .tool-btn .icon {
+        font-size: 16px;
+    }
+    
+    .route-buttons {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    
+    .map-detail-trigger {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+    
+    .map-detail-trigger .map-icon {
+        font-size: 12px;
+    }
+    
+    .map-detail-trigger .map-text {
+        font-size: 9px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -495,4 +780,22 @@
     .house-header h3 { font-size: 16px; }
     .house-details-info strong { width: 80px; font-size: 13px; }
     .comments-section h2 { font-size: 20px; }
+    
+    .map-detail-trigger {
+        top: 5px;
+        right: 5px;
+        padding: 4px 6px;
+    }
+    
+    .map-detail-trigger .map-text {
+        display: none;
+    }
+    
+    .tool-section {
+        padding: 15px;
+    }
+    
+    .tool-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

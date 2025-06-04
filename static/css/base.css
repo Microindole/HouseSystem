@@ -1,5 +1,5 @@
 /* 顶部导航栏样式 */
-.navbar{display:flex;justify-content:space-between;align-items:center;background-color:#24292f;color:white;padding:10px 20px;box-shadow:0 2px 5px rgba(0,0,0,0.1);height:60px;position:relative;z-index:1000}
+.navbar{background-size: cover;background-repeat: no-repeat;background-position: center;display:flex;justify-content:space-between;align-items:center;background-color:#24292f;color:white;padding:10px 20px;box-shadow:0 2px 5px rgba(0,0,0,0.1);height:60px;position:relative;z-index:1000}
 /* 乐居阁字样样式 */
 .navbar .logo{font-size:1.8rem;font-weight:bold;color:white;text-decoration:none;display:inline-block;margin-right:20px}
 /* 乐居阁字样 */
@@ -45,8 +45,9 @@
 .close-button:hover{color:#000}
 /* 认证按钮样式 */
 .auth-buttons{display:flex;align-items:center;margin-left:auto}
-.login-button{padding:8px 15px;background-color:#007bff;color:#ffffff;text-decoration:none;border-radius:5px;transition:background-color 0.3s ease}
-.login-button:hover{background-color:#0056b3}
+.login-button{padding:8px 16px;background-color:#28a745;color:#ffffff;text-decoration:none;border-radius:6px;border:none;font-size:14px;cursor:pointer;transition:background-color 0.3s ease,transform 0.2s ease,box-shadow 0.3s ease;box-shadow:0 4px 6px rgba(0,0,0,0.1);display:inline-block;height:40px;line-height:24px;font-weight:500}
+.login-button:hover{background-color:#218838;transform:scale(1.05);box-shadow:0 6px 10px rgba(40,167,69,0.2)}
+.login-button:active{transform:scale(0.95)}
 /* 用户侧边栏 */
 .user-sidebar{position:fixed;top:0;right:-400px;width:300px;height:100%;background:linear-gradient(135deg,#ffffff,#f0f0f0);box-shadow:-4px 0 15px rgba(0,0,0,0.2);transition:right 0.6s cubic-bezier(0.25,1,0.5,1),opacity 0.6s ease;z-index:1000;color:#333333;opacity:0}
 .user-sidebar.hidden{right:-400px;opacity:0}
@@ -64,8 +65,8 @@
 /* 鼠标悬停时的动态效果 */
 .user-sidebar:hover{background:linear-gradient(135deg,#f9f9f9,#e6e6e6);box-shadow:-6px 0 20px rgba(0,0,0,0.3)}
 /* 用户名按钮样式 */
-.username-button{background-color:#2c974b;color:#ffffff;border:none;border-radius:20px;padding:8px 16px;font-size:14px;cursor:pointer;transition:background-color 0.3s ease,transform 0.2s ease,box-shadow 0.3s ease;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
-.username-button:hover{background-color:#22863a;transform:scale(1.1);box-shadow:0 6px 10px rgba(0,0,0,0.2)}
+.username-button{background-color:#28a745;color:#ffffff;border:none;border-radius:6px;padding:8px 16px;font-size:14px;cursor:pointer;transition:background-color 0.3s ease,transform 0.2s ease,box-shadow 0.3s ease;box-shadow:0 4px 6px rgba(0,0,0,0.1);display:inline-block;height:40px;line-height:24px;font-weight:500}
+.username-button:hover{background-color:#218838;transform:scale(1.05);box-shadow:0 6px 10px rgba(40,167,69,0.2)}
 .username-button:active{transform:scale(0.95)}
 /* 动画效果 */
 @keyframes fadeInSlideDown{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
