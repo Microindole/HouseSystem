@@ -168,7 +168,7 @@ def cancel_income_stats():
         func.count(RentalContract.id).label('order_count'),
         func.sum(RentalContract.total_amount).label('total_amount')
     ).filter(
-        RentalContract.status == 1,
+        RentalContract.status == 4,
         RentalContract.updated_at >= start_date,
         RentalContract.updated_at <= end_date + timedelta(days=1)
     ).group_by(

@@ -1,79 +1,119 @@
 {% extends 'base.html' %}
 {% block title %}系统统计{% endblock %}
+
+{% block head %}
+    <script src="{{ url_for('static', filename='js/common/message-toast.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/statistic_admin.css') }}">
+{% endblock %}
+
 {% block body %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin/statistic_admin.css') }}">
 <div style="width: 90%; margin: 0 auto; padding: 20px;">
   <h2 style="text-align: center;">系统统计总览</h2>
 
   <div id="triangle-layout">
 
     <!-- 出租率 -->
-
-<div id="tab-rent" class="tab-content stat-block stat-top-left">
-  <h3>出租率统计</h3>
-  <div class="stat-toolbar">
-    <label>开始日期:</label>
-    <input type="date" id="startDate" name="startDate">
-    <label>结束日期:</label>
-    <input type="date" id="endDate" name="endDate">
-    <button class="btn-query" id="queryBtn">查询</button>
-    <button id="updateRentRateBtn" class="btn-action">今日出租率</button>
-  </div>
-  <div id="rentRateChart" class="stat-chart"></div>
-</div>
-
-<!-- 收入统计 -->
-<div id="tab-income" class="tab-content stat-block stat-top-right">
-  <h3>每日收入统计</h3>
-  <div class="stat-toolbar">
-    <label>开始日期：</label>
-    <input type="date" id="startedDate">
-    <label>结束日期：</label>
-    <input type="date" id="endedDate">
-    <button class="btn-query" onclick="renderIncomeChart()">查询</button>
-  </div>
-  <div id="incomeChart" class="stat-chart"></div>
-</div>
-
-<!-- 网站访问量 -->
-<div id="tab-visit" class="tab-content stat-block stat-bottom">
-   <h3>网站访问量统计</h3>
-  <div class="stat-toolbar">
-    <label>开始日期:</label>
-    <input type="date" id="visitStartDate">
-    <label>结束日期:</label>
-    <input type="date" id="visitEndDate">
-    <button class="btn-query" onclick="onVisitQueryClick()">查询</button>
-  </div>
-  <div id="visitChart" class="stat-chart"></div>
+    <div id="tab-rent" class="tab-content stat-block stat-top-left">
+      <h3>出租率统计</h3>
+      <div class="stat-toolbar">
+        <label>开始日期:</label>
+        <input type="date" id="startDate" name="startDate">
+        <label>结束日期:</label>
+        <input type="date" id="endDate" name="endDate">
+        <button class="btn-query" id="queryBtn">查询</button>
+        <button id="updateRentRateBtn" class="btn-action">今日出租率</button>
+      </div>
+      <div id="rentRateChart" class="stat-chart"></div>
     </div>
 
-      <div id="tab-log" class="tab-content stat-block stat-log">
-  <h3>操作日志</h3>
-  <div class="stat-toolbar">
-    <input type="text" id="logSearchInput" placeholder="搜索用户名/操作内容" />
-    <button class="btn-query" onclick="searchLogs()">搜索</button>
-    <button class="btn-action" onclick="loadAllLogs()">加载全部</button>
+    <!-- 收入统计 -->
+    <div id="tab-income" class="tab-content stat-block stat-top-right">
+      <h3>每日收入统计</h3>
+      <div class="stat-toolbar">
+        <label>开始日期：</label>
+        <input type="date" id="startedDate">
+        <label>结束日期：</label>
+        <input type="date" id="endedDate">
+        <button class="btn-query" onclick="renderIncomeChart()">查询</button>
+      </div>
+      <div id="incomeChart" class="stat-chart"></div>
+    </div>
+
+    <!-- 网站访问量 -->
+    <div id="tab-visit" class="tab-content stat-block stat-bottom">
+       <h3>网站访问量统计</h3>
+      <div class="stat-toolbar">
+        <label>开始日期:</label>
+        <input type="date" id="visitStartDate">
+        <label>结束日期:</label>
+        <input type="date" id="visitEndDate">
+        <button class="btn-query" onclick="onVisitQueryClick()">查询</button>
+      </div>
+      <div id="visitChart" class="stat-chart"></div>
+    </div>
+
+    <div id="tab-log" class="tab-content stat-block stat-log">
+      <h3>操作日志</h3>
+      <div class="stat-toolbar">
+        <input type="text" id="logSearchInput" placeholder="搜索用户名/操作内容" />
+        <button class="btn-query" onclick="searchLogs()">搜索</button>
+        <button class="btn-action" onclick="loadAllLogs()">加载全部</button>
+      </div>
+      <div id="logList" class="log-list">
+        <!-- 最近日志项将在这里动态加载 -->
+      </div>
+    </div>
+
   </div>
-  <div id="logList" class="log-list">
-    <!-- 最近日志项将在这里动态加载 -->
-  </div>
 </div>
 
-</div>
+<!-- ECharts -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
 
-
-</div>
-
+<style>
+  .stat-tab { padding:10px 30px; border:none; background:#eee; cursor:pointer; border-radius:6px; font-size:16px;}
+  .stat-tab.active { background:#4fa6ff; color:#fff;}
+  .tab-content { background:#fff; border-radius:8px; padding:20px;}
+</style>
 
 <script>
-function renderVisitChart() {
+// 统一的消息提示函数
+function handleError(error, defaultMessage = '操作失败') {
+  console.error(error);
+  if (window.showMessage) {
+    window.showMessage(error.message || defaultMessage, 'error');
+  } else {
+    alert(error.message || defaultMessage);
+  }
+}
+
+function showSuccess(message) {
+  if (window.showMessage) {
+    window.showMessage(message, 'success');
+  } else {
+    alert(message);
+  }
+}
+
+function showInfo(message) {
+  if (window.showMessage) {
+    window.showMessage(message, 'info');
+  } else {
+    alert(message);
+  }
+}
+
+// 访问量统计相关函数
+function renderVisitChart(startDate, endDate) {
   let url = '/contract/api/visit/stats';
   if (startDate && endDate) {
     url += `?start_date=${startDate}&end_date=${endDate}`;
   }
   fetch(url)
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error('获取访问量数据失败');
+      return res.json();
+    })
     .then(data => {
       const dates = data.map(d => d.date);
       const visits = data.map(d => d.visits);
@@ -85,233 +125,177 @@ function renderVisitChart() {
         yAxis: { type: 'value' },
         series: [{ name: '访问量', type: 'line', smooth: true, data: visits }]
       });
-    });
+    })
+    .catch(error => handleError(error, '获取访问量数据失败'));
 }
 
 function onVisitQueryClick() {
   const start = document.getElementById('visitStartDate').value;
   const end = document.getElementById('visitEndDate').value;
   if (!start || !end) {
+    showInfo('请选择开始日期和结束日期');
     return;
   }
   renderVisitChart(start, end);
 }
-// 显示时触发
-const tab = document.querySelector('#tab-visit');
-const observer = new MutationObserver(m => {
-  if (tab.style.display !== 'none') renderVisitChart();
-});
-observer.observe(tab, { attributes: true, attributeFilter: ['style'] });
-</script>
 
-<!-- ECharts -->
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-<style>
-  .stat-tab { padding:10px 30px; border:none; background:#eee; cursor:pointer; border-radius:6px; font-size:16px;}
-  .stat-tab.active { background:#4fa6ff; color:#fff;}
-  .tab-content { background:#fff; border-radius:8px; padding:20px;}
-</style>
-<script>
-
-
-  // 获取最近七天日期
-  function getLast7Days() {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(end.getDate() - 6);
-    return {
-      start: start.toISOString().slice(0, 10),
-      end: end.toISOString().slice(0, 10)
-    };
-  }
-
-  // 渲染出租率条状图
-  function renderBarChart(data) {
-    const chartDom = document.getElementById('rentRateChart');
-    const myChart = echarts.init(chartDom);
-    const option = {
-  title: { text: '出租率变化', left: 'center' },
-  tooltip: {
-    trigger: 'axis',
-    // 可选：Tooltip 中显示百分比
-    formatter: (params) => {
-      return `${params[0].axisValue}<br/>出租率：${(params[0].value*1).toFixed(1)}%`
-    }
-  },
-  xAxis: {
-    type: 'category',
-    data: data.dates,
-    axisLabel: { rotate: 30 }
-  },
-  yAxis: {
-    type: 'value',
-    name: '出租率 (%)',
-    min: 0,
-    max: 100,
-    axisLabel: {
-      // 根据数据类型选择以下一种格式
-      formatter: (value) => (value * 1).toFixed(1) + '%'  // 小数转百分比
-      // formatter: '{value}%'  // 整数直接拼接
-    }
-  },
-  series: [{
-    name: '出租率',
-    type: 'bar',
-    data: data.rates,
-    itemStyle: {
-      color: '#4fa6ff',
-      borderRadius: [6, 6, 0, 0]
-    },
-    barWidth: 30,
-    // 可选：柱状图顶部显示百分比
-    label: {
-      show: true,
-      position: 'top',
-      formatter: (params) => {
-        const value = params.value;
-        return typeof value === 'number'
-          ? (value * 100).toFixed(1) + '%'
-          : value + '%'
-      }
-    }
-  }],
-  grid: { left: 60, right: 30, bottom: 60, top: 60 }
-};
-    myChart.setOption(option);
-  }
-
-  // 获取数据并渲染
-  function fetchRentRateData(startDate, endDate) {
-    fetch(`/account/api/rent_rate_history?start_date=${startDate}&end_date=${endDate}`)
-      .then(response => response.json())
-      .then(data => renderBarChart(data))
-      .catch(error => {
-        alert('获取出租率数据失败');
-        console.error(error);
-      });
-  }
-
-  // 查询按钮事件
-  function onQueryClick() {
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    if (!startDate || !endDate) {
-
-      return;
-    }
-    fetchRentRateData(startDate, endDate);
-  }
-
-  // 页面加载自动获取最近七天
-  window.onload = function () {
-    const { start, end } = getLast7Days();
-
-    document.getElementById('startDate').value = start;
-    document.getElementById('endDate').value = end;
-    fetchRentRateData(start, end);
-      document.getElementById('startedDate').value = start;
-  document.getElementById('endedDate').value = end;
-    document.getElementById('queryBtn').onclick = onQueryClick;
-    document.getElementById("updateRentRateBtn").onclick = function () {
-      fetch("/account/admin/manual_rent_rate_update")
-        .then(response => {
-          if (!response.ok) throw new Error("网络错误");
-          return response.json();
-        })
-        .then(data => {
-          alert(`操作成功：${data.message}\n出租率为 ${data.rent_rate}%`);
-        })
-        .catch(error => {
-          alert("手动更新失败：" + error.message);
-          console.error("更新失败:", error);
-        });
-    };
-    renderIncomeChart();
-    document.getElementById('visitStartDate').value = start;
-    document.getElementById('visitEndDate').value = end;
-    renderVisitChart(start, end);
+// 出租率统计相关函数
+function getLast7Days() {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - 6);
+  return {
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10)
   };
-</script>
+}
 
-    <!-- 引入 ECharts -->
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const tab = document.querySelector('#tab-income');
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.target.style.display !== 'none') {
-        setDefaultDate(); // 设置默认日期为最近七天
-        renderIncomeChart();
+function renderBarChart(data) {
+  const chartDom = document.getElementById('rentRateChart');
+  const myChart = echarts.init(chartDom);
+  const option = {
+    title: { text: '出租率变化', left: 'center' },
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params) => `${params[0].axisValue}<br/>出租率：${(params[0].value * 1).toFixed(1)}%`
+    },
+    xAxis: {
+      type: 'category',
+      data: data.dates,
+      axisLabel: { rotate: 30 }
+    },
+    yAxis: {
+      type: 'value',
+      name: '出租率 (%)',
+      min: 0,
+      max: 100,
+      axisLabel: {
+        formatter: (value) => (value * 1).toFixed(1) + '%'
       }
-    });
-  });
-  observer.observe(tab, { attributes: true, attributeFilter: ['style'] });
+    },
+    series: [{
+      name: '出租率',
+      type: 'bar',
+      data: data.rates,
+      itemStyle: { color: '#4fa6ff', borderRadius: [6, 6, 0, 0] },
+      barWidth: 30,
+      label: {
+        show: true,
+        position: 'top',
+        formatter: (params) => typeof params.value === 'number' ? (params.value * 100).toFixed(1) + '%' : params.value + '%'
+      }
+    }],
+    grid: { left: 60, right: 30, bottom: 60, top: 60 }
+  };
+  myChart.setOption(option);
+}
 
-  function setDefaultDate() {
-    const today = new Date();
-    const sevenDaysAgo = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
-    document.getElementById('startedDate').value = sevenDaysAgo.toISOString().slice(0, 10);
-    document.getElementById('endedDate').value = today.toISOString().slice(0, 10);
+function fetchRentRateData(startDate, endDate) {
+  fetch(`/account/api/rent_rate_history?start_date=${startDate}&end_date=${endDate}`)
+    .then(response => {
+      if (!response.ok) throw new Error('网络请求失败');
+      return response.json();
+    })
+    .then(data => renderBarChart(data))
+    .catch(error => handleError(error, '获取出租率数据失败'));
+}
+
+function onQueryClick() {
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  if (!startDate || !endDate) {
+    showInfo('请选择开始日期和结束日期');
+    return;
+  }
+  fetchRentRateData(startDate, endDate);
+}
+
+// 收入统计相关函数
+function renderIncomeChart() {
+  const start = document.getElementById('startedDate').value;
+  const end = document.getElementById('endedDate').value;
+
+  let url = '/contract/api/income/cancel_stats';
+  if (start && end) {
+    url += `?start_date=${start}&end_date=${end}`;
   }
 
-  window.renderIncomeChart = function () {
-    const start = document.getElementById('startedDate').value;
-    const end = document.getElementById('endedDate').value;
+  fetch(url)
+    .then(response => {
+      if (!response.ok) throw new Error('获取收入统计数据失败');
+      return response.json();
+    })
+    .then(data => {
+      const dates = data.map(item => item.date);
+      const orderCounts = data.map(item => item.order_count);
+      const totalAmounts = data.map(item => item.total_amount);
 
-    let url = '/contract/api/income/cancel_stats';
-    if (start && end) {
-      url += `?start_date=${start}&end_date=${end}`;
-    }
+      const chartDom = document.getElementById('incomeChart');
+      const myChart = echarts.init(chartDom);
+      const option = {
+        title: { text: '每日订单收入统计', left: 'center' },
+        tooltip: { trigger: 'axis' },
+        legend: { data: ['订单数', '总金额'], top: 30 },
+        xAxis: { type: 'category', data: dates, boundaryGap: false },
+        yAxis: [
+          { type: 'value', name: '订单数' },
+          { type: 'value', name: '金额 (元)', position: 'right' }
+        ],
+        series: [
+          { name: '订单数', type: 'line', smooth: true, data: orderCounts },
+          { name: '总金额', type: 'line', yAxisIndex: 1, smooth: true, data: totalAmounts }
+        ]
+      };
+      myChart.setOption(option);
+    })
+    .catch(error => handleError(error, '获取收入统计数据失败'));
+}
 
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        const dates = data.map(item => item.date);
-        const orderCounts = data.map(item => item.order_count);
-        const totalAmounts = data.map(item => item.total_amount);
-
-        const chartDom = document.getElementById('incomeChart');
-        const myChart = echarts.init(chartDom);
-        const option = {
-          title: { text: '每日订单收入统计', left: 'center' },
-          tooltip: { trigger: 'axis' },
-          legend: { data: ['订单数', '总金额'], top: 30 },
-          xAxis: { type: 'category', data: dates, boundaryGap: false },
-          yAxis: [
-            { type: 'value', name: '订单数' },
-            { type: 'value', name: '金额 (元)', position: 'right' }
-          ],
-          series: [
-            { name: '订单数', type: 'line', smooth: true, data: orderCounts },
-            { name: '总金额', type: 'line', yAxisIndex: 1, smooth: true, data: totalAmounts }
-          ]
-        };
-        myChart.setOption(option);
-      })
-      .catch(error => console.error('获取收入统计数据失败', error));
-  }
-});
-</script>
-
-    <script>
+// 日志相关函数
 function loadRecentLogs() {
-  fetch('/logging/api/logs?limit=5')
-    .then(res => res.json())
-    .then(data => renderLogs(data.logs));
+  fetch('/logging/api/logs?limit=10')
+    .then(res => {
+      if (!res.ok) throw new Error('获取日志数据失败');
+      return res.json();
+    })
+    .then(data => renderLogs(data.logs))
+    .catch(error => handleError(error, '加载最近日志失败'));
 }
 
 function loadAllLogs() {
   fetch('/logging/api/logs')
-    .then(res => res.json())
-    .then(data => renderLogs(data.logs));
+    .then(res => {
+      if (!res.ok) throw new Error('获取日志数据失败');
+      return res.json();
+    })
+    .then(data => {
+      renderLogs(data.logs);
+      showSuccess('已加载全部日志');
+    })
+    .catch(error => handleError(error, '加载全部日志失败'));
 }
 
 function searchLogs() {
   const keyword = document.getElementById('logSearchInput').value.trim();
+  if (!keyword) {
+    showInfo('请输入搜索关键词');
+    return;
+  }
+  
   fetch('/logging/api/logs?search=' + encodeURIComponent(keyword))
-    .then(res => res.json())
-    .then(data => renderLogs(data.logs));
+    .then(res => {
+      if (!res.ok) throw new Error('搜索日志失败');
+      return res.json();
+    })
+    .then(data => {
+      renderLogs(data.logs);
+      if (data.logs.length === 0) {
+        showInfo('未找到匹配的日志记录');
+      } else {
+        showSuccess(`找到 ${data.logs.length} 条匹配记录`);
+      }
+    })
+    .catch(error => handleError(error, '搜索日志失败'));
 }
 
 function renderLogs(logs) {
@@ -329,8 +313,39 @@ function renderLogs(logs) {
   });
 }
 
-// 页面加载时加载最近日志
-document.addEventListener('DOMContentLoaded', loadRecentLogs);
+// 页面初始化
+document.addEventListener('DOMContentLoaded', function() {
+  const { start, end } = getLast7Days();
+
+  // 设置默认日期
+  document.getElementById('startDate').value = start;
+  document.getElementById('endDate').value = end;
+  document.getElementById('startedDate').value = start;
+  document.getElementById('endedDate').value = end;
+  document.getElementById('visitStartDate').value = start;
+  document.getElementById('visitEndDate').value = end;
+
+  // 绑定事件
+  document.getElementById('queryBtn').onclick = onQueryClick;
+  document.getElementById("updateRentRateBtn").onclick = function () {
+    fetch("/account/admin/manual_rent_rate_update")
+      .then(response => {
+        if (!response.ok) throw new Error("网络错误，无法更新出租率");
+        return response.json();
+      })
+      .then(data => {
+        showSuccess(`操作成功：${data.message}\n出租率为 ${data.rent_rate}%`);
+        fetchRentRateData(start, end); // 更新后刷新图表
+      })
+      .catch(error => handleError(error, "手动更新失败"));
+  };
+
+  // 初始化图表和日志
+  fetchRentRateData(start, end);
+  renderIncomeChart();
+  renderVisitChart(start, end);
+  loadRecentLogs();
+});
 </script>
 
 {% endblock %}
